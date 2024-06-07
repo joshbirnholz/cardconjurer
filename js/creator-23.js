@@ -820,6 +820,9 @@ function autoFrame() {
 
 	} else {
 		colors = [...new Set(card.text.mana.text.toUpperCase().split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+		if(card.text.rules.text.toLowerCase().includes('devoid')) {
+			colors = [];
+		}
 	}
 
 	var group;
