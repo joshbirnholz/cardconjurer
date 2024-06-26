@@ -592,7 +592,8 @@ function cardFrameProperties(colors, manaCost, typeLine, power, style) {
 	}
 
 	var isHybrid = manaCost.includes('/');
-
+	var isDevoid = colors.includes('D');
+	colors = colors.filter(color => color != 'D');
 	var rules;
 	if (style == 'Seventh') {
 		if (typeLine.includes('Land')) {
@@ -604,7 +605,7 @@ function cardFrameProperties(colors, manaCost, typeLine, power, style) {
 		} else {
 			if (colors.length == 1) {
 				rules = colors[0];
-			} else if (colors.length >=2) {
+			} else if (colors.length >=2 ) {
 				rules = 'M';
 			} else if (typeLine.includes("Artifact")) {
 				rules = 'A';
@@ -741,6 +742,18 @@ function cardFrameProperties(colors, manaCost, typeLine, power, style) {
 			frameRight = colors[1];
 		}
 	}
+	if(isDevoid) {
+		colors = colors.filter(color => color != 'D');
+		pinline = 'C';
+		pinlineRight = null;
+		rules = 'C';
+		rulesRight = null;
+		if(power)
+			pt = 'C';
+		frame = 'C';
+		frameRight = null; 
+		console.log(pinline, pinlineRight, rules, rulesRight, pt, frame, frameRight)
+	}
 
 	return {
 		'pinline': pinline,
@@ -759,8 +772,16 @@ function autoFrame() {
 	if (frame == 'false') { autoFramePack = null; return; }
 
 	var colors = [];
+	var rules = card.text.rules.text.toLowerCase();
+	var name = card.text.title.text.toLowerCase();
+	for(var i = 0; i < rules.length - name.length; i++) {
+		//replace cardname with CARDNAME in rules
+		if (rules.slice(i, i + name.length) == name) {
+			rules = rules.slice(0, i) + '{CARDNAME}' + rules.slice(i + name.length);
+			i += 7;
+		}
+	}
 	if (card.text.type.text.toLowerCase().includes('land')) {
-		var rules = card.text.rules.text;
 		var flavorIndex = rules.indexOf('{flavor}');
 		if (flavorIndex == -1) {
 			flavorIndex = rules.indexOf('{oldflavor}');
@@ -768,6 +789,7 @@ function autoFrame() {
 		if (flavorIndex != -1) {
 			rules = rules.substring(0, flavorIndex);
 		}
+
 
 		var lines = rules.split('\n');
 
@@ -788,19 +810,19 @@ function autoFrame() {
 			}
 		});
 
-		if (!colors.includes('W') && (rules.toLowerCase().includes('plains') || card.text.type.text.toLowerCase().includes('plains'))) {
+		if (!colors.includes('W') && (rules.includes('plains') || card.text.type.text.toLowerCase().includes('plains'))) {
 			colors.push('W');
 		}
-		if (!colors.includes('U') && (rules.toLowerCase().includes('island') || card.text.type.text.toLowerCase().includes('island'))) {
+		if (!colors.includes('U') && (rules.includes('island') || card.text.type.text.toLowerCase().includes('island'))) {
 			colors.push('U');
 		}
-		if (!colors.includes('B') && (rules.toLowerCase().includes('swamp') || card.text.type.text.toLowerCase().includes('swamp'))) {
+		if (!colors.includes('B') && (rules.includes('swamp') || card.text.type.text.toLowerCase().includes('swamp'))) {
 			colors.push('B');
 		}
-		if (!colors.includes('R') && (rules.toLowerCase().includes('mountain') || card.text.type.text.toLowerCase().includes('mountain'))) {
+		if (!colors.includes('R') && (rules.includes('mountain') || card.text.type.text.toLowerCase().includes('mountain'))) {
 			colors.push('R');
 		}
-		if (!colors.includes('G') && (rules.toLowerCase().includes('forest') || card.text.type.text.toLowerCase().includes('forest'))) {
+		if (!colors.includes('G') && (rules.includes('forest') || card.text.type.text.toLowerCase().includes('forest'))) {
 			colors.push('G');
 		}
 
@@ -820,6 +842,9 @@ function autoFrame() {
 
 	} else {
 		colors = [...new Set(card.text.mana.text.toUpperCase().split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+		if(rules.includes('devoid')) {
+			colors.push('D');
+		}
 	}
 
 	var group;
@@ -829,45 +854,49 @@ function autoFrame() {
 	} else if (frame == 'M15RegularNew') {
 		autoM15NewFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
 		group = 'Accurate';
-	} else if (frame == 'M15Eighth') {
-		autoM15EighthFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Custom';
-	} else if (frame == 'M15EighthUB') {
-		autoM15EighthUBFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Custom';
-	} else if (frame == 'UB') {
-		autoUBFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Showcase-5';
-	} else if (frame == 'UBNew') {
-		autoUBNewFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Accurate';
-	} else if (frame == 'FullArtNew') {
-		autoFullArtNewFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Accurate';
-	} else if (frame == 'Circuit') {
-		autoCircuitFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		group = 'Custom';
 	} else if (frame == 'Etched') {
 		group = 'Showcase-5';
 		autoEtchedFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-	} else if (frame == 'Praetors') {
-		group = 'Showcase-5';
-		autoPhyrexianFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-	} else if (frame == 'Seventh') {
-		group = 'Misc-2';
-		autoSeventhEditionFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
 	} else if (frame == 'M15BoxTopper') {
 		group = 'Showcase-5';
 		autoExtendedArtFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text, false);
-	} else if (frame == 'M15ExtendedArtShort') {
-		group = 'Showcase-5';
-		autoExtendedArtFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text, true);
 	} else if (frame == '8th') {
 		group = 'Misc-2';
 		auto8thEditionFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text, false);
+	} if (frame == 'M15Eighth') {
+		autoM15EighthFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+		group = 'Custom';
 	} else if (frame == 'Borderless') {
 		group = 'Showcase-5';
 		autoBorderlessFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+	} else {
+		//remove template without colorless mode
+		colors = colors.filter(color => color != 'D');
+		 if (frame == 'M15EighthUB') {
+			autoM15EighthUBFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+			group = 'Custom';
+		} else if (frame == 'UB') {
+			autoUBFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+			group = 'Showcase-5';
+		} else if (frame == 'UBNew') {
+			autoUBNewFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+			group = 'Accurate';
+		} else if (frame == 'FullArtNew') {
+			autoFullArtNewFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+			group = 'Accurate';
+		} else if (frame == 'Circuit') {
+			autoCircuitFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+			group = 'Custom';
+		} else if (frame == 'Praetors') {
+			group = 'Showcase-5';
+			autoPhyrexianFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+		} else if (frame == 'Seventh') {
+			group = 'Misc-2';
+			autoSeventhEditionFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+		} else if (frame == 'M15ExtendedArtShort') {
+			group = 'Showcase-5';
+			autoExtendedArtFrame(colors, card.text.mana.text, card.text.type.text, card.text.pt.text, true);
+		}
 	}
 
 	if (autoFramePack != frame) {
@@ -983,9 +1012,13 @@ async function autoM15Frame(colors, mana_cost, type_line, power) {
 	//clear the draggable frames
 	card.frames = [];
 	document.querySelector('#frame-list').innerHTML = null;
-
-	var properties = cardFrameProperties(colors, mana_cost, type_line, power);
 	var style = 'regular';
+	if(colors.includes('D')) {
+		style = 'devoid';
+		colors = colors.filter(color => color != 'D');
+	}
+	var properties = cardFrameProperties(colors, mana_cost, type_line, power);
+	
 	if (type_line.toLowerCase().includes('snow')) {
 		style = 'snow';
 	} else if (type_line.toLowerCase().includes('enchantment creature') || type_line.toLowerCase().includes('enchantment artifact')) {
@@ -1586,6 +1619,11 @@ function makeM15FrameByLetter(letter, mask = false, maskToRightHalf = false, sty
 	var frame = {
 		'name': frameName + ' Frame',
 		'src': '/img/frames/m15/' + style.toLowerCase() + '/m15Frame' + letter + '.png',
+	}
+
+	if (style == 'devoid') {
+		frame.src = frame.src.replace('Frame' + letter, 'devoidFrame' + letter);
+	
 	}
 
 	if (style == 'snow') {
