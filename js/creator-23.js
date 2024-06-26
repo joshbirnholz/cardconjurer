@@ -2977,7 +2977,6 @@ function makeSeventhEditionFrameByLetter(letter, mask = false, maskToRightHalf =
 		'L': 'Land',
 		'C': 'Colorless',
 		'V': 'Vehicle',
-		'E': 'Eldrazi',
 		'WL': 'White Land',
 		'UL': 'Blue Land',
 		'BL': 'Black Land',
