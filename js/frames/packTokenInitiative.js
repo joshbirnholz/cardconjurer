@@ -1,6 +1,6 @@
 //defines available frames
 availableFrames = [
-	{name:'Initiative Frame', src:'/img/frames/token/Initiative/initiative.png'}
+	{name:'Initiative Frame', src:'/img/frames/token/initiative/initiative.png'}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
