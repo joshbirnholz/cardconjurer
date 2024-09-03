@@ -3448,7 +3448,7 @@ function writeText(textObject, targetContext) {
 		newSplitText = [];
 		splitText.forEach((item, index) => {
 			if (item.includes('{') && item.includes('}')) {
-				newSplitText.push(item);
+				newSplitText.push(item, '{lns}');
 			} else if (item == ' ') {
 				newSplitText.push(`{down${scaleHeight(0.01)}}`);
 			} else {

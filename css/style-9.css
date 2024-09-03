@@ -167,6 +167,10 @@
 	font-family: dinnextmedium;
 	src: url('../fonts/DIN-Next-Medium.otf') format('opentype');
 }
+@font-face {
+	font-family: notosans;
+	src: url('../fonts/NotoSans-Regular.ttf') format('truetype');
+}
 /*Variables*/
 :root {
 	--site-background: url('../img/lowpolyBackground.svg');

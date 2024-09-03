@@ -9,6 +9,7 @@ loadFramePacks([
 	{name:'Legends Multicolored', value:'Legends'},
 	{name:'Alpha/Beta/Unlimited', value:'ABU'},
 	{name:'Misc', value:'disabled'},
+	{name:'8th Edition Playtest Cards', value:'8thPlaytest'},
 	{name:'Playtest Cards', value:'Playtest'},
 	{name:'Dungeon (AFR)', value:'Dungeon'},
 	{name:'Planechase', value:'Planechase'},

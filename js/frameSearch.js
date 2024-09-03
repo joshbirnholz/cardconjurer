@@ -184,6 +184,7 @@ const frameNames = new Map ([
 	['Fourth Edition', 'Fourth'],
 	['Legends Multicolored', 'Legends'],
 	['Alpha/Beta/Unlimited', 'ABU'],
+	['8th Edition Playtest Cards', '8thPlaytest'],
 	['Playtest Cards', 'Playtest'],
 	['Dungeon (AFR)', 'Dungeon'],
 	['Planechase', 'Planechase'],
