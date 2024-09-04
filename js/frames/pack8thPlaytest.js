@@ -48,7 +48,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.artBounds = {x:360/2010, y:378/2814, width:(1818-360)/2010, height:(1546-378)/2814};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:204/2010, y:2598/2814, width:0.12, height:0.0410, vertical:'center', horizontal: 'center'};
+	card.setSymbolBounds = {x:204/2010, y:2598/2814, width:0.105, height:0.0410, vertical:'center', horizontal: 'center'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
@@ -63,9 +63,8 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'{conditionalcolor:Black_Frame,Land_Frame,Colorless_Frame:white}\uFFEE {elemidinfo-artist}', x:0.094, y:1938/2100, width:0.8107, height:0.0248, oneLine:true, font:'matrixb', size:0.0248, color:'black', shadowX:0.0007, shadowY:0.0005},
-		wizards: {name:'wizards', text:'{conditionalcolor:Black_Frame,Land_Frame,Colorless_Frame:white}\u2122 & \u00a9 1993-{elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:0.094, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'black', shadowX:0.0007, shadowY:0.0005},
-		bottom: {text:'{conditionalcolor:Black_Frame,Land_Frame,Colorless_Frame:white}NOT FOR SALE   CardConjurer.com', x:0.094, y:1994/2100, width:0.8107, height:0.0134, oneLine:true, font:'mplantin', size:0.0134, color:'black', shadowX:0.0007, shadowY:0.0005}
+		top: {text:'{conditionalcolor:White_Frame:black}Illus. {elemidinfo-artist}', x:0.07, y:2475/2814, width:0.8107, height:0.035, oneLine:true, font:'notosans', size:0.035, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90},
+		midLeft: {text:'{conditionalcolor:White_Frame:black}{elemidinfo-note} {elemidinfo-set} {elemidinfo-number}', x:0.125, y:2475/2814, width:0.8107, height:0.0134, oneLine:true, font:'notosans', size:0.0134, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90}
 	});
 }
 //loads available frames
