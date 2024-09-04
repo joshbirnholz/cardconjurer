@@ -48,7 +48,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.artBounds = {x:360/2010, y:378/2814, width:(1818-360)/2010, height:(1546-378)/2814};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:204/2010, y:2598/2814, width:0.105, height:0.0410, vertical:'center', horizontal: 'center'};
+	card.setSymbolBounds = {x:207/2010, y:2598/2814, width:0.105, height:0.0410, vertical:'center', horizontal: 'center'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
