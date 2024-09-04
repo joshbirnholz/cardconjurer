@@ -63,8 +63,8 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'{conditionalcolor:White_Frame:black}Illus. {elemidinfo-artist}', x:0.07, y:2475/2814, width:0.44, height:0.035, oneLine:true, font:'notosans', size:0.035, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90},
-		midLeft: {text:'{conditionalcolor:White_Frame:black}{elemidinfo-note} {elemidinfo-set} {elemidinfo-number}', x:0.125, y:2475/2814, width:0.44, height:0.0134, oneLine:true, font:'notosans', size:0.0134, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90}
+		top: {text:'{conditionalcolor:White_Frame:black}Illus. {elemidinfo-artist}', x:0.066, y:2475/2814, width:0.44, height:0.035, oneLine:true, font:'notosans', size:0.035, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90},
+		midLeft: {text:'{conditionalcolor:White_Frame:black}{elemidinfo-note} {elemidinfo-set} {elemidinfo-number}', x:0.12, y:2475/2814, width:0.44, height:0.0172, oneLine:true, font:'notosans', size:0.0172, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90}
 	});
 }
 //loads available frames
