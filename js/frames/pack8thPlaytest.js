@@ -58,13 +58,13 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		mana: {name:'Mana Cost', text:'', x:125/2010, y:165/2814, size:120/2010, manaCost:true, vertical:true, noVerticalCenter:true, shadowY:0.0035},
 		title: {name:'Title', text:'', x:368/2010, y:195/2814, width:1454/2010, height:121/2814, oneLine:true, font:'matrixb', size:0.0429},
 		type: {name:'Type', text:'', x:363/2010, y:1579/2814, width:1466/2010, height:101/2814, oneLine:true, font:'matrixb', size:94/2814},
-		rules: {name:'Rules Text', text:'', x:338/2010, y:1773/2814, width:(1844-338)/2010, height:(2626-1773)/2814, size:0.0362},
+		rules: {name:'Rules Text', text:'', x:362/2010, y:1803/2814, width:(1831-362)/2010, height:(2613-1803)/2814, size:0.0362},
 		pt: {name:'Power/Toughness', text:'', x:1504/2010, y:2513/2814, width:0.1367, height:0.0443, size:0.0443, font:'matrixbsc', oneLine:true, align:'center'}
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'{conditionalcolor:White_Frame:black}Illus. {elemidinfo-artist}', x:0.07, y:2475/2814, width:0.8107, height:0.035, oneLine:true, font:'notosans', size:0.035, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90},
-		midLeft: {text:'{conditionalcolor:White_Frame:black}{elemidinfo-note} {elemidinfo-set} {elemidinfo-number}', x:0.125, y:2475/2814, width:0.8107, height:0.0134, oneLine:true, font:'notosans', size:0.0134, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90}
+		top: {text:'{conditionalcolor:White_Frame:black}Illus. {elemidinfo-artist}', x:0.07, y:2475/2814, width:0.44, height:0.035, oneLine:true, font:'notosans', size:0.035, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90},
+		midLeft: {text:'{conditionalcolor:White_Frame:black}{elemidinfo-note} {elemidinfo-set} {elemidinfo-number}', x:0.125, y:2475/2814, width:0.44, height:0.0134, oneLine:true, font:'notosans', size:0.0134, color:'white', shadowX:0.0007, shadowY:0.0005, rotation:-90}
 	});
 }
 //loads available frames
