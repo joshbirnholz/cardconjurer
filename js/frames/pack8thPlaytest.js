@@ -45,7 +45,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//sets card version
 	card.version = '8thPlaytest';
 	//art bounds
-	card.artBounds = {x:360/2010, y:378/2814, width:(1818-360)/2010, height:(1546-378)/2814};
+	card.artBounds = {x:346/2010, y:365/2814, width:(1828-346)/2010, height:(1555-365)/2814};
 	autoFitArt();
 	//set symbol bounds
 	card.setSymbolBounds = {x:207/2010, y:2598/2814, width:0.105, height:0.0410, vertical:'center', horizontal: 'center'};
