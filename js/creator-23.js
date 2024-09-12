@@ -752,7 +752,7 @@ function cardFrameProperties(colors, manaCost, typeLine, power, style) {
 			pt = 'C';
 		frame = 'C';
 		frameRight = null; 
-		console.log(pinline, pinlineRight, rules, rulesRight, pt, frame, frameRight)
+		// console.log(pinline, pinlineRight, rules, rulesRight, pt, frame, frameRight)
 	}
 
 	return {
