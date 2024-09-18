@@ -3315,7 +3315,8 @@ function loadTextOptions(textObject, replace=true) {
 function textOptionClicked(event) {
 	selectedTextIndex = getElementIndex(event.target);
 	document.querySelector('#text-editor').value = Object.entries(card.text)[selectedTextIndex][1].text;
-	document.querySelector('#text-editor-font-size').value = Object.entries(card.text)[selectedTextIndex][1].fontSize;
+
+	document.querySelector('#text-editor-font-size').value = Object.entries(card.text)[selectedTextIndex][1].fontSize ?? 0;
 	selectSelectable(event);
 }
 function textboxEditor() {
