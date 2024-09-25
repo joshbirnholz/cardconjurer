@@ -41,6 +41,7 @@ const frameNames = new Map ([
 	['Brawl Legend Crowns', 'Brawl'],
 	//showcase
 	['Paranormal (DSK)', 'Paranormal'],
+	['Japanese (DSK)', 'JapaneseShowcase'],
 	['Bloomburrow Borderless (BLB)', 'BloomburrowBorderless'],
 	['Woodland (BLB)', 'Woodland'],
 	['Memory Corridor (ACR) (Assassin\'s Creed)', 'MemoryCorridor'],
