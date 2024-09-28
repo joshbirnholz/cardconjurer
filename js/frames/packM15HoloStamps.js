@@ -1,6 +1,5 @@
 //Create objects for common properties across available frames
 var bounds = {x:0.436, y:0.9034, width:0.128, height:0.0458};
-var boundsJP = {x:0.4365, y:0.902, width:0.1264, height:0.0452};
 //defines available frames
 availableFrames = [
 	{name:'White Holo Stamp', src:'/img/frames/m15/holoStamps/m15HoloStampW.png', bounds:bounds},
@@ -18,14 +17,6 @@ availableFrames = [
 	{name:'Gray Holo Stamp', src:'/img/frames/m15/holoStamps/gray.png', bounds:{x:0.4554, y:0.9172, width:0.0894, height:0.0320}},
 	{name:'Acorn Holo Stamp', src:'/img/frames/m15/holoStamps/acorn.png', bounds:{x:0.4554, y:0.9129, width:0.0894, height:0.0381}},
 	{name:'Alchemy Holo Stamp', src:'/img/frames/m15/holoStamps/alchemy.png', bounds:{x:0.4554, y:0.9172, width:0.0894, height:0.0320}},
-	{name:'JP White Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampW.png', bounds:boundsJP},
-	{name:'JP Blue Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampU.png', bounds:boundsJP},
-	{name:'JP Black Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampB.png', bounds:boundsJP},
-	{name:'JP Red Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampR.png', bounds:boundsJP},
-	{name:'JP Green Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampG.png', bounds:boundsJP},
-	{name:'JP Multicolored Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampM.png', bounds:boundsJP},
-	{name:'JP Artifact Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampA.png', bounds:boundsJP},
-	{name:'JP Land Holo Stamp', src:'/img/frames/m15/japaneseShowcase/japaneseShowcaseHolostampL.png', bounds:boundsJP},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = true;

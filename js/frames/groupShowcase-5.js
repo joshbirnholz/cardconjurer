@@ -1,7 +1,6 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
 	{name:'Paranormal (DSK)', value:'Paranormal'},
-	{name:'Japanese (DSK)', value:'JapaneseShowcase'},
 	{name:'Bloomburrow Borderless (BLB)', value:'BloomburrowBorderless'},
 	{name:'Woodland (BLB)', value:'Woodland'},
 	{name:'Memory Corridor (ACR)', value:'MemoryCorridor'},
@@ -55,6 +54,7 @@ loadFramePacks([
 	{name:'Generic Showcase Frames', value:'disabled'},
 	{name:'Borderless', value:'GenericShowcase'},
 	{name:'Borderless (Alt)', value:'Borderless'},
+	{name:'Japan', value:'JapanShowcase'},
 	{name:'Fullart', value:'M15ClearTextboxes'},
 	{name:'Nickname ("Godzilla")', value:'M15Nickname'},
 	{name:'Extended Art (Regular)', value:'M15BoxTopper'},
@@ -68,7 +68,7 @@ loadFramePacks([
 	{name:'Etched (Snow)', value:'EtchedSnow'},
 	{name:'Legend Crowns (Etched)', value:'LegendCrownsEtched'},
 	{name:'Inner Crowns (Etched)', value:'InnerCrownsEtched'},
-	
+
 	{name:'Universes Beyond', value:'disabled'},
 	{name:'Universes Beyond', value:'UB'},
 	{name:'Universes Beyond (Full art)', value:'UBFull'},
