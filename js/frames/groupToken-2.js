@@ -5,6 +5,7 @@ loadFramePacks([
 	{name:'Tall', value:'TokenTall-1'},
 	{name:'Short', value:'TokenShort-1'},
 	{name:'Monarch Token', value:'TokenMonarch'},
+	{name:'Marker Card', value:'TokenMarker'},
 	{name:'Initiative Token', value:'TokenInitiative'},
 	{name:'Day/Night Marker', value:'TokenDayNight'},
 	{name:'Planeswalker Emblems', value:'Emblem'},

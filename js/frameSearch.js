@@ -169,6 +169,7 @@ const frameNames = new Map ([
 	['Tall Tokens', 'TokenTall-1'],
 	['Short Tokens', 'TokenShort-1'],
 	['Monarch Token', 'TokenMonarch'],
+	['Marker Card', 'TokenMarker'],
 	['Initiative Token', 'TokenInitiative'],
 	['Day/Night Marker', 'TokenDayNight'],
 	['Planeswalker Emblems', 'Emblem'],
