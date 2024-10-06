@@ -3,6 +3,7 @@ var bounds = {x:0.0594, y:0.0505, width:0.0734, height:0.0524};
 //defines available frames
 availableFrames = [
 	{name:'Up Arrow', src:'/img/frames/m15/transform/icons/default.png', bounds:bounds},
+	{name:'Down Arrow', src:'/img/frames/m15/transform/icons/downArrow.png', bounds:bounds},
 	{name:'Sun', src:'/img/frames/m15/transform/icons/sun.svg', bounds:bounds},
 	{name:'Crescent Moon', src:'/img/frames/m15/transform/icons/moon.svg', bounds:bounds},
 	{name:'Full Moon', src:'/img/frames/m15/transform/icons/fullmoon.svg', bounds:bounds},
