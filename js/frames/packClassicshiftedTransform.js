@@ -11,6 +11,9 @@ availableFrames = [
 	{name:'Green Transform Indicator', src:'/img/frames/custom/classicshifted/transform/g.png', bounds:bounds},
 	{name:'Multicolored Transform Indicator', src:'/img/frames/custom/classicshifted/transform/m.png', bounds:bounds},
 	{name:'Artifact Transform Indicator', src:'/img/frames/custom/classicshifted/transform/a.png', bounds:bounds},
+	{name:'Colorless Transform Indicator', src:'/img/frames/custom/classicshifted/transform/c.png', bounds:bounds},
+	{name:'Up Arrow', src:'/img/frames/m15/transform/icons/default.png', bounds:bounds2},
+	{name:'Down Arrow', src:'/img/frames/m15/transform/icons/downArrow.png', bounds:bounds2},
 	{name:'Sun', src:'/img/frames/m15/transform/icons/sun.svg', bounds:bounds2},
 	{name:'Crescent Moon', src:'/img/frames/m15/transform/icons/moon.svg', bounds:bounds2},
 	{name:'Full Moon', src:'/img/frames/m15/transform/icons/fullmoon.svg', bounds:bounds2},
@@ -22,6 +25,7 @@ availableFrames = [
 	{name:'Lesson', src:'/img/frames/m15/transform/icons/lesson.svg', bounds:bounds2},
 	{name:'Closed Fan', src:'/img/frames/m15/transform/icons/fanClosed.svg', bounds:bounds2},
 	{name:'Open Fan', src:'/img/frames/m15/transform/icons/fanOpen.svg', bounds:bounds2},
+	{name:'Hammer', src:'/img/frames/m15/transform/icons/hammer.png', bounds:bounds2},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
