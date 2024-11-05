@@ -824,7 +824,7 @@ function inputCardArtNameNumber(cardArtNameNumberInput) {
 	temporaryCardArt.onload = function() {
 		cardArt.src = this.src
 	}
-	temporaryCardArt.src = cardArtUrlList[cardArtNameNumberInput - 1] //config.hosts << "img.scryfall.com" //environment configuration
+	temporaryCardArt.src = cardArtUrlList[cardArtNameNumberInput - 1]
 	document.getElementById('inputInfoArtist').value = cardArtArtistList[cardArtNameNumberInput - 1]
 	document.getElementById('inputInfoArtist2').value = document.getElementById('inputInfoArtist').value
 	bottomInfoUpdated()
