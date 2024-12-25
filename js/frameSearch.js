@@ -198,6 +198,7 @@ const frameNames = new Map ([
 	['Promos', 'PromoOpenHouse'],
 	['Promo Borderless Frames', 'PromoRegular-1'],
 	['Promo Borderless Frames (Extra Short)', 'IkoShort'],
+	['Promo Nyx Frames', 'PromoNyx'],
 	['Promo Extended Art Frames', 'PromoExtended'],
 	['Promo Nickname Frames', 'PromoNickname'],
 	['Promo Generic Showcase', 'PromoGenericShowcase'],
