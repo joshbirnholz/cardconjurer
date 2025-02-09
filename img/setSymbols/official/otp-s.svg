@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 595.28 595.28">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Timeshifted-4);
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: url(#Timeshifted-5);
+      }
+
+      .cls-4 {
+        fill: url(#Timeshifted-3);
+      }
+
+      .cls-5 {
+        fill: url(#Timeshifted);
+      }
+
+      .cls-5, .cls-6, .cls-7, .cls-8 {
+        fill-rule: evenodd;
+      }
+
+      .cls-6 {
+        fill: url(#Timeshifted-8);
+      }
+
+      .cls-7 {
+        fill: url(#Timeshifted-7);
+      }
+
+      .cls-9 {
+        fill: url(#Timeshifted-2);
+      }
+
+      .cls-10 {
+        fill: url(#Timeshifted-6);
+      }
+    </style>
+    <linearGradient id="Timeshifted" x1="0" y1="718.53" x2="1" y2="718.53" gradientTransform="translate(735.09 509463.66) rotate(-.11) scale(922.77 -708.62)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#612c75"/>
+      <stop offset="0" stop-color="#653179"/>
+      <stop offset=".11" stop-color="#855693"/>
+      <stop offset=".21" stop-color="#9e73a8"/>
+      <stop offset=".31" stop-color="#b088b7"/>
+      <stop offset=".41" stop-color="#bb94c0"/>
+      <stop offset=".5" stop-color="#bf99c3"/>
+      <stop offset=".59" stop-color="#bb94c0"/>
+      <stop offset=".69" stop-color="#b088b7"/>
+      <stop offset=".79" stop-color="#9e73a8"/>
+      <stop offset=".89" stop-color="#855693"/>
+      <stop offset=".99" stop-color="#653179"/>
+      <stop offset="1" stop-color="#612c75"/>
+    </linearGradient>
+    <linearGradient id="Timeshifted-2" data-name="Timeshifted" y1="718.59" y2="718.59" gradientTransform="translate(50455.87 90161.04) rotate(-29.24) scale(143.49 -143.49)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-3" data-name="Timeshifted" y1="718.61" y2="718.61" gradientTransform="translate(70646.83 106303.48) rotate(-33.69) scale(177.03 -177.03)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-4" data-name="Timeshifted" y1="718.58" y2="718.58" gradientTransform="translate(370488.82 493.9) rotate(-90) scale(515.25 -515.25)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-5" data-name="Timeshifted" y1="718.58" y2="718.58" gradientTransform="translate(370603.97 493.9) rotate(-90) scale(515.25 -515.25)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-6" data-name="Timeshifted" y1="718.58" y2="718.58" gradientTransform="translate(370717.86 493.9) rotate(-90) scale(515.25 -515.25)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-7" data-name="Timeshifted" y1="718.6" y2="718.6" gradientTransform="translate(38608.98 359377.84) rotate(-6.13) scale(502.81 -502.81)" xlink:href="#Timeshifted"/>
+    <linearGradient id="Timeshifted-8" data-name="Timeshifted" y1="718.58" y2="718.58" gradientTransform="translate(44720.77 349094.54) rotate(-7.3) scale(489.05 -489.05)" xlink:href="#Timeshifted"/>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g id="M">
+      <rect class="cls-2" width="595.28" height="595.28"/>
+      <path class="cls-8" d="M4.36,49.74h587.5s-16.63,11.66-43.29,97.68l-22.08.11v298.4h23.35s14.36,67.28,41.94,96.84H4.57s14.08-3.09,43.35-97.69h21.68v-37.46h-32.37v-221.54h32.37v-38h-21.96S23.01,63.72,4.36,49.74Z"/>
+      <path class="cls-5" d="M175.37,215.74v161.33h-108.63v-161.33h108.63ZM105.32,305.67l-14.21,40.77h61.34l-14.19-40.71c9.07-5.54,15.13-15.54,15.13-26.94,0-17.41-14.14-31.55-31.55-31.55s-31.55,14.14-31.55,31.55c0,11.36,6.02,21.33,15.03,26.88Z"/>
+      <rect class="cls-9" x="102.26" y="145.67" width="48.93" height="42.15"/>
+      <rect class="cls-4" x="102.26" y="405.83" width="48.93" height="40.45"/>
+      <rect class="cls-1" x="215.46" y="145.67" width="49.39" height="300.61"/>
+      <rect class="cls-3" x="330.61" y="145.67" width="49.39" height="300.61"/>
+      <rect class="cls-10" x="444.5" y="145.67" width="49.39" height="300.61"/>
+      <path class="cls-7" d="M70.02,117.73h455.87l10.96-38.35H59.06l10.96,38.35Z"/>
+      <path class="cls-6" d="M70.02,475.56h455.87l10.96,38.35H59.06l10.96-38.35Z"/>
+    </g>
+  </g>
+</svg>

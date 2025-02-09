@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_2"
+   data-name="Layer 2"
+   viewBox="0 0 1003.19 953.2"
+   version="1.1"
+   width="1003.19"
+   height="953.20001"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <style
+       id="style1">
+      .cls-1 {
+        stroke-width: 0px;
+      }
+
+      .cls-1, .cls-2 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        stroke: #000;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.08px;
+      }
+    </style>
+  </defs>
+  <g
+     id="Layer_1-2"
+     data-name="Layer 1">
+    <g
+       id="M">
+      <g
+         id="Ebene2">
+        <path
+           class="cls-1"
+           d="M 141.52,307.48 389.69,271.41 501.02,45.63 612.98,270.79 861.77,307.49 682.64,482.89 724.93,731.06 502.26,614.13 278.97,729.82 320.64,482.9 141.51,307.5 Z"
+           id="path1" />
+        <path
+           class="cls-2"
+           d="M 170.34,711.59 203.3,523.75 65.84,388.78 0.54,589.07 170.34,711.6 Z"
+           id="path2" />
+        <path
+           class="cls-2"
+           d="M 832.84,714.02 799.88,526.18 937.34,391.21 1002.65,591.49 832.85,714.02 Z"
+           id="path3" />
+        <path
+           class="cls-2"
+           d="M 876.92,199.79 811.74,0.76 H 602.26 l 84.59,171.17 190.08,27.86 z"
+           id="path4" />
+        <path
+           class="cls-2"
+           d="M 126.29,199.57 191.48,0.54 h 209.48 l -84.59,171.17 z"
+           id="path5" />
+        <path
+           class="cls-2"
+           d="M 331.39,829.26 501.07,740.69 670.25,829.26 501.57,952.66 331.4,829.26 Z"
+           id="path6" />
+      </g>
+    </g>
+  </g>
+</svg>

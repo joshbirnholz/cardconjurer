@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_2"
+   data-name="Layer 2"
+   viewBox="0 0 725.00999 1039.89"
+   version="1.1"
+   width="725.01001"
+   height="1039.89"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2">
+    <style
+       id="style1">
+      .cls-1 {
+        fill: url(#linear-gradient);
+        fill-rule: evenodd;
+        stroke-width: 0px;
+      }
+    </style>
+    <linearGradient
+       id="linear-gradient"
+       x1="-592.44"
+       y1="519.95001"
+       x2="-591.44"
+       y2="519.95001"
+       gradientTransform="matrix(0,0,0,0,-5216.28,24.19)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#000"
+         id="stop1" />
+      <stop
+         offset="1"
+         stop-color="#000"
+         id="stop2" />
+    </linearGradient>
+  </defs>
+  <g
+     id="Layer_1-2"
+     data-name="Layer 1">
+    <path
+       class="cls-1"
+       d="m 385.22,0 339.79,550.09 -271.78,489.8 H 312.64 L 0,573.2 14.18,551.97 374.27,16.32 Z m -68.05,168.11 v -0.07 L 45.84,573.2 317.22,978.26 355.75,907.7 356.46,805.03 243.1,643.35 c -23.66,-37.74 -7.39,-84.86 48.88,-141.28 -27.64,47.4 -31.07,88.67 -10.39,123.7 l 123.3,169.84 -0.46,112.55 40.76,70.1 235.69,-427.12 -235.69,-383.06 -36.1,83.29 -0.41,98.2 c 55.76,88.12 91.45,146.57 107.12,175.42 15.67,28.81 -0.06,79.45 -47.15,151.96 20.68,-46.24 23.57,-91.22 8.51,-134.96 L 362.84,358.88 361.16,253.39 317.17,168.12 v 0 z"
+       id="path2"
+       style="fill:url(#linear-gradient)" />
+  </g>
+</svg>
