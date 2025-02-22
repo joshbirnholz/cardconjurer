@@ -40,7 +40,8 @@ const frameNames = new Map ([
 	['Conspiracies (Draft Matters)', 'Conspiracy'],
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
-	//
+	// Showcase
+	['Ghostfire (TDM)', 'Ghostfire'],
 	['Japan Showcase', 'JapanShowcase'],
 	['Paranormal (DSK)', 'Paranormal'],
 	['Bloomburrow Borderless (BLB)', 'BloomburrowBorderless'],
