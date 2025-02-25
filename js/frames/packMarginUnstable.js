@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Red Extension', src:'/img/frames/unstable/margins/r.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Green Extension', src:'/img/frames/unstable/margins/g.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Multicolored Extension', src:'/img/frames/unstable/margins/m.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
+	{name:'Artifact Extension', src:'/img/frames/unstable/margins/a.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Land Extension', src:'/img/frames/unstable/margins/c.png', bounds:bounds, ogBounds:ogBounds, masks:masks}
 ];
 //disables/enables the "Load Frame Version" button

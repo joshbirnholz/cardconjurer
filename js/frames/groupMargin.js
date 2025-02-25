@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Generic Margins', value:'Margin-1'},
+	{name:'Japanese Showcase Margins', value:'MarginJapaneseShowcase'},
 	{name:'Legends of Ixalan Margins', value:'MarginIxalanLegends'},
 	{name:'Memory Corridor Margins', value:'MarginMemoryCorridor'},
 	{name:'Breaking News Margin', value:'MarginBreakingNews'},

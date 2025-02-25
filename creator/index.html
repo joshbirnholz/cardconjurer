@@ -303,7 +303,7 @@
 						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");' data-dropFunction='uploadArt' data-otherParams='autoFit'>
 						        </div>
 						        <div>
-									<input type='url' placeholder='Via URL' class='input' onchange='uploadArt(this.value, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
+									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
 									<h5 class='input-description margin-bottom'></h5>
 										<label class='checkbox-container input'>Autofit when setting art
 											<input id='art-update-autofit' type='checkbox' onchange='setAutofit();'>

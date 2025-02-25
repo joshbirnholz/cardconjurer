@@ -8,6 +8,7 @@ availableFrames = [
 	{name:'Red Frame', src:'/img/frames/unstable/unstableFrameR.png', masks:masks},
 	{name:'Green Frame', src:'/img/frames/unstable/unstableFrameG.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/unstable/unstableFrameM.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/unstable/unstableFrameA.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/unstable/unstableFrameC.png', masks:masks}
 ];
 //disables/enables the "Load Frame Version" button

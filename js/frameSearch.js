@@ -40,6 +40,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	//showcase
+	['Japanese Showcase (DSK)', 'JapaneseShowcase'],
 	['Paranormal (DSK)', 'Paranormal'],
 	['Bloomburrow Borderless (BLB)', 'BloomburrowBorderless'],
 	['Woodland (BLB)', 'Woodland'],
@@ -133,6 +134,8 @@ const frameNames = new Map ([
 	['Planeswalker Transform Icons', 'PlaneswalkerTransformIcons'],
 	//saga
 	['Sagas', 'SagaRegular'],
+	['Sagas', 'SagaNyx'],
+	['Sagas', 'SagaNyxFlavor'],
 	['Sagas (Universes Beyond)', 'SagaUB'],
 	['Sagas (Scrolls of Middle-earth) (LTR)', 'SagaLTR'],
 	//dfc
