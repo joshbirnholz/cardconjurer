@@ -95,6 +95,7 @@ loadFramePacks([
 	{name:'Floating Legend Crowns (Universes Beyond)', value:'UBLegendCrownsFloating'},
 	{name:'Inner Crowns', value:'M15InnerCrowns'},
 	{name:'Nicknames', value:'M15Nickname-2'},
+	{name:'Japanese Showcase Nicknames', value:'JapaneseShowcaseNicknames'},
 	{name:'Holo Stamps', value:'M15HoloStamps'},
 	{name:'Dark Power/Toughness', value:'M15DarkPT'},
 	{name:'Colored Borders', value:'M15Borders'},
