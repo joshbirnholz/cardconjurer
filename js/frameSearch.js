@@ -214,6 +214,7 @@ const frameNames = new Map ([
 	['Fullart Basics (THB)', 'TextlessBasics'],
 	['Fullart Basics (ZEN)', 'ZendikarBasic-1'],
 	['Fullart Snow Basics', 'FullartBasicRoundBottom'],
+	['Unfinity Basics (UNF)', 'Unfinity'],
 	['Unstable Basics (UST)', 'Unstable'],
 	['Unhinged Basics (UNH)', 'Unhinged'],
 	['Generic Showcase', 'TextlessGenericShowcase'],

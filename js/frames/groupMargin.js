@@ -10,6 +10,7 @@ loadFramePacks([
 	{name:'LTR Ring Margins', value:'MarginRing'},
 	{name:'D&D Module Margins', value:'MarginDNDModule'},
 	{name:'Mystical Archive Margins', value:'MarginMysticalArchive'},
+	{name:'Unfinity Basics Margins', value:'MarginUnfinity'},
 	{name:'Unstable Basics Margins', value:'MarginUnstable'},
 	{name:'Invocation Margins', value:'MarginInvocation'},
 	{name:'Accurate Frame Margins', value:'MarginNew'},
