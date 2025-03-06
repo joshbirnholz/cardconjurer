@@ -1,13 +1,26 @@
 //Create objects for common properties across available frames
 var masks = [
-    {src:'/img/frames/m15/japanShowcase/MaskPinline.png', name:'Pinline'}, 
-    {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, 
-    {src:'/img/frames/m15/regular/m15MaskType.png', name:'Type'}, 
-    {src:'/img/frames/m15/regular/m15MaskRules.png', name:'Rules'}, 
-    {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
+    {src:'/img/frames/m15/japanShowcase/mask/MaskPinline.png', name:'Pinline'},
+	{src:'/img/frames/m15/japanShowcase/mask/MaskTitle.png', name:'Title'},
+	{src:'/img/frames/m15/japanShowcase/mask/MaskType.png', name:'Type'},
+	{src:'/img/frames/m15/japanShowcase/mask/MaskBottomPinline.png', name:'Bottom Pinline'},
+	{src:'/img/frames/m15/japanShowcase/mask/MaskBottom.png', name:'Bottom'}];
+	
+var masks2 = [
+	{src:'/img/frames/m15/japanShowcase/mana/1.png', name:'1 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/2.png', name:'2 Mana Symbol'}, 
+	{src:'/img/frames/m15/japanShowcase/mana/3.png', name:'3 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/4.png', name:'4 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/5.png', name:'5 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/6.png', name:'6 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/7.png', name:'7 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/8.png', name:'8 Mana Symbol'},
+	{src:'/img/frames/m15/japanShowcase/mana/9.png', name:'9 Mana Symbol'}];
 
 var bounds = {x:0.7771, y:0.8876, width:0.1720, height:0.0593};
 var boundsStamp = {x:0.4365, y:0.902, width:0.1264, height:0.0452};
+var bounds3 = {x:0, y:0, width:1, height:1};
+
 //defines available frames
 
 availableFrames = [
@@ -19,6 +32,7 @@ availableFrames = [
 	{name:'Multicolored Frame', src:'/img/frames/m15/japanShowcase/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/japanShowcase/a.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/japanShowcase/l.png', masks:masks},
+	{name:'Border', src:'/img/frames/m15/japanShowcase/border.png', bounds:bounds3},
 	
 
 	{name:'White Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/w.png', bounds:bounds},
@@ -28,7 +42,9 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', bounds:bounds},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', bounds:bounds},
 
+	{name:'Mana Symbol Backing (10)', src:'/img/frames/m15/japanShowcase/mana/10mana.png', masks:masks2, bounds:bounds3},
 
 
 	{name:'White Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/w.png', bounds:boundsStamp},
@@ -60,10 +76,10 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	resetWatermark();
 	//text
 	loadTextOptions({
-		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:65/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
+		mana: {name:'Mana Cost', text:'', y:0.0683, width:0.9190, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0,},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
 		type: {name:'Type', text:'', x:0.0854, y:0.612, width:0.71, height:0.0543, oneLine:true, font:'belerenb', size:0.0279, outlineWidth:0.008, color:'white'},
-		rules: {name:'Rules Text', text:'', x:0.086, y:0.692, width:0.771, height:0.206, size:0.033, outlineWidth:0.008, color:'white'},
+		rules: {name:'Rules Text', text:'', x:0.086, y:0.692, width:0.771, height:0.206, size:0.033, outlineWidth:0.008, font:'Plantin MT Pro', color:'white'},
 		pt: {name:'Power/Toughness', text:'', x:0.804, y:0.896, width:0.1180, height:0.049, size:0.04, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
 }
