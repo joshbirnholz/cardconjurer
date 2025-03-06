@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/unfinity/masks/titlePinlines.png', name:'Title Pinlines'}, {src:'/img/frames/unfinity/masks/title.png', name:'Title'}, {src:'/img/frames/unfinity/masks/landSymbol.png', name:'Land Symbol'}, {src:'/img/frames/unstable/pinline.svg', name:'Bottom'}];
+var masks = [{src:'/img/frames/unfinity/mask/titlePinlines.png', name:'Title Pinlines'}, {src:'/img/frames/unfinity/mask/title.png', name:'Title'}, {src:'/img/frames/unfinity/mask/landSymbol.png', name:'Land Symbol'}, {src:'/img/frames/unstable/pinline.svg', name:'Bottom'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/unfinity/W.png', masks:masks},
