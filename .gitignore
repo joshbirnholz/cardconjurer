@@ -32,3 +32,4 @@ access.log
 error.log
 
 fly.toml
+docker-compose.override.yml
