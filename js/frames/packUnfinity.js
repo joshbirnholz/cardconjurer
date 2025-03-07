@@ -2,14 +2,14 @@
 var masks = [{src:'/img/frames/unfinity/mask/titlePinlines.png', name:'Title Pinlines'}, {src:'/img/frames/unfinity/mask/title.png', name:'Title'}, {src:'/img/frames/unfinity/mask/landSymbol.png', name:'Land Symbol'}, {src:'/img/frames/unstable/pinline.svg', name:'Bottom'}];
 //defines available frames
 availableFrames = [
-	{name:'White Frame', src:'/img/frames/unfinity/W.png', masks:masks},
-	{name:'Blue Frame', src:'/img/frames/unfinity/U.png', masks:masks},
-	{name:'Black Frame', src:'/img/frames/unfinity/B.png', masks:masks},
-	{name:'Red Frame', src:'/img/frames/unfinity/R.png', masks:masks},
-	{name:'Green Frame', src:'/img/frames/unfinity/G.png', masks:masks},
-	{name:'Multicolored Frame', src:'/img/frames/unfinity/M.png', masks:masks},
-	{name:'Artifact Frame', src:'/img/frames/unfinity/A.png', masks:masks},
-	{name:'Colorless Frame', src:'/img/frames/unfinity/C.png', masks:masks}
+	{name:'White Frame', src:'/img/frames/unfinity/w.png', masks:masks},
+	{name:'Blue Frame', src:'/img/frames/unfinity/u.png', masks:masks},
+	{name:'Black Frame', src:'/img/frames/unfinity/b.png', masks:masks},
+	{name:'Red Frame', src:'/img/frames/unfinity/r.png', masks:masks},
+	{name:'Green Frame', src:'/img/frames/unfinity/g.png', masks:masks},
+	{name:'Multicolored Frame', src:'/img/frames/unfinity/m.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/unfinity/a.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/unfinity/c.png', masks:masks}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
