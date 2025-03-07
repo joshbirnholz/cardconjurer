@@ -16,6 +16,9 @@ var masks2 = [
 	{src:'/img/frames/m15/japanShowcase/mana/7.png', name:'7 Mana Symbol'},
 	{src:'/img/frames/m15/japanShowcase/mana/8.png', name:'8 Mana Symbol'},
 	{src:'/img/frames/m15/japanShowcase/mana/9.png', name:'9 Mana Symbol'}];
+	
+var masks3 = [
+    {src:'/img/frames/m15/japanShowcase/mask/MaskPtBoxPinline.png', name:'PT Box Pinline'}];
 
 var bounds = {x:0.7771, y:0.8876, width:0.1720, height:0.0593};
 var boundsStamp = {x:0.4365, y:0.902, width:0.1264, height:0.0452};
@@ -35,14 +38,14 @@ availableFrames = [
 	{name:'Border', src:'/img/frames/m15/japanShowcase/border.png', bounds:bounds3},
 	
 
-	{name:'White Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/w.png', bounds:bounds},
-	{name:'Blue Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/u.png', bounds:bounds},
-	{name:'Black Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/b.png', bounds:bounds},
-	{name:'Red Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/r.png', bounds:bounds},
-	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', bounds:bounds},
-	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', bounds:bounds},
-	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', bounds:bounds},
-	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', bounds:bounds},
+	{name:'White Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/w.png', masks:masks3, bounds:bounds},
+	{name:'Blue Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/u.png', masks:masks3, bounds:bounds},
+	{name:'Black Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/b.png', masks:masks3, bounds:bounds},
+	{name:'Red Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/r.png', masks:masks3, bounds:bounds},
+	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', masks:masks3, bounds:bounds},
+	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', masks:masks3, bounds:bounds},
+	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', masks:masks3, bounds:bounds},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', masks:masks3, bounds:bounds},
 
 	{name:'Mana Symbol Backing (10)', src:'/img/frames/m15/japanShowcase/mana/10mana.png', masks:masks2, bounds:bounds3},
 
