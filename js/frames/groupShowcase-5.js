@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
+	{name: 'Ghostfire (TDM)', value: 'Ghostfire'},
 	{name:'Japan Showcase', value:'JapanShowcase'},
 	{name:'Paranormal (DSK)', value:'Paranormal'},
 	{name:'Bloomburrow Borderless (BLB)', value:'BloomburrowBorderless'},
