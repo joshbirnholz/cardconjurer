@@ -92,6 +92,10 @@
 	src: url('../fonts/Souvenir-Itc-T-OT-Bold.otf') format('opentype');
 }
 @font-face {
+	font-family: souvenirmed;
+	src: url('../fonts/souvenirstd-medium.otf') format('opentype');
+}
+@font-face {
 	font-family: palatino;
 	src: url('../fonts/Palatino Font.ttf') format('truetype');
 }
