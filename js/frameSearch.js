@@ -63,6 +63,7 @@ const frameNames = new Map ([
 	['Ravnica City (MOM)', 'Ravnica'],
 	['Tarkir Sketch (MOM)', 'Tarkir'],
 	['Oil Slick (ONE)', 'OilSlick'],
+	['Shattered Glass (BOT)', 'ShatteredGlass'],
 	['Stained Glass (DMU)', 'DMUStainedGlass'],
 	['Golden Age (SNC)', 'SNCGilded'],
 	['Art Deco (SNC)', 'SNCArtDeco'],

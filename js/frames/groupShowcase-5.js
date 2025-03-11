@@ -24,6 +24,7 @@ loadFramePacks([
 	{name:'Ikoria Crystal (MOM)', value:'Crystal'},
 	{name:'Ravnica City (MOM)', value:'Ravnica'},
 	{name:'Oil Slick (ONE)', value:'OilSlick'},
+	{name:'Shattered Glass (BOT)', value:'ShatteredGlass'},
 	{name:'Stained Glass (DMU)', value:'DMUStainedGlass'},
 	{name:'Golden Age (SNC)', value:'SNCGilded'},
 	{name:'Art Deco (SNC)', value:'SNCArtDeco'},
