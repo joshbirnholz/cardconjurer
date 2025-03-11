@@ -232,6 +232,7 @@ const frameNames = new Map ([
 	['Floating Old Border', 'OldFloating'],
 	['Floating Old Border (Short)', 'OldFloatingShort'],
 	['Classicshifted', 'Classicshifted'],
+	['Classicshifted Nickname', 'ClassicshiftedNickname'],
 	['Classicshifted Lands', 'ClassicshiftedLands'],
 	['Classicshifted Planeswalkers', 'ClassicshiftedPlaneswalker'],
 	['Classicshifted Planeswalker Transform Addons', 'ClassicshiftedPlaneswalkerTransform'],
