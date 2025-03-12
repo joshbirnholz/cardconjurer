@@ -7,17 +7,13 @@ availableFrames = [
         src: "/img/frames/ghostfire/frame.png",
     },
     {
-        name: "FrameWithPTBox",
-        src: "/img/frames/ghostfire/framePT.png",
+        name: "Power/Toughness",
+        src: "/img/frames/ghostfire/pt.png", bounds:{ y: -0.003, x: -0.001 },
     },
     {
         name: "BorderlessFrame",
         src: "/img/frames/ghostfire/bFrame.png",
     },
-    {
-        name: "BorderlessFrameWithPTBox",
-        src: "/img/frames/ghostfire/bFramePT.png",
-    }
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector("#loadFrameVersion").disabled = false;
