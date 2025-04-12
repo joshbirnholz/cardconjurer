@@ -41,6 +41,7 @@ loadFramePacks([
 
 	{name:'Classicshifted Series', value:'disabled'},
 	{name:'Classicshifted', value:'Classicshifted'},
+	{name:'Classicshifted Nickname', value:'ClassicshiftedNickname'},
 	{name:'Classicshifted Lands', value:'ClassicshiftedLands'},
 	{name:'Classicshifted Planeswalkers', value:'ClassicshiftedPlaneswalker'},
 	{name:'Classicshifted Planeswalker Transform Addons', value:'ClassicshiftedPlaneswalkerTransform'},

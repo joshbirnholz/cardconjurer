@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 1000 1000" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-2416,0)">
+        <g id="R" transform="matrix(1,0,0,1,-0.333333,0)">
+            <rect x="2416.33" y="0" width="1000" height="1000" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,-1207.67,0)">
+                <path d="M3639.56,391.788C3639.56,391.788 3872.01,307.575 3935.22,306.525C3935.22,306.525 4019.4,180.173 4124,36.411C4124,36.411 4285.49,238.066 4296.77,292.331C4296.77,292.331 4597.72,383.343 4609.95,391.339C4609.95,391.339 4452.34,628.004 4420.78,633.528C4420.78,633.528 4429.27,950.984 4426.96,963.307C4426.96,963.307 4176.64,896.3 4135.82,857.02C4135.82,857.02 3974.12,919.55 3824.92,965.181C3824.92,965.181 3816.97,692.594 3837.15,654.822C3837.15,654.822 3653.6,419.03 3639.56,391.788Z"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-1207.67,0)">
+                <path d="M3849.18,615.498L3694.17,408.503C3694.17,408.503 3899.59,332.708 3973.8,336.864C3973.8,336.864 4130.54,326.596 4175.66,475.199C4175.66,475.199 4167.62,324.016 3976.81,306.008L4124.76,94.614C4124.76,94.614 4245.68,253.809 4271.78,318.791C4297.88,383.773 4292.55,450.353 4285.1,470.061C4285.1,470.061 4273.28,534.764 4209.6,575.67C4209.6,575.67 4353.33,518.397 4309.65,332.859L4555.56,410.005C4555.56,410.005 4416.92,603.967 4371.69,630.893C4371.69,630.893 4252.57,734.142 4125.82,637.788C4125.82,637.788 4225.27,761.439 4387.22,658.872L4390.81,918.888C4390.81,918.888 4265.32,879.431 4184.95,845.832C4104.57,812.234 4060.01,752.485 4045.52,719.546C4031.02,686.606 4021.18,627.023 4042.62,577.616C4042.62,577.616 3956.47,709.699 4101.82,833.69L3858.49,917.275C3858.49,917.275 3854.22,817.461 3864.86,687.205C3875.5,556.949 3977.52,468.124 4069.9,478.783C4069.9,478.783 3930.46,435.492 3849.18,615.498Z" style="fill:url(#_Radial1);"/>
+            </g>
+        </g>
+    </g>
+    <defs>
+        <radialGradient id="_Radial1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="matrix(449.851,3.95515,-3.95515,449.851,4124,533.937)"><stop offset="0" style="stop-color:rgb(141,116,47);stop-opacity:1"/><stop offset="0" style="stop-color:rgb(215,189,116);stop-opacity:1"/><stop offset="0.61" style="stop-color:rgb(212,186,113);stop-opacity:1"/><stop offset="0.7" style="stop-color:rgb(202,176,104);stop-opacity:1"/><stop offset="0.78" style="stop-color:rgb(185,160,89);stop-opacity:1"/><stop offset="0.8" style="stop-color:rgb(179,154,84);stop-opacity:1"/><stop offset="0.86" style="stop-color:rgb(163,138,69);stop-opacity:1"/><stop offset="0.94" style="stop-color:rgb(147,122,53);stop-opacity:1"/><stop offset="1" style="stop-color:rgb(141,116,47);stop-opacity:1"/></radialGradient>
+    </defs>
+</svg>

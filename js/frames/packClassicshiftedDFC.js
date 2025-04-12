@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Green MDFC Flipside', src:'/img/frames/custom/classicshifted/mdfc/g.png', bounds:bounds2},
 	{name:'Multicolored MDFC Flipside', src:'/img/frames/custom/classicshifted/mdfc/m.png', bounds:bounds2},
 	{name:'Artifact MDFC Flipside', src:'/img/frames/custom/classicshifted/mdfc/a.png', bounds:bounds2},
+	{name:'Colorless MDFC Flipside', src:'/img/frames/custom/classicshifted/mdfc/c.png', bounds:bounds2},
 	{name:'Land MDFC Flipside', src:'/img/frames/custom/classicshifted/mdfc/l.png', bounds:bounds2},
 	{name:'Front Face', src:'/img/frames/custom/classicshifted/mdfc/mdfcFront.png', bounds:bounds1},
 	{name:'Back Face', src:'/img/frames/custom/classicshifted/mdfc/mdfcBack.png', bounds:bounds1}

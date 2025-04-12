@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/scroll/maskNoOverlay.png', name:'No Art Overlay'}];
+var masks = [{src:'/img/frames/scroll/maskNoOverlay.png', name:'No Art Overlay'}, {src:'/img/frames/scroll/maskExtendedArt.png', name:'Extended Art Overlay'}, {src:'/img/frames/scroll/maskBorderless.png', name:'Borderless Overlay'}, {src:'/img/frames/scroll/maskBorderlessWithBorder.png', name:'Borderless With Border Overlay'}];
 // var bounds = {x:0.7573, y:0.8848, width:0.188, height:0.0733};
 var crownBounds = {x:49/2010, y:43/2814, width:1909/2010, height:70/2814};
 var stampBounds = {x:834/2010, y:2518/2814, width:349/2010, height:181/2814};

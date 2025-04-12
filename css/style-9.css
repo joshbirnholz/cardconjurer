@@ -92,6 +92,10 @@
 	src: url('../fonts/Souvenir-Itc-T-OT-Bold.otf') format('opentype');
 }
 @font-face {
+	font-family: souvenirmed;
+	src: url('../fonts/souvenirstd-medium.otf') format('opentype');
+}
+@font-face {
 	font-family: palatino;
 	src: url('../fonts/Palatino Font.ttf') format('truetype');
 }
@@ -170,6 +174,22 @@
 @font-face {
 	font-family: notosans;
 	src: url('../fonts/NotoSans-Regular.ttf') format('truetype');
+}
+@font-face {
+	font-family: plantinmtprobold;
+	src: url('../fonts/PlantinMTProBold.woff2') format("woff2");
+}
+@font-face {
+	font-family: plantinmtprorg;
+	src: url('../fonts/PlantinMTProRg.woff2') format("woff2");
+}
+@font-face {
+	font-family: plantinmtprorgit;
+	src: url('../fonts/PlantinMTProRgIt.woff2') format("woff2");
+}
+@font-face {
+	font-family: plantinmtprosemiboldit;
+	src: url('../fonts/PlantinMTProSemiBdIt.woff2') format("woff2");
 }
 /*Variables*/
 :root {

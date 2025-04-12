@@ -338,6 +338,7 @@ loadManaSymbols(['wu', 'wb', 'ub', 'ur', 'br', 'bg', 'rg', 'rw', 'gw', 'gu', '2w
 				 'wup', 'wbp', 'ubp', 'urp', 'brp', 'bgp', 'rgp', 'rwp', 'gwp', 'gup', 'purplew', 'purpleu', 'purpleb', 'purpler', 'purpleg',
 				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2]);
 loadManaSymbols(['bar.png', 'whitebar.png']);
+loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'], [1.2, 1.2]);
 loadManaSymbols(true, ['chaos'], [1.2, 1]);
 loadManaSymbols(true, ['tk'], [0.8, 1]);
 loadManaSymbols(true, ['planeswalker'], [0.6, 1.2]);
@@ -4122,6 +4123,30 @@ function uploadArt(imageSource, otherParams) {
 		};
 	}
 }
+async function pasteArt() {
+  try {
+    const clipboardItems = await navigator.clipboard.read();
+    
+    for (const item of clipboardItems) {
+      for (const type of item.types) {
+        if (type.startsWith('image/')) {
+          const blob = await item.getType(type);
+          
+          const url = URL.createObjectURL(blob);
+
+          uploadArt(url, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");
+          // document.getElementById('preview').src = url;
+          return;
+        }
+      }
+    }
+
+    notify('No image found in clipboard!');
+  } catch (err) {
+    console.error('Failed to read clipboard: ', err);
+    notify('Clipboard access not allowed or no image available.');
+  }
+}
 function artEdited() {
 	card.artSource = art.src;
 	card.artX = document.querySelector('#art-x').value / card.width;
@@ -4330,7 +4355,7 @@ function fetchSetSymbol() {
 		localStorage.setItem('lockSetSymbolCode', setCode);
 	}
 	var setRarity = document.querySelector('#set-symbol-rarity').value.toLowerCase().replace('uncommon', 'u').replace('common', 'c').replace('rare', 'r').replace('mythic', 'm') || 'c';
-	if (['sld', 'a22', 'a23', 'j22'].includes(setCode.toLowerCase())) {
+	if (['a22', 'a23', 'j22'].includes(setCode.toLowerCase())) {
 		uploadSetSymbol(fixUri(`/img/setSymbols/custom/${setCode.toLowerCase()}-${setRarity}.png`), 'resetSetSymbol');
 	} else if (['cc', 'logan', 'joe'].includes(setCode.toLowerCase())) {
 		uploadSetSymbol(fixUri(`/img/setSymbols/custom/${setCode.toLowerCase()}-${setRarity}.svg`), 'resetSetSymbol');
@@ -4342,7 +4367,7 @@ function fetchSetSymbol() {
 		uploadSetSymbol('https://api.hexproof.io/symbols/set/' + setCode + '/' + setRarity, 'resetSetSymbol');
 	} else {
 		var extension = 'svg';
-		if (['moc', 'ltr', 'ltc', 'cmm', 'who', 'scd', 'woe', 'wot', 'woc', 'lci', 'lcc', 'mkm', 'mkc', 'otj', 'otc'].includes(setCode.toLowerCase())) {
+		if (['moc', 'ltr', 'ltc', 'cmm', 'who', 'scd', 'woe', 'wot', 'woc', 'lci', 'lcc', 'mkm', 'mkc', 'otj', 'otc', 'dft', 'drc', 'tdm', 'tdc', 'fin', 'fic'].includes(setCode.toLowerCase())) {
 			extension = 'png';
 		}
 		if (setSymbolAliases.has(setCode.toLowerCase())) setCode = setSymbolAliases.get(setCode.toLowerCase());

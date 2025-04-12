@@ -303,13 +303,14 @@
 						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");' data-dropFunction='uploadArt' data-otherParams='autoFit'>
 						        </div>
 						        <div>
-									<input type='url' placeholder='Via URL' class='input' onchange='uploadArt(this.value, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
+									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
 									<h5 class='input-description margin-bottom'></h5>
 										<label class='checkbox-container input'>Autofit when setting art
 											<input id='art-update-autofit' type='checkbox' onchange='setAutofit();'>
 											<span class='checkmark'></span>
 										</label>
 								</div>
+								<button class='input margin-bottom' onclick='pasteArt();'>Paste from clipboard</button>
 							</div>
 							<h5 class='margin-bottom padding input-description'>Or enter a card name</h5>
 							<input id='art-name' type='text' placeholder='Enter Card Name' class='input margin-bottom' onchange="fetchScryfallData(this.value, artFromScryfall, 'art');">
@@ -441,6 +442,7 @@
 								<option value="/img/watermarks/b.svg">Black</option>
 								<option value="/img/watermarks/r.svg">Red</option>
 								<option value="/img/watermarks/g.svg">Green</option>
+								<option value="/img/watermarks/c.svg">Colorless</option>
 								<option disabled>Mechanics</option>
 								<option value="/img/watermarks/ability-foretell.svg">Foretell</option>
 								<option disabled>Phyrexian/Mirrodin</option>
