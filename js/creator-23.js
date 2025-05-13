@@ -5306,7 +5306,7 @@ function imageURL(url, destination, otherParams) {
 	} else if (params.get('noproxy') != '') {
 		//CORS PROXY LINKS
 		//Previously: https://cors.bridged.cc/
-		imageurl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+		imageurl = 'https://corsproxy.io/?url=' + encodeURIComponent(url);
 	}
 	destination(imageurl, otherParams);
 }
