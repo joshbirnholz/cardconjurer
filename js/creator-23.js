@@ -6,6 +6,8 @@ if (debugging) {
 	document.querySelectorAll('.debugging').forEach(element => element.classList.remove('hidden'));
 }
 
+var frameNames = new Map();
+
 //To save the server from being overloaded? Maybe?
 function fixUri(input) {
 	/* --- DISABLED FOR LOCAL VERSION --
@@ -464,6 +466,7 @@ function loadFramePacks(framePackOptions = []) {
 		} else {
 			framePackOption.value = item.value;
 		}
+		frameNames.set(item.name, item.value)
 		document.querySelector('#selectFramePack').appendChild(framePackOption);
 	});
 	loadScript("/js/frames/pack" + document.querySelector('#selectFramePack').value + ".js");
