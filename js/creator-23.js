@@ -4859,6 +4859,43 @@ function extractSagaReminderText(text) {
   const match = text.match(/^\([^)]*\)/);
   return match ? match[0] : null;
 }
+  
+function parseClassAbilities(text) {
+    const lines = text.split('\n'); // Split text into lines
+    const abilities = [];
+    let reminderText = '';
+    let currentLevel = 1;
+
+    // Check if the first line is reminder text
+    if (lines[0].startsWith('(')) {
+            reminderText = lines.shift(); // Extract reminder text
+    }
+
+    // Process each line
+    for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Check for "{cost}: Level X" format
+            const levelMatch = line.match(/^(\{.*?\}):\s*Level \d+/); // Match cost and level
+            if (levelMatch) {
+                    const cost = `${levelMatch[1]}:`; // Extract cost (e.g., "{G}")
+                    const ability = lines[i + 1]?.trim() || ''; // Get the next line as ability text
+                    abilities.push({ cost, ability });
+                    i++; // Skip the next line since it's already processed
+                    currentLevel++;
+            } else if (abilities.length === 0) {
+                    // Handle the first level's ability text without "Level" heading
+                    abilities.push({ cost: '', ability: line });
+            }
+    }
+
+    // Prepend reminder text to the first ability if it exists
+    if (reminderText && abilities.length > 0) {
+            abilities[0].ability = `${reminderText}{lns}{bar}{lns}${abilities[0].ability}`;
+    }
+
+    return abilities;
+}
 
 function changeCardIndex() {
 	var cardToImport = scryfallCard[document.querySelector('#import-index').value];
@@ -5022,6 +5059,23 @@ function changeCardIndex() {
 		card.text.reminder.text = `{i}${extractSagaReminderText(cardToImport.oracle_text)}{/i}`;
 		card.saga = {...card.saga, abilities: abilities.map(a => a.steps).concat(Array.from({ length: 4 - abilities.length}, () => 0)), count: abilities.length};
 		updateAbilityHeights()
+	} else if (card.version.toLowerCase().includes('class') && !card.version.includes('classicshifted') && typeof classCanvas !== "undefined") {
+		if (card.text.flavor) {
+			// future support classes with flavor text
+			card.text.flavor.text = cardToImport.flavor_text || '';
+		}
+		const abilities = parseClassAbilities(cardToImport.oracle_text);
+		for (let i = 0; i < abilities.length; i++) {
+			const { cost, ability } = abilities[i];
+			if (cost) {
+				card.text[`level${i}a`].text = abilities[i].cost.replace('\u2212', '-');
+			}
+			if (i !== 0) {
+				card.text[`level${i}b`].text = `Level ${i + 1}`;
+			}
+			card.text[`level${i}c`].text = ability.replace('(', '{i}(').replace(')', '){/i}');
+		}
+		card.class = {...card.class, abilities: abilities.map(a => a.cost).concat(Array.from({ length: 4 - abilities.length}, () => '')), count: abilities.length};
 	} else if (card.version.includes('battle')) {
 		card.text.defense.text = cardToImport.defense || '';
 	}
