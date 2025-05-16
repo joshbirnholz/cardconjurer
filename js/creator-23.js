@@ -5288,6 +5288,43 @@ function extractSagaReminderText(text) {
   const match = text.match(/^\([^)]*\)/);
   return match ? match[0] : null;
 }
+  
+function parseClassAbilities(text) {
+    const lines = text.split('\n'); // Split text into lines
+    const abilities = [];
+    let reminderText = '';
+    let currentLevel = 1;
+
+    // Check if the first line is reminder text
+    if (lines[0].startsWith('(')) {
+            reminderText = lines.shift(); // Extract reminder text
+    }
+
+    // Process each line
+    for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Check for "{cost}: Level X" format
+            const levelMatch = line.match(/^(\{.*?\}):\s*Level \d+/); // Match cost and level
+            if (levelMatch) {
+                    const cost = `${levelMatch[1]}:`; // Extract cost (e.g., "{G}")
+                    const ability = lines[i + 1]?.trim() || ''; // Get the next line as ability text
+                    abilities.push({ cost, ability });
+                    i++; // Skip the next line since it's already processed
+                    currentLevel++;
+            } else if (abilities.length === 0) {
+                    // Handle the first level's ability text without "Level" heading
+                    abilities.push({ cost: '', ability: line });
+            }
+    }
+
+    // Prepend reminder text to the first ability if it exists
+    if (reminderText && abilities.length > 0) {
+            abilities[0].ability = `${reminderText}{lns}{bar}{lns}${abilities[0].ability}`;
+    }
+
+    return abilities;
+}
 
 function parseClassAbilities(text) {
     const lines = text.split('\n'); // Split text into lines
