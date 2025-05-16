@@ -264,6 +264,7 @@ const frameNames = new Map ([
 	['StoneCutter Case', 'StoneCutterDeluxeCase'],
 	['StoneCutter MDFC Addons', 'StoneCutterDeluxeDFC'],
 	['StoneCutter Transform Addons', 'StoneCutterDeluxeTransformAddons'],
+	['StoneCutter V1', 'StoneCutterDeluxe'],
 	['Short Neon (NEO)', 'NEONeonShort'],
 	['Colored Golden Age (SNC)', 'SNCGildedColored'],
 	['Textless Golden Age (SNC)', 'SNCGildedTextless'],
