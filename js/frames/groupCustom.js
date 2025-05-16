@@ -62,6 +62,7 @@ loadFramePacks([
 	{name:'StoneCutter Case', value:'StoneCutterDeluxeCase'},
 	{name:'StoneCutter MDFC Addons', value:'StoneCutterDeluxeDFC'},
 	{name:'StoneCutter Transform Addons', value:'StoneCutterDeluxeTransformAddons'},
+	{name:'StoneCutter V1', value:'StoneCutterDeluxe'},
 
 	{name:'Showcase Frame Varients', value:'disabled'},
 	{name:'Short Neon (NEO)', value:'NEONeonShort'},
