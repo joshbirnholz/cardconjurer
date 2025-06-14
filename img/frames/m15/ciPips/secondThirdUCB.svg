@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1500"
+   height="2100"
+   version="1.1"
+   xml:space="preserve"
+   style="clip-rule:evenodd;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2"
+   id="svg1"
+   sodipodi:docname="secondThird.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:serif="http://www.serif.com/"><defs
+   id="defs1" /><sodipodi:namedview
+   id="namedview1"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1" />
+    <rect
+   id="Card"
+   x="0"
+   y="0"
+   width="1500"
+   height="2100"
+   style="fill:none" />
+    <g
+   id="Card1"
+   serif:id="Card"
+   transform="translate(-0.005,418.658)">
+        <path
+   id="CI-Pip"
+   serif:id="CI Pip"
+   d="m 150,1220 c 12.142,0 22,9.86 22,22 0,4.01 -1.073,7.76 -2.947,11 L 150,1242 Z"
+   style="fill:#ef3827" />
+    </g>
+</svg>

@@ -1,6 +1,6 @@
 //Create objects for common properties across available frames
 var masks = [{src:'/img/frames/saga/creature/transform-back/masks/pinline.png', name:'Pinline'}, {src:'/img/frames/saga/creature/transform-back/masks/title.png', name:'Title'}, {src:'/img/frames/saga/creature/masks/sagaMaskType.png', name:'Type'}, {src:'/img/frames/saga/creature/transform-back/masks/frame.png', name:'Frame'}, {src:'/img/frames/saga/creature/masks/sagaMaskBanner.png', name:'Banner'}, {src:'/img/frames/saga/creature/masks/sagaMaskBannerRight.png', name:'Banner (Right)'}, {src:'/img/frames/saga/creature/masks/sagaMaskText.png', name:'Text'}, {src:'/img/frames/saga/creature/masks/sagaMaskBorder.png', name:'Border'}];
-var pipMasks = [{src:'/img/frames/m15/ciPips/firstHalf.svg', name:'First Half'}, {src:'/img/frames/m15/ciPips/secondHalf.svg', name:'Second Half'}, {src:'/img/frames/m15/ciPips/firstThird.svg', name:'First Third'}, {src:'/img/frames/m15/ciPips/secondThird.svg', name:'Second Third'}, {src:'/img/frames/m15/ciPips/thirdThird.svg', name:'Third Third'}];
+var pipMasks = [{src:'/img/frames/m15/ciPips/firstHalfUBC.svg', name:'First Half'}, {src:'/img/frames/m15/ciPips/secondHalfUCB.svg', name:'Second Half'}, {src:'/img/frames/m15/ciPips/firstThirdUCB.svg', name:'First Third'}, {src:'/img/frames/m15/ciPips/secondThirdUCB.svg', name:'Second Third'}, {src:'/img/frames/m15/ciPips/thirdThirdUCB.svg', name:'Third Third'}];
 var pipBounds = {x:0, y:561/2814, width:1, height:1};
 var bounds = {x:0.7573, y:0.8848, width:0.188, height:0.0733};
 //defines available frames
@@ -21,11 +21,11 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/transform/regular/ptG.png', bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/transform/regular/ptM.png', bounds:bounds},
 
-	{name:'White Pip', src:'/img/frames/m15/ciPips/w.svg', masks:masks, complementary:18, bounds:pipBounds},
-	{name:'Blue Pip', src:'/img/frames/m15/ciPips/u.svg', masks:masks, complementary:18, bounds:pipBounds},
-	{name:'Black Pip', src:'/img/frames/m15/ciPips/b.svg', masks:masks, complementary:18, bounds:pipBounds},
-	{name:'Red Pip', src:'/img/frames/m15/ciPips/r.svg', masks:masks, complementary:18, bounds:pipBounds},
-	{name:'Green Pip', src:'/img/frames/m15/ciPips/g.svg', masks:masks, complementary:18, bounds:pipBounds},
+	{name:'White Pip', src:'/img/frames/m15/ciPips/w.svg', masks:pipMasks, complementary:18, bounds:pipBounds},
+	{name:'Blue Pip', src:'/img/frames/m15/ciPips/u.svg', masks:pipMasks, complementary:18, bounds:pipBounds},
+	{name:'Black Pip', src:'/img/frames/m15/ciPips/b.svg', masks:pipMasks, complementary:18, bounds:pipBounds},
+	{name:'Red Pip', src:'/img/frames/m15/ciPips/r.svg', masks:pipMasks, complementary:18, bounds:pipBounds},
+	{name:'Green Pip', src:'/img/frames/m15/ciPips/g.svg', masks:pipMasks, complementary:18, bounds:pipBounds},
 	{name:'Color Identity Pip Base', src:'/img/frames/m15/ciPips/base.png', bounds:{x:0.0767, y:2178/2814, width:0.0467, height:0.0334}}
 ];
 //disables/enables the "Load Frame Version" button
