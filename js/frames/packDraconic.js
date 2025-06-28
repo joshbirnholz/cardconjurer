@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [];
+var masks = [{src:'/img/frames/draconic/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/draconic/masks/maskType.png', name:'Type'}, {src:'/img/frames/draconic/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/draconic/masks/maskFrame.png', name:'Frame'}, {src:'/img/frames/draconic/masks/maskFullart.png', name:'Fullart'}];
 var borderMasks = [{src:'/img/frames/draconic/pt/maskInner.png', name:'Inner Box'}, {src:'/img/frames/draconic/pt/maskBorder.png', name:'Border'}];
 var ptBounds = {x:1519/2010, y:2363/2814, width:486/2010, height:309/2814};
 var stampBounds = {x:792/2010, y:2517/2814, width:426/2010, height:184/2814};
