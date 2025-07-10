@@ -766,6 +766,13 @@
 				</div>
 				<div class='readable-background padding'>
 					<h3 class='download padding' onclick='downloadCard();'>Download your card</h3>
+					<h3 class='download padding' onclick="bulkDownloadZip()">Download all saved cards (can take a while)</h3>
+					<div class='padding input-grid'>
+						<label class='checkbox-container input'>Include card number in filename
+							<input id='cardname-include-number' type='checkbox' onchange='setCardnameIncludeNumber(this.checked);'>
+							<span class='checkmark'></span>
+						</label>
+					</div>
 					<h5 onclick='downloadCard(false, true);' id='downloadJpg' href='' target='_blank' class='padding download input-description' style='text-align: left;'>Click here to download as JPEG</h5>
 					<h5 onclick='downloadCard(true);' id='downloadAlt' href='' target='_blank' class='padding download input-description' style='text-align: left;'>Click here for an alternative download</h5>
 					<!-- <label class='checkbox-container input margin-bottom'>800 DPI
