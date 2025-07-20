@@ -4726,12 +4726,16 @@ function watermarkEdited() {
 	if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
 		card.watermarkLeft = document.querySelector('#watermark-left').value;
 	}
-	// card.watermarkLeft = document.querySelector('#watermark-left').value;
-	// card.watermarkRight =  document.querySelector('#watermark-right').value;
-	card.watermarkOpacity = document.querySelector('#watermark-opacity').value / 100;
+	// Store original opacity
+	const originalOpacity = document.querySelector('#watermark-opacity').value / 100;
+	// Set opacity based on cutout checkbox
+	card.watermarkOpacity = document.querySelector('#watermark-cutout').checked ? 1 : originalOpacity;
 	watermarkContext.globalCompositeOperation = 'source-over';
 	watermarkContext.globalAlpha = 1;
 	watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+	// Store original colors
+	const originalLeft = card.watermarkLeft;
+	const originalRight = card.watermarkRight;
 	if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
 		if (card.watermarkRight != 'none') {
 			watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
@@ -4754,6 +4758,15 @@ function watermarkEdited() {
 		watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
 		watermarkContext.globalAlpha = card.watermarkOpacity;
 		watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+	}
+	// Restore original colors
+	card.watermarkLeft = originalLeft;
+	card.watermarkRight = originalRight;
+
+	if (document.querySelector('#watermark-cutout').checked) {
+		watermarkContext.globalCompositeOperation = 'destination-out';
+	} else {
+		watermarkContext.globalCompositeOperation = 'source-over'; 
 	}
 	drawCard();
 }
@@ -4985,6 +4998,16 @@ function drawCard() {
 		cardContext.drawImage(planeswalkerPreFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	}
 	cardContext.drawImage(frameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	// Apply watermark
+	if (document.querySelector('#watermark-cutout').checked) {
+		// Use destination-out to create transparency
+		cardContext.globalCompositeOperation = 'destination-out';
+		cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+		cardContext.globalCompositeOperation = 'source-over';
+	} else {
+		// Draw normal watermark if cutout is not enabled
+		cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	}
 	if (card.version.toLowerCase().includes('planeswalker') && typeof planeswalkerPostFrameCanvas !== "undefined") {
 		cardContext.drawImage(planeswalkerPostFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	} else if (card.version.toLowerCase().includes('planeswalker') && typeof planeswalkerCanvas !== "undefined") {
@@ -4996,22 +5019,10 @@ function drawCard() {
 	if (document.querySelector('#show-guidelines').checked) {
 		cardContext.drawImage(guidelinesCanvas, scaleX(card.marginX) / 2, scaleY(card.marginY) / 2, cardCanvas.width, cardCanvas.height);
 	}
-	// watermark
-	cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	// custom elements for sagas, classes, and dungeons
-	if (card.version.toLowerCase().includes('saga') && typeof sagaCanvas !== "undefined") {
-		cardContext.drawImage(sagaCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	} else if (card.version.includes('class') && !card.version.includes('classic') && typeof classCanvas !== "undefined") {
-		cardContext.drawImage(classCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	} else if (card.version.toLowerCase().includes('dungeon') && typeof dungeonCanvas !== "undefined") {
-		cardContext.drawImage(dungeonCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	}
 	// text
 	cardContext.drawImage(textCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	// set symbol
-	if (card.setSymbolBounds) {
-		drawSetSymbol(cardContext, setSymbol, card.setSymbolBounds); 
-	}
+	cardContext.drawImage(setSymbol, scaleX(card.setSymbolX), scaleY(card.setSymbolY), setSymbol.width * card.setSymbolZoom, setSymbol.height * card.setSymbolZoom);
 	// serial
 	if (card.serialNumber || card.serialTotal) {
 		var x = parseInt(card.serialX) || 172;
