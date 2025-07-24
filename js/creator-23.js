@@ -3509,7 +3509,9 @@ async function drawText() {
 	}
 }
 var justifyWidth = 90;
+let manaSymbolsToRender = [];
 function writeText(textObject, targetContext) {
+	manaSymbolsToRender = [];
 	//Most bits of info about text loaded, with defaults when needed
 	var textX = scaleX(textObject.x) || scaleX(0);
 	var textY = scaleY(textObject.y) || scaleY(0);
@@ -3911,9 +3913,11 @@ function writeText(textObject, targetContext) {
 					lineContext.letterSpacing = possibleCode.replace('kerning', '') + 'px';
 					lineContext.font = lineContext.font; //necessary for the letterspacing update to be recognized
 				} else if (getManaSymbol(possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined) {
-					possibleCode = possibleCode.replaceAll('/', '')
+					var possibleCode = possibleCode.replaceAll('/', '');
 					var manaSymbol;
-					if (textObject.manaPrefix && (getManaSymbol(textObject.manaPrefix + possibleCode) != undefined || getManaSymbol(textObject.manaPrefix + possibleCode.split('').reverse().join('')) != undefined)) {
+					// Add symbol to render queue without drawing immediately
+					if (textObject.manaPrefix && 
+						(getManaSymbol(textObject.manaPrefix + possibleCode) != undefined || getManaSymbol(textObject.manaPrefix + possibleCode.split('').reverse().join('')) != undefined)) {
 						manaSymbol = getManaSymbol(textObject.manaPrefix + possibleCode) || getManaSymbol(textObject.manaPrefix + possibleCode.split('').reverse().join(''));
 					} else {
 						manaSymbol = getManaSymbol(possibleCode) || getManaSymbol(possibleCode.split('').reverse().join(''));
@@ -3983,14 +3987,88 @@ function writeText(textObject, targetContext) {
 					}
 					lineContext.drawImage(fakeShadow, 0, 0);
 					//fake shadow ends (thanks, safari)
+					// Add to render queue
+					manaSymbolsToRender.push({
+						symbol: manaSymbol,
+						x: manaSymbolX,
+						y: manaSymbolY, 
+						width: manaSymbolWidth,
+						height: manaSymbolHeight,
+						hasOutline: textOutlineWidth > 0,
+						color: manaSymbolColor,
+						radius: textArcRadius,
+						arcStart: textArcStart,
+						currentX: currentX,
+						backImage: backImage,
+						outlineWidth: textOutlineWidth
+					});
 					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
 
 					manaSymbolColor = origManaSymbolColor;
+					continue;
 				} else {
 					wordToWrite = word;
 				}
 			}
 
+			function renderManaSymbols() {
+				if (manaSymbolsToRender.length === 0) return;
+			
+				var outlineCanvas = lineCanvas.cloneNode(); 
+				var outlineContext = outlineCanvas.getContext('2d');
+				var symbolCanvas = lineCanvas.cloneNode();
+				var symbolContext = symbolCanvas.getContext('2d');
+				// Save existing text content
+				var tempCanvas = lineCanvas.cloneNode();
+				var tempContext = tempCanvas.getContext('2d');
+				tempContext.drawImage(lineCanvas, 0, 0);
+				// Clear the line context
+				lineContext.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+				// First pass: Draw outlines only
+				manaSymbolsToRender.forEach(symbolData => {
+					if (!symbolData.hasOutline) return;
+					outlineContext.fillStyle = 'black';
+					outlineContext.beginPath();
+					var scaleFactor = 1.3;
+					var centerX = symbolData.x + symbolData.width/2;
+					var centerY = symbolData.y + symbolData.height/2;
+					var radius = (Math.max(symbolData.width, symbolData.height) * scaleFactor) / 2;
+					outlineContext.arc(centerX, centerY + (symbolData.radius ?? 0), radius, 0, 2 * Math.PI);
+					outlineContext.fill();
+				});
+				// Transfer outlines to main canvas
+				lineContext.drawImage(outlineCanvas, 0, 0);
+				// Restore text content on top of outlines
+				lineContext.drawImage(tempCanvas, 0, 0);
+				// Second pass: Draw mana symbols
+				manaSymbolsToRender.forEach(symbolData => {
+					if (symbolData.radius > 0) {
+						if (symbolData.symbol.backs) {
+							symbolContext.drawImageArc(symbolData.backImage, symbolData.x, symbolData.y, 
+								symbolData.width, symbolData.height, symbolData.radius, 
+								symbolData.arcStart, symbolData.currentX);
+						}
+						symbolContext.drawImageArc(symbolData.symbol.image, symbolData.x, symbolData.y, 
+							symbolData.width, symbolData.height, symbolData.radius,
+							symbolData.arcStart, symbolData.currentX);
+					} else if (symbolData.color) {
+						symbolContext.fillImage(symbolData.symbol.image, symbolData.x, symbolData.y,
+							symbolData.width, symbolData.height, symbolData.color);
+					} else {
+						if (symbolData.symbol.backs) {
+							symbolContext.drawImage(symbolData.backImage, symbolData.x, symbolData.y,
+								symbolData.width, symbolData.height);
+						}
+						symbolContext.drawImage(symbolData.symbol.image, symbolData.x, symbolData.y,
+							symbolData.width, symbolData.height);
+					}
+				});
+			
+				// Draw symbols on top of text
+				lineContext.drawImage(symbolCanvas, 0, 0);
+				
+				manaSymbolsToRender = [];
+			}
 			if (wordToWrite && lineContext.font.endsWith('belerenb')) {
 				wordToWrite = wordToWrite.replace(/f(?:\s|$)/g, '\ue006').replace(/h(?:\s|$)/g, '\ue007').replace(/m(?:\s|$)/g, '\ue008').replace(/n(?:\s|$)/g, '\ue009').replace(/k(?:\s|$)/g, '\ue00a');
 			}
@@ -4014,6 +4092,9 @@ function writeText(textObject, targetContext) {
 				}
 				if (currentX > widestLineWidth) {
 					widestLineWidth = currentX;
+				}
+				if (manaSymbolsToRender.length > 0) {
+					renderManaSymbols();
 				}
 				paragraphContext.drawImage(lineCanvas, horizontalAdjust, currentY);
 				lineY = 0;
@@ -4113,6 +4194,7 @@ function writeText(textObject, targetContext) {
 		}
 	}
 }
+
 CanvasRenderingContext2D.prototype.fillTextArc = function(text, x, y, radius, startRotation, distance = 0, outlineWidth = 0) {
 	this.save();
 	this.translate(x - distance + scaleWidth(0.5), y + radius);
