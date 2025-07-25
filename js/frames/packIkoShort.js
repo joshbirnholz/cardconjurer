@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/iko/short/pinline.svg', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/iko/short/type.svg', name:'Type'}, {src:'/img/frames/iko/short/rules.svg', name:'Rules'}, {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/iko/short/masks/maskPinlines.png', name:'Pinline'}, {src:'/img/frames/iko/short/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/iko/short/masks/maskType.png', name:'Type'}, {src:'/img/frames/iko/short/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/iko/short/masks/maskNoTitle.png', name:'No Title'}, {src:'/img/frames/iko/short/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/iko/short/masks/maskStraightBorder.png', name:'Straight Border'}, {src:'/img/frames/iko/short/masks/maskBorder.png', name:'Border'}];
 var bounds = {x:0.7573, y:0.8848, width:0.188, height:0.0733};
 //defines available frames
 availableFrames = [
