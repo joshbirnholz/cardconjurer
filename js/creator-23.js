@@ -3717,6 +3717,8 @@ function writeText(textObject, targetContext) {
 					newLineSpacing = textSize * 0.35;
 				} else if (possibleCode == 'lns' || possibleCode == 'linenospace') {
 					newLine = true;
+				} else if (possibleCode == 'bullet' || possibleCode == '•') {
+					wordToWrite = '•';
 				} else if (possibleCode == 'bar') {
 					var barWidth = textWidth * 0.96;
 					var barHeight = scaleHeight(0.03);
