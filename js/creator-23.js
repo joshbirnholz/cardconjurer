@@ -4743,6 +4743,66 @@ function setDefaultCollector() {
 	};
 	localStorage.setItem('defaultCollector', JSON.stringify(defaultCollector));
 }
+function drawSetSymbol(cardContext, setSymbol, bounds) {
+	if (!bounds) return;
+	
+	const symbolWidth = setSymbol.width * card.setSymbolZoom;
+	const symbolHeight = setSymbol.height * card.setSymbolZoom; 
+	const x = scaleX(card.setSymbolX);
+	const y = scaleY(card.setSymbolY);
+
+	if (bounds.outlineWidth) {
+		// Create temp canvas for outlined symbol
+		const tempCanvas = document.createElement('canvas');
+		const tempCtx = tempCanvas.getContext('2d');
+		
+		// Make canvas larger to accommodate the stroke
+		const outlineWidth = scaleWidth(bounds.outlineWidth/100); // Adjust divisor to control stroke thickness
+		tempCanvas.width = symbolWidth + (outlineWidth * 2);
+		tempCanvas.height = symbolHeight + (outlineWidth * 2);
+		
+		// Draw symbol
+		tempCtx.drawImage(setSymbol, outlineWidth, outlineWidth, symbolWidth, symbolHeight);
+		
+		// Create path from non-transparent pixels
+		const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+		tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+		
+		// Setup stroke style
+		tempCtx.strokeStyle = bounds.outlineColor || 'black';
+		tempCtx.lineWidth = outlineWidth;
+		tempCtx.lineJoin = 'round';
+		tempCtx.lineCap = 'round';
+		
+		// Trace the path and stroke it
+		tempCtx.beginPath();
+		for (let y = 0; y < tempCanvas.height; y++) {
+			for (let x = 0; x < tempCanvas.width; x++) {
+				if (imageData.data[(y * tempCanvas.width + x) * 4 + 3] > 128) {
+					tempCtx.moveTo(x, y);
+					while (x < tempCanvas.width && imageData.data[(y * tempCanvas.width + x) * 4 + 3] > 128) {
+						x++;
+					}
+					tempCtx.lineTo(x, y);
+				}
+			}
+		}
+		tempCtx.stroke();
+		
+		// Draw original on top
+		tempCtx.drawImage(setSymbol, outlineWidth, outlineWidth, symbolWidth, symbolHeight);
+
+		// Draw to main canvas
+		cardContext.drawImage(tempCanvas, 
+			x - outlineWidth, 
+			y - outlineWidth,
+			tempCanvas.width,
+			tempCanvas.height);
+	} else {
+		// Draw main symbol without outline
+		cardContext.drawImage(setSymbol, x, y, symbolWidth, symbolHeight);
+	}
+}
 //DRAWING THE CARD (putting it all together)
 function drawCard() {
 	// reset
@@ -4786,7 +4846,9 @@ function drawCard() {
 	// text
 	cardContext.drawImage(textCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	// set symbol
-	cardContext.drawImage(setSymbol, scaleX(card.setSymbolX), scaleY(card.setSymbolY), setSymbol.width * card.setSymbolZoom, setSymbol.height * card.setSymbolZoom)
+	if (card.setSymbolBounds) {
+		drawSetSymbol(cardContext, setSymbol, card.setSymbolBounds); 
+	}	
 	// serial
 	if (card.serialNumber || card.serialTotal) {
 		var x = parseInt(card.serialX) || 172;
