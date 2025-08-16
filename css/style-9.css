@@ -600,6 +600,20 @@ textarea.input {
 	-ms-transform: rotate(45deg);
 	transform: rotate(45deg);
 }
+.checkbox-container input:disabled + .checkmark {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-container input:disabled ~ span {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.checkbox-container:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 /*Collapsible*/
 .collapsible {
 	cursor: pointer;

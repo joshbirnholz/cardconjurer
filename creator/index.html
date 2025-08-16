@@ -565,14 +565,14 @@
 							<div class='input-grid margin-bottom'>
 								<input id='watermark-opacity' type='number' class='input' oninput='watermarkEdited();' value=40 step=1 min=0 max=100>
 							</div>
-							<div class='margin-bottom'>
-								<h5 class='input-description padding margin-bottom'>Watermark Display Options</h5>
+							<h5 class='input-description padding margin-bottom'>Watermark Display Options</h5>
+							<div class='input-grid margin-bottom'>
 								<label class='checkbox-container input margin-bottom'>Frame-only Cutout (preserves art)
 									<input id='watermark-frame-cutout' type='checkbox' onchange='watermarkEdited();'>
 									<span class='checkmark'></span>
 								</label>
 								<label class='checkbox-container input margin-bottom'>Cutout Everything (removes art)
-									<input id='watermark-cutout' type='checkbox' onchange='watermarkEdited();'>
+									<input id='watermark-cutout' type='checkbox' onchange='watermarkEdited();' disabled>
 									<span class='checkmark'></span>
 								</label>
 							</div>

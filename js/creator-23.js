@@ -4719,55 +4719,64 @@ function watermarkRightColor(c) {
 	watermarkEdited();
 }
 function watermarkEdited() {
-    card.watermarkSource = watermark.src;
-    card.watermarkX = document.querySelector('#watermark-x').value / card.width;
-    card.watermarkY = document.querySelector('#watermark-y').value / card.height;
-    card.watermarkZoom = document.querySelector('#watermark-zoom').value / 100;
-    if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
-        card.watermarkLeft = document.querySelector('#watermark-left').value;
-    }
-    // Store original opacity
-    const originalOpacity = document.querySelector('#watermark-opacity').value / 100;
-    // Set opacity based on cutout checkbox
-    card.watermarkOpacity = document.querySelector('#watermark-cutout').checked ? 1 : originalOpacity;
-    watermarkContext.globalCompositeOperation = 'source-over';
-    watermarkContext.globalAlpha = 1;
-    watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-    // Store original colors
-    const originalLeft = card.watermarkLeft;
-    const originalRight = card.watermarkRight;
-    if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
-        if (card.watermarkRight != 'none') {
-            watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
-            watermarkContext.globalCompositeOperation = 'source-in';
-            if (card.watermarkRight == 'default') {
-                watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-            } else {
-                watermarkContext.fillStyle = card.watermarkRight;
-                watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-            }
-            watermarkContext.globalCompositeOperation = 'destination-over';
-        }
-        if (card.watermarkLeft == 'default') {
-            watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-        } else {
-            watermarkContext.fillStyle = card.watermarkLeft;
-            watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-        }
-        watermarkContext.globalCompositeOperation = 'destination-in';
-        watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
-        watermarkContext.globalAlpha = card.watermarkOpacity;
-        watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
-    }
-    // Restore original colors
-    card.watermarkLeft = originalLeft;
-    card.watermarkRight = originalRight;
+	card.watermarkSource = watermark.src;
+	card.watermarkX = document.querySelector('#watermark-x').value / card.width;
+	card.watermarkY = document.querySelector('#watermark-y').value / card.height;
+	card.watermarkZoom = document.querySelector('#watermark-zoom').value / 100;
+	if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
+		card.watermarkLeft = document.querySelector('#watermark-left').value;
+	}
+	const firstBox = document.querySelector('#watermark-frame-cutout');
+	const secondBox = document.querySelector('#watermark-cutout')
 
-    // Store cutout preferences for later use in drawCard
-    card.watermarkCutout = document.querySelector('#watermark-cutout').checked;
-    card.watermarkFrameCutout = document.querySelector('#watermark-frame-cutout').checked;
+	if (firstBox.checked) {
+	secondBox.disabled = false
+	} else if (!secondBox.disabled) {
+	secondBox.disabled = true
+	secondBox.checked = false
+	}
+	// Store original opacity
+	const originalOpacity = document.querySelector('#watermark-opacity').value / 100;
+	// Set opacity based on cutout checkbox
+	card.watermarkOpacity = document.querySelector('#watermark-cutout').checked ? 1 : originalOpacity;
+	watermarkContext.globalCompositeOperation = 'source-over';
+	watermarkContext.globalAlpha = 1;
+	watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+	// Store original colors
+	const originalLeft = card.watermarkLeft;
+	const originalRight = card.watermarkRight;
+	if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
+		if (card.watermarkRight != 'none') {
+			watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
+			watermarkContext.globalCompositeOperation = 'source-in';
+			if (card.watermarkRight == 'default') {
+				watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+			} else {
+				watermarkContext.fillStyle = card.watermarkRight;
+				watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+			}
+			watermarkContext.globalCompositeOperation = 'destination-over';
+		}
+		if (card.watermarkLeft == 'default') {
+			watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+		} else {
+			watermarkContext.fillStyle = card.watermarkLeft;
+			watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+		}
+		watermarkContext.globalCompositeOperation = 'destination-in';
+		watermarkContext.drawImage(watermark, scaleX(card.watermarkX), scaleY(card.watermarkY), watermark.width * card.watermarkZoom, watermark.height * card.watermarkZoom);
+		watermarkContext.globalAlpha = card.watermarkOpacity;
+		watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+	}
+	// Restore original colors
+	card.watermarkLeft = originalLeft;
+	card.watermarkRight = originalRight;
 
-    drawCard();
+	// Store cutout preferences for later use in drawCard
+	card.watermarkCutout = document.querySelector('#watermark-cutout').checked;
+	card.watermarkFrameCutout = document.querySelector('#watermark-frame-cutout').checked;
+
+	drawCard();
 }
 function resetWatermark() {
 	var watermarkZoom;
