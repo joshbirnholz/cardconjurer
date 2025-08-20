@@ -176,23 +176,23 @@
 	src: url('../fonts/NotoSans-Regular.ttf') format('truetype');
 }
 @font-face {
-	font-family: plantinmtprobold;
+	font-family: "Plantin-MT-Pro-Bold";
 	src: url('../fonts/PlantinMTProBold.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprorg;
+	font-family: "Plantin-MT-Pro-Rg";
 	src: url('../fonts/PlantinMTProRg.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprorgit;
+	font-family: "Plantin-MT-Pro-Rg-It";
 	src: url('../fonts/PlantinMTProRgIt.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprosemiboldit;
+	font-family: "Plantin-MT-Pro-SemiBd-It";
 	src: url('../fonts/PlantinMTProSemiBdIt.woff2') format("woff2");
 }
 @font-face {
-	font-family: fomalhaut;
+	font-family: "Magic-Fomalhaut";
 	src: url('../fonts/Magic-Fomalhaut.woff2') format("woff2");
 }
 /*Variables*/
@@ -275,7 +275,7 @@ img {
 }
 /*Fonts*/
 .title {
-	font-family: belerenbsc;
+	font-family: belerenbsc, fomalhaut;
 }
 h1.title {
 	font-size: 4rem;
@@ -285,32 +285,32 @@ h1.title {
 }
 h1 {
 	font-size: 3rem;
-	font-family: Montserrat-SemiBold, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-SemiBold, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, Magic-Fomalhaut, sans-serif;
 	overflow-wrap: break-word;
 }
 h2 {
 	font-size: 2.5rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, Magic-Fomalhaut, sans-serif;
 	overflow-wrap: break-word;
 }
 h3 {
 	font-size: 2rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, Magic-Fomalhaut, sans-serif;
 	overflow-wrap: break-word;
 }
 h4 {
 	font-size: 1.5rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, Magic-Fomalhaut, sans-serif;
 	overflow-wrap: break-word;
 }
 h5 {
 	font-size: 1.25rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, Magic-Fomalhaut, sans-serif;
 	overflow-wrap: break-word;
 }
 p {
 	font-size: 1rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, Plantin-MT-Pro-Rg, Plantin-MT-Pro-Rg-It, sans-serif;
 	overflow-wrap: break-word;
 }
 a {
@@ -504,7 +504,7 @@ a.underline {
 	background: var(--input-background);
 	color: inherit;
 	font-size: 1.25rem;
-	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, Geneva, sans-serif;
+	font-family: Montserrat-Medium, Helvetica, Tahoma, Verdana, fomalhaut, Plantin-MT-Pro-Rg, Plantin-MT-Pro-It, Geneva, sans-serif;
 	font-weight: 100;
 	border-width: 0.25rem 0 0 0;
 	border-style: solid;

@@ -36,7 +36,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	await resetCardIrregularities();
 	replacementMasks = {'Right Half':'img/frames/storybook/mul/rightHalf.png'};
 	//sets card version
-	card.version = 'storybook_woe';
+	card.version = 'adventure';
 	card.showsFlavorBar = false;
 	//art bounds
 	card.artBounds = {x:54/1500, y:62/2100, width:1398/1500, height:1157/2100};
@@ -52,12 +52,12 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
 		type: {name:'Type', text:'', x:0.0854, y:0.5667, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
-		rules: {name:'Rules Text', text:'', x:172/2010, y:2088/2814, width:813/2010, height:447/2814, size:0.0353},
-		rules2: {name:'Rules Text (Right)', text:'', x:1069/2010, y:1829/2814, width:767/2010, height:724/2814, size:0.0353},
+		rules: {name:'Rules Text (Right)', text:'', x:1069/2010, y:1829/2814, width:767/2010, height:724/2814, size:0.0353},
 		pt: {name:'Power/Toughness', text:'', x:0.7934, y:0.9029, width:0.14, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'},
 		mana2: {name:'Adventure Mana Cost', text:'', x:0.0814, y:0.6391, width:0.4, height:60/2100, oneLine:true, size:60/1638, color:'white', shadowX:-0.001, shadowY:0.0029, align:'right', manaCost:true},
 		title2: {name:'Adventure Title', text:'', x:0.0814, y:0.6391, width:0.4, height:0.0296, size:0.0296, color:'white', oneLine:true, font:'belerenb'},
 		type2: {name:'Adventure Type', text:'', x:0.0814, y:0.6839, width:0.4, height:0.0296, size:0.0296, color:'white', oneLine:true, font:'belerenb'},
+		rules2: {name:'Rules Text', text:'', x:172/2010, y:2088/2814, width:813/2010, height:447/2814, size:0.0353},
 	});
 }
 //loads available frames

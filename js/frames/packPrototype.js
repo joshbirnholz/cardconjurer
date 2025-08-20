@@ -58,10 +58,11 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
 		type: {name:'Type', text:'', x:0.0854, y:0.5664, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
-		rules: {name:'Rules Text', text:'', x:129/1500, y:1565/2100, width:1242/1500, height:359/2100, size:0.0295},
+		prototype: {name:'Prototype Rules', text:'Prototype {i}(You may cast this spell with different mana cost, color, and size. It keeps its abilities and types.){/i}', x:129/1500, y:1335/2100, width:1041/1500, height:193/2100, size:0.0295},
+		rules2: {name:'Rules Text', text:'', x:129/1500, y:1565/2100, width:1242/1500, height:359/2100, size:0.0295},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'},
 		mana2: {name:'Prototype Mana Cost', text:'', x:-24/1500, y:1340/2100, width:0.9292, height:71/2100, oneLine:true, size:72/2100, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
-		rules2: {name:'Prototype Rules', text:'Prototype {i}(You may cast this spell with different mana cost, color, and size. It keeps its abilities and types.){/i}', x:129/1500, y:1335/2100, width:1041/1500, height:193/2100, size:0.0295},
+		prototype: {name:'Prototype Rules', text:'Prototype {i}(You may cast this spell with different mana cost, color, and size. It keeps its abilities and types.){/i}', x:129/1500, y:1335/2100, width:1041/1500, height:193/2100, size:0.0295},
 		pt2: {name:'Prototype P/T', text:'', x:0.7928, y:0.6935, width:0.1367, height:0.0372, size:0.0372, color:'white', font:'belerenbsc', oneLine:true, align:'center'},
 	});
 }
