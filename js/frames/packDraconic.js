@@ -1,8 +1,7 @@
 //Create objects for common properties across available frames
-var masks = [];
-var borderMasks = [{src:'/img/frames/draconic/pt/maskInner.png', name:'Inner Box'}, {src:'/img/frames/draconic/pt/maskBorder.png', name:'Border'}];
-var ptBounds = {x:1519/2010, y:2363/2814, width:486/2010, height:309/2814};
-var stampBounds = {x:792/2010, y:2517/2814, width:426/2010, height:184/2814};
+var masks = [{src:'/img/frames/draconic/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/draconic/masks/maskType.png', name:'Type'}, {src:'/img/frames/draconic/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/draconic/masks/maskFrame.png', name:'Frame'}, {src:'/img/frames/draconic/masks/maskFullart.png', name:'Fullart'}, {src:'/img/frames/draconic/masks/maskBorderless.png', name:'Borderless'}, {src:'/img/frames/draconic/masks/maskTrueBorderless.png', name:'True Borderless'}];
+var ptBounds = {x:0, y:0, width:1, height:1};
+var stampBounds = {x:0, y:0, width:1, height:1};
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/draconic/w.png', masks:masks},
@@ -14,14 +13,14 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/draconic/a.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/draconic/c.png', masks:masks},
 
-	{name:'White Power/Toughness', src:'/img/frames/draconic/pt/w.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Blue Power/Toughness', src:'/img/frames/draconic/pt/u.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Black Power/Toughness', src:'/img/frames/draconic/pt/b.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Red Power/Toughness', src:'/img/frames/draconic/pt/r.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Green Power/Toughness', src:'/img/frames/draconic/pt/g.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Multicolored Power/Toughness', src:'/img/frames/draconic/pt/m.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Artifact Power/Toughness', src:'/img/frames/draconic/pt/a.png', bounds:ptBounds, masks: borderMasks},
-	{name:'Colorless Power/Toughness', src:'/img/frames/draconic/pt/c.png', bounds:ptBounds, masks: borderMasks},
+	{name:'White Power/Toughness', src:'/img/frames/draconic/pt/w.png', bounds:ptBounds},
+	{name:'Blue Power/Toughness', src:'/img/frames/draconic/pt/u.png', bounds:ptBounds},
+	{name:'Black Power/Toughness', src:'/img/frames/draconic/pt/b.png', bounds:ptBounds},
+	{name:'Red Power/Toughness', src:'/img/frames/draconic/pt/r.png', bounds:ptBounds},
+	{name:'Green Power/Toughness', src:'/img/frames/draconic/pt/g.png', bounds:ptBounds},
+	{name:'Multicolored Power/Toughness', src:'/img/frames/draconic/pt/m.png', bounds:ptBounds},
+	{name:'Artifact Power/Toughness', src:'/img/frames/draconic/pt/a.png', bounds:ptBounds},
+	{name:'Colorless Power/Toughness', src:'/img/frames/draconic/pt/c.png', bounds:ptBounds},
 
 	{name:'White Holo Stamp', src:'/img/frames/draconic/stamp/w.png', bounds:stampBounds},
 	{name:'Blue Holo Stamp', src:'/img/frames/draconic/stamp/u.png', bounds:stampBounds},
@@ -45,7 +44,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.artBounds = {x:66/2010, y:323/2814, width:1876/2010, height:1252/2814};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:1386/1500, y:1234/2100, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:1386/1500, y:1240/2100, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};

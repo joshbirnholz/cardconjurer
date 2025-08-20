@@ -1,5 +1,7 @@
 loadFramePacks([
 	{name:'Generic Margins', value:'Margin-1'},
+	{name:'Borderless Stellar Sights', value:'MarginBorderlessStellarSights'},
+	{name:'Draconic Margins', value:'MarginDraconic'},
 	{name:'Japan Showcase Margins', value:'MarginJapanShowcase'},
 	{name:'Legends of Ixalan Margins', value:'MarginIxalanLegends'},
 	{name:'Memory Corridor Margins', value:'MarginMemoryCorridor'},
@@ -55,7 +57,7 @@ var loadMarginVersion = async () => {
 	if (card.version.includes('saga')) {
 		sagaEdited();
 	}
-	if (card.version.includes('class')) {
+	if (card.version.includes('class') && !card.version.includes('classic')) {
 		classEdited();
 	}
 	drawTextBuffer();

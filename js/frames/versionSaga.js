@@ -62,13 +62,13 @@ function sagaEdited() {
 	card.saga.count = 0;
 	var lastY = card.text.ability0.y;
 	for (var i = 0; i < 4; i ++) {
-	 	card.text['ability' + i].y = lastY;
-	 	var height = parseFloat((parseInt(document.querySelector('#saga-height-' + i).value) / card.height).toFixed(4));
-	 	if (height > 0) {
-	 		card.saga.count ++;
-	 	}
-	 	card.text['ability' + i].height = height;
-	 	lastY += height;
+		card.text['ability' + i].y = lastY;
+		var height = parseFloat((parseInt(document.querySelector('#saga-height-' + i).value) / card.height).toFixed(4));
+		if (height > 0) {
+			card.saga.count ++;
+		}
+		card.text['ability' + i].height = height;
+		lastY += height;
 	}
 	fixSagaInputs();
 	//draw to saga canvas
@@ -110,13 +110,40 @@ function sagaEdited() {
 
 function updateAbilityHeights() {
 	const maxHeight = card.text.type.y - card.text.ability0.y;
-	const height = maxHeight / card.saga.count;
-	card.text.ability0.height = 0
-	card.text.ability1.height = 0
-	card.text.ability2.height = 0
-	card.text.ability2.height = 0
+	
+	// Get all saga abilities that have content
+	const abilities = [];
 	for (let i = 0; i < card.saga.count; i++) {
-		card.text[`ability${i}`].height = height;
+	const abilityText = card.text[`ability${i}`].text;
+	// Count words excluding reminder text in parentheses
+	const wordCount = abilityText
+		.replace(/\([^)]*\)/g, '') // Remove reminder text
+		.trim()
+		.split(/\s+/)
+		.length;
+		
+	abilities.push({
+		index: i,
+		wordCount: wordCount
+	});
+	}
+
+	// Calculate proportional heights
+	const totalWords = abilities.reduce((sum, a) => sum + a.wordCount, 0);
+	
+	// Add height constraint (minimum height)
+	const minHeight = maxHeight * 0.15; // 15% of max height
+	let availableHeight = maxHeight - (minHeight * abilities.length);
+	abilities.forEach(ability => {
+		const height = minHeight + (
+			(ability.wordCount / totalWords) * availableHeight
+		);
+		card.text[`ability${ability.index}`].height = height;
+	});
+
+	// Set remaining abilities to 0 height
+	for (let i = card.saga.count; i < 4; i++) {
+	card.text[`ability${i}`].height = 0;
 	}
 
 	fixSagaInputs(sagaEdited);

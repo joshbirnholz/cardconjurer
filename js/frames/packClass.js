@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/class/pinline.svg', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/saga/sagaMaskType.png', name:'Type'}, {src:'/img/frames/class/frame.svg', name:'Frame'}, {src:'/img/frames/class/text.svg', name:'Text'}, {src:'/img/frames/class/textRight.png', name:'Text, Right Half'}, {src:'/img/frames/class/border.svg', name:'Border'}];
+var masks = [{src:'/img/frames/class/masks/maskPinlines.png', name:'Pinline'}, {src:'/img/frames/class/masks/maskBorderlessPinlines.png', name:'Borderless Pinlines'}, {src:'/img/frames/class/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/class/masks/maskType.png', name:'Type'}, {src:'/img/frames/class/masks/maskFrame.png', name:'Frame'}, {src:'/img/frames/class/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/class/masks/maskTextBoxes.png', name:'Text Boxes'}, {src:'/img/frames/class/textRight.png', name:'Text, Right Half'}, {src:'/img/frames/class/masks/maskBorderless.png', name:'Borderless'}, {src:'/img/frames/class/masks/maskBorder.png', name:'Border'}, {src:'/img/frames/class/masks/maskBorderlessBorder.png', name:'Borderless Border'},];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/class/w.png', masks:masks},

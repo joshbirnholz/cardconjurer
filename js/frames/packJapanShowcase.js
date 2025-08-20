@@ -3,8 +3,8 @@ var masks = [
     {src:'/img/frames/m15/japanShowcase/mask/MaskPinline.png', name:'Pinline'},
 	{src:'/img/frames/m15/japanShowcase/mask/MaskTitle.png', name:'Title'},
 	{src:'/img/frames/m15/japanShowcase/mask/MaskType.png', name:'Type'},
-	{src:'/img/frames/m15/japanShowcase/mask/MaskBottomPinline.png', name:'Bottom Pinline'},
-	{src:'/img/frames/m15/japanShowcase/mask/MaskBottom.png', name:'Bottom'}];
+	{src:'/img/frames/m15/japanShowcase/mask/MaskBottomPinline.png', name:'Border Pinline'},
+	{src:'/img/frames/m15/japanShowcase/mask/MaskBottom.png', name:'Border'}];
 	
 var masks2 = [
 	{src:'/img/frames/m15/japanShowcase/mana/1.png', name:'1 Mana Symbol'},
@@ -34,7 +34,7 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/m15/japanShowcase/g.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/m15/japanShowcase/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/japanShowcase/a.png', masks:masks},
-	{name:'Land Frame', src:'/img/frames/m15/japanShowcase/L.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/m15/japanShowcase/Land.png', masks:masks},
 	{name:'Border', src:'/img/frames/m15/japanShowcase/border.png', bounds:bounds3},
 	
 
@@ -45,6 +45,7 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', masks:masks3, bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', masks:masks3, bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', masks:masks3, bounds:bounds},
+	{name:'Land Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/l.png', masks:masks3, bounds:bounds},
 	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', masks:masks3, bounds:bounds},
 
 	{name:'Mana Symbol Backing (10)', src:'/img/frames/m15/japanShowcase/mana/10mana.png', masks:masks2, bounds:bounds3},
@@ -72,14 +73,14 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.artBounds = {x:0, y:0, width:1, height:0.9224};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:0.91, y:0.635, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:0.91, y:0.635, width:0.12, height:0.0410, vertical:'center', horizontal: 'right', outlineWidth:0.003, outlineColor:'black'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
 	resetWatermark();
 	//text
 	loadTextOptions({
-		mana: {name:'Mana Cost', text:'', y:0.0683, width:0.9190, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0,},
+		mana: {name:'Mana Cost', text:'', y:0.0683, width:0.9190, height:71/2100, oneLine:true, size:71/1638, align:'right', outlineWidth:0.010, manaCost:true, manaSpacing:0,},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
 		type: {name:'Type', text:'', x:0.0854, y:0.612, width:0.71, height:0.0543, oneLine:true, font:'belerenb', size:0.0279, outlineWidth:0.008, color:'white'},
 		rules: {name:'Rules Text', text:'', x:0.086, y:0.692, width:0.771, height:0.206, size:0.033, outlineWidth:0.008, font:'Plantin MT Pro', color:'white'},

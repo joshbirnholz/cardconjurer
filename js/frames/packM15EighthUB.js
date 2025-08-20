@@ -15,6 +15,14 @@ availableFrames = [
 	{name:'Land Frame', src:'/img/frames/custom/m15-eighth/ub/l.png', masks:masks},
 	{name:'Vehicle Frame', src:'/img/frames/custom/m15-eighth/ub/v.png', masks:masks},
 
+	{name:'White Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/we.png', masks:masks},
+	{name:'Blue Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/ue.png', masks:masks},
+	{name:'Black Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/be.png', masks:masks},
+	{name:'Red Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/re.png', masks:masks},
+	{name:'Green Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/ge.png', masks:masks},
+	{name:'Multicolored Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/me.png', masks:masks},
+	{name:'Artifact Enchantment Frame', src:'/img/frames/custom/m15-eighth/ub/ae.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/m15/ub/pt/w.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/ub/pt/u.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/ub/pt/b.png', bounds:bounds},
@@ -77,8 +85,8 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'{conditionalcolor:M15_Border,Vehicle_Frame:white}\uFFEE {elemidinfo-artist}', x:0.0647, y:1973/2100, width:0.8107, height:0.0248, oneLine:true, font:'belerenbsc', size:0.02095, color:'black'},
-		wizards: {name:'wizards', text:'{conditionalcolor:M15_Border,Land_Frame,Vehicle_Frame,Colorless_Frame,White_Land_Frame,Blue_Land_Frame,Black_Land_Frame,Red_Land_Frame,Green_Land_Frame,Multicolored_Land_Frame:white}\u2122 & \u00a9 1993-{elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:0.0647, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'black', shadowX:0.0007, shadowY:0.0005},
+		top: {text:'{conditionalcolor:White_Enchantment_Frame,Blue_Enchantment_Frame,Black_Enchantment_Frame,Red_Enchantment_Frame,Green_Enchantment_Frame,Multicolored_Enchantment_Frame,Artifact_Enchantment_Frame,M15_Border,Vehicle_Frame:white}\uFFEE {elemidinfo-artist}', x:0.0647, y:1973/2100, width:0.8107, height:0.0248, oneLine:true, font:'belerenbsc', size:0.02095, color:'black'},
+		wizards: {name:'wizards', text:'{conditionalcolor:M15_Border,White_Enchantment_Frame,Blue_Enchantment_Frame,Black_Enchantment_Frame,Red_Enchantment_Frame,Green_Enchantment_Frame,Multicolored_Enchantment_Frame,Artifact_Enchantment_Frame,Land_Frame,Vehicle_Frame,Colorless_Frame,White_Land_Frame,Blue_Land_Frame,Black_Land_Frame,Red_Land_Frame,Green_Land_Frame,Multicolored_Land_Frame:white}\u2122 & \u00a9 1993-{elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:0.0647, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'black', shadowX:0.0007, shadowY:0.0005},
 	});
 }
 //loads available frames

@@ -13,6 +13,15 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/m15/transform/ub/frontA.png', masks:masks},
 	{name:'Vehicle Frame', src:'/img/frames/m15/transform/ub/frontV.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/transform/ub/frontL.png', masks:masks},
+
+	{name:'White Enchantment Frame', src:'/img/frames/m15/transform/ub/frontWE.png', masks:masks},
+	{name:'Blue Enchantment Frame', src:'/img/frames/m15/transform/ub/frontUE.png', masks:masks},
+	{name:'Black Enchantment Frame', src:'/img/frames/m15/transform/ub/frontBE.png', masks:masks},
+	{name:'Red Enchantment Frame', src:'/img/frames/m15/transform/ub/frontRE.png', masks:masks},
+	{name:'Green Enchantment Frame', src:'/img/frames/m15/transform/ub/frontGE.png', masks:masks},
+	{name:'Multicolored Enchantment Frame', src:'/img/frames/m15/transform/ub/frontME.png', masks:masks},
+	{name:'Artifact Enchantment Frame', src:'/img/frames/m15/transform/ub/frontAE.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/m15/ub/pt/w.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/ub/pt/u.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/ub/pt/b.png', bounds:bounds},
@@ -23,12 +32,14 @@ availableFrames = [
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/ub/pt/c.png', bounds:bounds},
 	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/ub/pt/v.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/regular/m15PTA.png', bounds:bounds},
+
 	{name:'White Land Frame', src:'/img/frames/m15/transform/ub/frontWL.png', masks:masks},
 	{name:'Blue Land Frame', src:'/img/frames/m15/transform/ub/frontUL.png', masks:masks},
 	{name:'Black Land Frame', src:'/img/frames/m15/transform/ub/frontBL.png', masks:masks},
 	{name:'Red Land Frame', src:'/img/frames/m15/transform/ub/frontRL.png', masks:masks},
 	{name:'Green Land Frame', src:'/img/frames/m15/transform/ub/frontGL.png', masks:masks},
 	{name:'Multicolored Land Frame', src:'/img/frames/m15/transform/ub/frontML.png', masks:masks},
+
 	{name:'White Holo Stamp', src:'/img/frames/m15/ub/regular/stamp/w.png', bounds:bounds2},
 	{name:'Blue Holo Stamp', src:'/img/frames/m15/ub/regular/stamp/u.png', bounds:bounds2},
 	{name:'Black Holo Stamp', src:'/img/frames/m15/ub/regular/stamp/b.png', bounds:bounds2},

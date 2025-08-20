@@ -27,6 +27,12 @@ loadFramePacks([
 	{name:'Universes Beyond (Front)', value:'M15EighthTransformUBFront'},
 	{name:'Universes Beyond (Back)', value:'M15EighthTransformUBBack'},
 
+	{name:'Modern M15 Eighth MDFC', value:'disabled'},
+	{name:'Regular (MDFC)', value:'M15EighthModal'},
+	{name:'Nyx (MDFC)', value:'M15EighthModalNyx'},
+	{name:'Snow (MDFC)', value:'M15EighthModalSnow'},
+	{name:'Universes Beyond (MDFC) ', value:'M15EighthModalUB'},
+
 	{name:'Modern M15 Eighth Edition Tokens', value:'disabled'},
 	{name:'Regular', value:'M15EighthToken'},
 	{name:'Nyx', value:'M15EighthNyxToken'},

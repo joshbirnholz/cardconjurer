@@ -15,6 +15,14 @@ availableFrames = [
 	{name:'Vehicle Frame', src:'/img/frames/m15/new/ub/v.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/m15/new/ub/c.png', masks:masks},
 
+	{name:'White Enchantment Frame', src:'/img/frames/m15/new/ub/ew.png', masks:masks},
+	{name:'Blue Enchantment Frame', src:'/img/frames/m15/new/ub/eu.png', masks:masks},
+	{name:'Black Enchantment Frame', src:'/img/frames/m15/new/ub/eb.png', masks:masks},
+	{name:'Red Enchantment Frame', src:'/img/frames/m15/new/ub/er.png', masks:masks},
+	{name:'Green Enchantment Frame', src:'/img/frames/m15/new/ub/eg.png', masks:masks},
+	{name:'Multicolored Enchantment Frame', src:'/img/frames/m15/new/ub/em.png', masks:masks},
+	{name:'Artifact Enchantment Frame', src:'/img/frames/m15/new/ub/ea.png', masks:masks},
+
 	{name:'White Land Frame', src:'/img/frames/m15/new/ub/lw.png', masks:masks},
 	{name:'Blue Land Frame', src:'/img/frames/m15/new/ub/lu.png', masks:masks},
 	{name:'Black Land Frame', src:'/img/frames/m15/new/ub/lb.png', masks:masks},

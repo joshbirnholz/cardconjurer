@@ -7,6 +7,10 @@ loadFramePacks([
 	{name:'Borderless (Front)', value:'TransformBorderlessFront'},
 	{name:'Extended Art (Front)', value:'TransformExtendedFront'},
 	{name:'Sagas (Front)', value:'SagaDFC'},
+	{name:'Saga Creatures (Front)', value: 'SagaCreatureFront'},
+	{name:'Saga Creatures (Back)', value: 'SagaCreatureBack'},
+	{name:'Saga Creatures (Universes Beyond) (Front)', value: 'SagaCreatureUBFront'},
+	{name:'Saga Creatures (Universes Beyond) (Back)', value: 'SagaCreatureUBBack'},
 
 	{name:'Back', value:'disabled'},
 	{name:'Regular (Back)', value:'M15TransformBackNew'},

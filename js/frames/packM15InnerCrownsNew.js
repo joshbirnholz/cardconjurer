@@ -10,6 +10,14 @@ availableFrames = [
 	{name:'Multicolored Inner Crown (Nyx)', src:'/img/frames/m15/innerCrowns/new/nyx/m.png', bounds:bounds},
 	{name:'Artifact Inner Crown (Nyx)', src:'/img/frames/m15/innerCrowns/new/nyx/a.png', bounds:bounds},
 
+	{name:'White Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/ew.png', bounds:bounds},
+	{name:'Blue Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/eu.png', bounds:bounds},
+	{name:'Black Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/eb.png', bounds:bounds},
+	{name:'Red Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/er.png', bounds:bounds},
+	{name:'Green Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/eg.png', bounds:bounds},
+	{name:'Multicolored Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/em.png', bounds:bounds},
+	{name:'Artifact Inner Crown (Nyx Universes Beyond)', src:'/img/frames/m15/innerCrowns/new/nyx/ea.png', bounds:bounds},
+
 	{name:'White Inner Crown (Companion)', src:'/img/frames/m15/innerCrowns/new/companion/w.png', bounds:bounds},
 	{name:'Blue Inner Crown (Companion)', src:'/img/frames/m15/innerCrowns/new/companion/u.png', bounds:bounds},
 	{name:'Black Inner Crown (Companion)', src:'/img/frames/m15/innerCrowns/new/companion/b.png', bounds:bounds},

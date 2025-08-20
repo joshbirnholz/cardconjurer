@@ -253,6 +253,9 @@
 									<h5>{right#}</h5><h5>Moves the text # pixels right</h5>
 									<h5>{shadow#}</h5><h5>Changes the shadow distance to # (use {shadow0} to remove the shadow)</h5>
 									<h5>{shadowcolor#}</h5><h5>Changes the shadow color to #</h5>
+									<h5>{outline#}</h5><h5>Changes the Outline Width to # (enables it if not already enabled)</h5>
+									<h5>{outlinecolor___}</h5><h5>Changes the Outline Color to ___ (ie '{outlinecolorblue}'</h5>
+									<h5>{bullet}</h5><h5>Does bullet point •</h5>
 									<h5>{indent}</h5><h5>Indents the rest of the paragraph to the current point</h5>
 									<h5>{/indent}</h5><h5>Removes paragraph indendation</h5>
 									<h5>{kerning#}</h5><h5>Changes the kerning (letter spacing) to #</h5>
@@ -284,6 +287,12 @@
 						<div class='readable-background padding margin-bottom'>
 							<label class='checkbox-container input'>Hide reminder text
 								<input id='hide-reminder-text' type='checkbox' onchange='textEdited();'>
+								<span class='checkmark'></span>
+							</label>
+						</div>
+						<div class='readable-background padding margin-bottom'>
+							<label class='checkbox-container input'>Auto-italicize reminder text
+								<input id='italicize-reminder-text' type='checkbox' onchange='textEdited();'>
 								<span class='checkmark'></span>
 							</label>
 						</div>
@@ -403,6 +412,13 @@
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='padding margin-bottom input-description'>Clears the Set Symbol, making it blank</h5>
 							<button class='input margin-bottom' onclick='uploadSetSymbol(blank.src);'>Remove Set Symbol</button>
+						</div>
+						<div class='readable-background padding margin-bottom'>
+							<h5 class='input-description margin-bottom'>Click and drag to move set symbol instead of art (hold shift to zoom)</h5>
+							<label class='checkbox-container input margin-bottom'>Click and drag to move set symbol instead of art
+								<input id='drag-target-setSymbol' type='checkbox'>
+								<span class='checkmark'></span>
+							</label>
 						</div>
 						<div class='readable-background padding'>
 							<h5 class='input-description margin-bottom'>Lock the set symbol code (saves between reloads)</h5>
@@ -667,6 +683,10 @@
 							</select>
 						</div>
 						<div class='readable-background margin-bottom padding'>
+							<h5 class='padding margin-bottom input-description'>Paste full text</h5>
+							<button class='input margin-bottom' onclick='pasteCardText();'>Paste card</button>
+						</div>
+						<div class='readable-background margin-bottom padding'>
 							<h5 class='padding margin-bottom input-description'>Save your current card</h5>
 							<button class='input margin-bottom' onclick='saveCard();'>Save Card</button>
 							<h5 class='padding margin-bottom input-description'>Load a saved card</h5>
@@ -720,6 +740,7 @@
 							<option value="UB">Universes Beyond</option>
 							<option value="Etched">Etched</option>
 							<option value="Borderless">Borderless (Alt)</option>
+							<option value="BorderlessUB">Borderless (Alt) (Universes Beyond)</option>
 							<option value="Praetors">Phyrexian</option>
 							<option value="8th">8th Edition</option>
 							<option value="Seventh">Seventh Edition</option>
