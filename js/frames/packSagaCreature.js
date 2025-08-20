@@ -54,7 +54,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		ability1: {name:'Ability 2', text:'', x:0.1334, y:0, width:0.35, height:0.1786, size:0.0305},
 		ability2: {name:'Ability 3', text:'', x:0.1334, y:0, width:0.35, height:0.1786, size:0.0305},
 		ability3: {name:'Ability 4', text:'', x:0.1334, y:0, width:0.35, height:0, size:0.0305},
-		rules: {name:'Rules Text', text:'', x:160/2010, y:2333/2814, width:1692/2010, height:257/2814, size:0.0305, color:'black', align:'center'},
+		rules2: {name:'Rules Text', text:'', x:160/2010, y:2333/2814, width:1692/2010, height:257/2814, size:0.0305, color:'black', align:'center'},
 		reminder: {name:'Reminder Text', text:'{i}(As this Saga enters and after your draw step,//{right40}add a lore counter. Sacrifice after III.)', x:0.0867, y:0.1160, width:0.844, height:0.0828, size:0.0312, shadowColor:'white'},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'}
 	});
