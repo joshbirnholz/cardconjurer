@@ -13,6 +13,7 @@ loadFramePacks([
 	{name:'Vault (BIG)', value:'Vault'},
 	{name:'Wanted Poster (OTJ)', value:'Wanted'},
 	{name:'Pip-Boy (PIP)', value:'Pipboy'},
+	{name:'Showcase Magnified (MKM)', value:'ShowcaseMagnified'},
 	{name:'Dossier (MKM)', value:'Dossier'},
 	{name:'Legends of Ixalan - Pattern 1 (LCI)', value:'IxalanLegends1'},
 	{name:'Legends of Ixalan - Pattern 2 (LCI)', value:'IxalanLegends2'},
