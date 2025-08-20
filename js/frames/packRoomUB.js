@@ -24,25 +24,26 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'roomUB';
+	card.version = 'room';
 	//art bounds
 	card.artBounds = {x:276/2010, y:133/2814, width:1115/2010, height:2428/2814};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:2, y:2, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:3195/2010, y:207/2814, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
 	resetWatermark();
 	//text
 	loadTextOptions({
-		mana: {name:'Mana Cost (Right)', text:'', x:130/2010, y:0.4381, width:0.5367, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:-90},
-		title: {name:'Title (Right)', text:'', x:105/2010, y:0.4381, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
-		rules: {name:'Rules Text (Right)', text:'', x:1054/1500, y:0.4334, width:776/1500, height:372/2100, size:0.0362, rotation:-90},
-		mana2: {name:'Mana Cost (Left)', text:'', x:130/2010, y:0.8943, width:0.5367, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:-90},
-		title2: {name:'Title (Left)', text:'', x:105/2010, y:0.8943, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
+		mana: {name:'Mana Cost (Left)', text:'', x:130/2010, y:0.8943, width:0.5367, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:-90},
+		title: {name:'Title (Left)', text:'', x:105/2010, y:0.8943, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
 		type: {name:'Type', text:'', x:0.55, y:0.8943, width:1762/1500, height:0.0286, oneLine:true, font:'belerenb', size:0.0286, color:'white', rotation:-90},
-		rules2: {name:'Rules Text (Left)', text:'', x:1054/1500, y:0.8896, width:776/1500, height:372/2100, size:0.0362, rotation:-90},
+		rules: {name:'Rules Text (Left)', text:'', x:1054/1500, y:0.8896, width:776/1500, height:372/2100, size:0.0362, rotation:-90},
+		mana2: {name:'Mana Cost (Right)', text:'', x:130/2010, y:0.4381, width:0.5367, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:-90},
+		title2: {name:'Title (Right)', text:'', x:105/2010, y:0.4381, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
+		type2: {name:'Type 2', text:'', x:0.55, y:0.8943, width:1762/1500, height:0.0286, oneLine:true, font:'belerenb', size:0.0286, align:'right', color:'white', rotation:-90},
+		rules2: {name:'Rules Text (Right)', text:'', x:1054/1500, y:0.4334, width:776/1500, height:372/2100, size:0.0362, rotation:-90},
 		reminder: {name:'Room Rules', text:'{i}(You may cast either half. That door unlocks on the battlefield. As a sorcery, you may pay the mana cost of a locked door to unlock it.){/i}', x:916/1500, y:1868/2100, width:1734/1500, height:110/2100, color:'white', align:'center', size:0.0362, rotation:-90}
 		});
 }
