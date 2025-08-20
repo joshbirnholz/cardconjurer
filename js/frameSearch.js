@@ -42,7 +42,8 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
-	['Borderless Stellar Sights (EOE)', 'BorderlessStellarSights'],
+	['Borderless Stellar Sights (EOS)', 'BorderlessStellarSights'],
+	['Poster Stellar Sights (EOS)', 'PosterStellarSights'],
 	['Draconic (TDM)', 'Draconic'],
 	['Ghostfire (TDM)', 'Ghostfire'],
 	['Japan Showcase', 'JapanShowcase'],
