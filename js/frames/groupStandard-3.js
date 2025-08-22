@@ -30,7 +30,7 @@ loadFramePacks([
 	{name:'Devoid (Zendikar)', value:'M15Devoid'},
 	{name:'Aftermath (Amonkhet)', value:'Aftermath'},
 	{name:'Flip (Kamigawa)', value:'Flip'},
-	{name:'Levelers (Zendikar)', value:'Leveler'},
+	{name:'Levelers (Zendikar)', value:'Levelers'},
 	{name:'Split Cards', value:'Split'},
 	{name:'Fuse Cards', value:'Fuse'},
 	{name:'Conspiracies (Draft Matters)', value:'Conspiracy'},
