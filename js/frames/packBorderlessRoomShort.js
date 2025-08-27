@@ -1,8 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [
-	{src:'/img/frames/borderlessRoom/maskLeft.png', name:'Left Half'}, 
-	{src:'/img/frames/borderlessRoom/maskRight.png', name:'Right Half'}
-];
+var masks = [{src:'/img/frames/borderlessRoom/maskLeft.png', name:'Left Half'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/borderlessRoom/Short/w.png', masks:masks},
