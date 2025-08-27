@@ -5086,6 +5086,13 @@ function downloadCard(alt = false, jpeg = false) {
 	if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
 		notify('You must credit an artist before downloading!', 5);
 	} else {
+        // Block download if no margin unless overridden
+        var shouldWarnNoMargin = localStorage.getItem('warnNoMargin') !== 'true';
+        if (shouldWarnNoMargin && card.marginX === 0 && card.marginY === 0) {
+            notify('Downloading blocked: Card has no margin. Consider using 1/8 Inch Margin in the first dropdown (this card will not work with MakePlayingCards or MPCFill). Check the box "Allow Downloading Without Margin" to disable this warning.', 5);
+            return;
+        }
+
 		// Prep file information
 		var imageDataURL;
 		var imageName = getCardName();
@@ -5741,6 +5748,9 @@ function setRoundedCorners(value) {
 	card.noCorners = !value;
 	drawCard();
 }
+function setWarnNoMargin(value) {
+    localStorage.setItem('warnNoMargin', value);
+}
 //Various loaders
 function imageURL(url, destination, otherParams) {
 	var imageurl = url;
@@ -6025,6 +6035,12 @@ document.querySelector('#lockSetSymbolURL').checked = '' != localStorage.getItem
 if (document.querySelector('#lockSetSymbolURL').checked) {
 	setSymbol.src = localStorage.getItem('lockSetSymbolURL');
 }
+
+// Initialize warn no margin checkbox (defaults to unchecked, meaning warnings are shown)
+if (!localStorage.getItem('warnNoMargin')) {
+    localStorage.setItem('warnNoMargin', 'false');
+}
+document.querySelector('#warn-no-margin').checked = localStorage.getItem('warnNoMargin') === 'true';
 
 //bind inputs together
 bindInputs('#frame-editor-hsl-hue', '#frame-editor-hsl-hue-slider');
