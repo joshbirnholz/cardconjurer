@@ -6,8 +6,6 @@ if (debugging) {
 	document.querySelectorAll('.debugging').forEach(element => element.classList.remove('hidden'));
 }
 
-var frameNames = new Map();
-
 //To save the server from being overloaded? Maybe?
 function fixUri(input) {
 	/* --- DISABLED FOR LOCAL VERSION --
@@ -455,21 +453,6 @@ function drawFrames() {
 		frameContext.drawImage(prePTCanvas, 0, 0, frameCanvas.width, frameCanvas.height);
 	}
 	drawCard();
-}
-function loadFramePacks(framePackOptions = []) {
-	document.querySelector('#selectFramePack').innerHTML = null;
-	framePackOptions.forEach(item => {
-		var framePackOption = document.createElement('option');
-		framePackOption.innerHTML = item.name;
-		if (item.value == 'disabled') {
-			framePackOption.disabled = true;
-		} else {
-			framePackOption.value = item.value;
-		}
-		frameNames.set(item.name, item.value)
-		document.querySelector('#selectFramePack').appendChild(framePackOption);
-	});
-	loadScript("/js/frames/pack" + document.querySelector('#selectFramePack').value + ".js");
 }
 function loadFramePack(frameOptions = availableFrames) {
 	resetDoubleClick();
@@ -5769,9 +5752,10 @@ async function imageLocal(event, destination, otherParams) {
 	}
 	await reader.readAsDataURL(event.target.files[0]);
 }
-function loadScript(scriptPath) {
+function loadScript(scriptPath, cb) {
 	var script = document.createElement('script');
 	script.setAttribute('type', 'text/javascript');
+	script.onload = cb || function(){};
 	script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');}
 	script.setAttribute('src', scriptPath);
 	if (typeof script != 'undefined') {
@@ -6038,6 +6022,8 @@ bindInputs('#frame-editor-hsl-lightness', '#frame-editor-hsl-lightness-slider');
 bindInputs('#show-guidelines', '#show-guidelines-2', true);
 
 // Load / init whatever
-loadScript('/js/frames/groupStandard-3.js');
+loadScript("/js/frames/framePackGroups.js", () => {
+	loadFramePacks('standard');
+})
 loadAvailableCards();
 initDraggableArt();
