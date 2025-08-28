@@ -40,7 +40,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//text
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', x:+20/2010, y:0.0693, width:0.9190, height:71/2100, oneLine:true, size:71/1638, align:'right', outlineWidth:0.010, manaCost:true, manaSpacing:0,},
-		title: {name:'Title', text:'', x:145/2010, y:1701/2814, width:0.8292, height:0.0543, oneLine:true, font:'Magic-Fomalhaut', size:0.0381, color:'white'},
+		title: {name:'Title', text:'', x:145/2010, y:1701/2814, width:0.8292, height:0.0543, oneLine:true, font:'fomalhaut', size:0.0381, color:'white'},
 		type: {name:'Type', text:'', x:185/2010, y:1862/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324, color:'white'},
 		rules: {name:'Rules Text', text:'', x:185/2010, y:1985/2814, width:0.813, height:0.210, size:0.0362, color:'white'},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
