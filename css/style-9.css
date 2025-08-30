@@ -909,7 +909,8 @@ textarea.input {
 }
 .frame-element-editor, .textbox-editor {
 	display: none;
-	position: fixed;
+/*	position: fixed; <-- Line changed to below line to enable a draggable window --DSKZ*/
+	position: absolute;
 	max-width: calc(100vw - 6rem);
 	width: 64rem; /*multiple of 16?*/
 	max-height: calc(100vh - 6rem);
@@ -930,6 +931,8 @@ textarea.input {
 	padding: 2rem;
 	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
 	grid-gap: 1rem;
+	/* 	Next line added so that there is no highlighting --DSKZ*/
+	user-select: none;
 }
 .frame-element-editor.opened, .textbox-editor.opened {
 	display: grid;
