@@ -142,6 +142,13 @@ async function resetCardIrregularities({canvas = [getStandardWidth(), getStandar
 	}
 }
 async function setBottomInfoStyle() {
+	// IF statement verifying if user wants to display Artist info only on the card. If not, continue as normal --DSKZ
+	 if (document.querySelector('#enableArtistOnlyCheck')?.checked) {
+		await loadBottomInfo({
+				midLeft: {text:'{savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '} \uFFEE {savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.021, color:card.bottomInfoColor, outlineWidth:0.003},
+		});
+		return; //Exit Early
+	 }
 	if (document.querySelector('#enableNewCollectorStyle').checked) {
 			await loadBottomInfo({
 				midLeft: {text:'{elemidinfo-set} \u2022 {elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
