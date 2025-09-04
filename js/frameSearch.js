@@ -240,6 +240,7 @@ const frameNames = new Map ([
 	['Seventh Edition Snow Lands', 'SeventhSnowLands'],
 	['Floating Old Border', 'OldFloating'],
 	['Floating Old Border (Short)', 'OldFloatingShort'],
+	['Burning Revelation (SLD)', 'BurningRevelation'],
 	['Classicshifted', 'Classicshifted'],
 	['Classicshifted Nickname', 'ClassicshiftedNickname'],
 	['Classicshifted Lands', 'ClassicshiftedLands'],

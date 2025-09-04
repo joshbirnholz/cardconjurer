@@ -10,6 +10,7 @@ loadFramePacks([
 	{name:'Seventh Edition Snow Lands', value:'SeventhSnowLands'},
 	{name:'Floating Old Border', value:'OldFloating'},
 	{name:'Floating Old Border (Short)', value:'OldFloatingShort'},
+	{name:'Burning Revelation (SLD)', value:'BurningRevelation'},
 
 	{name:'Modern M15 Eighth Edition Style', value:'disabled'},
 	{name:'Regular', value:'M15Eighth'},
