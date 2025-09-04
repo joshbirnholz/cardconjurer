@@ -68,7 +68,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'Illus: {elemidinfo-artist}', x:0.1, y:1872/2100, width:0.8, height:0.0267, oneLine:true, size:0.0267, shadowX:0.0021, shadowY:0.0015, color:'white'},
+		top: {text:'Illus. {elemidinfo-artist}', x:0.1, y:1872/2100, width:0.8, height:0.0267, oneLine:true, size:0.0267, shadowX:0.0021, shadowY:0.0015, color:'white'},
 		wizards: {name:'wizards', text:'\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:0.1, y:1933/2100, width:0.8, height:0.0172, oneLine:true, size:0.0172, shadowX:0.0014, shadowY:0.001, color:'white'},
 		bottom: {text:'NOT FOR SALE   CardConjurer.com', x:0.1, y:1973/2100, width:0.8, height:26/2100, oneLine:true, size:26/2100, shadowX:0.0014, shadowY:0.001, color:'white'}
 	});
