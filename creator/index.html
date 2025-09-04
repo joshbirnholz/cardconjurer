@@ -112,26 +112,26 @@
 							<h5 class='margin-bottom padding input-description'>
 								Select a Frame Group and a Frame Pack, or type to search. Then you may Load the selected Frame Version (loading the frame version configures text placement, art size, etc...)</h5>
 							<div class='input-grid margin-bottom'>
-								<select id='selectFrameGroup' onchange='loadScript("/js/frames/group" + this.value + ".js")' class='input'>
+								<select id='selectFrameGroup' onchange='loadFramePacks(this.value)' class='input'>
 									<option disabled>Standard Frames</option>
-									<option value='Standard-3'>Regular</option>
-									<option value='Token-2'>Tokens</option>
-									<option value='Saga-1'>Sagas</option>
-									<option value='Planeswalker'>Planeswalkers</option>
-									<option value='Modal-1'>Modal DFC's</option>
-									<option value='DFC'>Transform</option>
+									<option value='standard'>Regular</option>
+									<option value='token'>Tokens</option>
+									<option value='saga'>Sagas</option>
+									<option value='planeswalker'>Planeswalkers</option>
+									<option value='modal'>Modal DFC's</option>
+									<option value='dfc'>Transform</option>
 									<option disabled>Special Frames</option>
-									<option value='Showcase-5'>Showcase Frames</option>
-									<option value='UniversesBeyond'>Universes Beyond</option>
-									<option value='Promo-2'>Promos (Tall Art)</option>
-									<option value='Textless-4'>Textless/Fullart</option>
+									<option value='showcase'>Showcase Frames</option>
+									<option value='universesBeyond'>Universes Beyond</option>
+									<option value='promo'>Promos (Tall Art)</option>
+									<option value='textless'>Textless/Fullart</option>
 									<option disabled>Other Frames</option>
-									<option value='Custom'>Custom</option>
-									<option value='Misc-2'>Old/Misc</option>
-									<option value='Accurate'>Accurate Frames</option>
-									<option value='Margin'>1/8th Inch Margin</option>
+									<option value='custom'>Custom</option>
+									<option value='misc'>Old/Misc</option>
+									<option value='accurate'>Accurate Frames</option>
+									<option value='margin'>1/8th Inch Margin</option>
 									<option disabled>Other Games</option>
-									<option value='FleshAndBlood'>Flesh and Blood</option>
+									<option value='fleshAndBlood'>Flesh and Blood</option>
 								</select>
 								<select id='selectFramePack' onchange='loadScript("/js/frames/pack" + this.value + ".js")' class='input'></select>
 								<div class="autocomplete"><input id='frameSearch' onchange="frameSearch(this.value)" type='text' class='input' placeholder='Search Frames...'></div>
