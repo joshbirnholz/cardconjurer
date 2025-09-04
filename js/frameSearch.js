@@ -213,6 +213,7 @@ const frameNames = new Map ([
 	['Promo Nickname Frames', 'PromoNickname'],
 	['Promo Generic Showcase', 'PromoGenericShowcase'],
 	//textless
+	['Edge of Eternities Basics (EOE)', 'EOEBasics'],
 	['Kamigawa Basics (NEO)', 'NeoBasics'],
 	['Fullart Basics (2022)', 'TextlessBasics2022'],
 	['Fullart Basics (Universes Beyond)', 'TextlessBasics2022UB'],

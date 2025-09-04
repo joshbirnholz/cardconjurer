@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Basic Lands', value:'disabled'},
+	{name:'Edge of Eternities Basics (EOE)', value:'EOEBasics'},
 	{name:'Kamigawa Basics (NEO)', value:'NeoBasics'},
 	{name:'Fullart Basics (2022)', value:'TextlessBasics2022'},
 	{name:'Fullart Basics (Universes Beyond)', value:'TextlessBasics2022UB'},
