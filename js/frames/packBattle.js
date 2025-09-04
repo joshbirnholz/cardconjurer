@@ -45,7 +45,8 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		title: {name:'Title', text:'', x:387/2100, y:81/1500, width:1547/2100, height:114/1500, oneLine:true, font:'belerenb', size:(0.0381*2100)/1500},
 		type: {name:'Type', text:'', x:268/2100, y:873/1500, width:1667/2100, height:114/1500, oneLine:true, font:'belerenb', size:(0.0324*2100)/1500},
 		rules: {name:'Rules Text', text:'', x:272/2100, y:1008/1500, width:1661/2100, height:414/1500, size:(0.0362*2100)/1500},
-		reminder: {name:'Reverse PT', text:'', x:257/2100, y:1219/1500, width:1667/2100, height:43/1500, size:(0.0291*2100)/1500, oneLine:true, color:'#666', align:'right', font:'belerenbsc'},
+		pt: {name:'Front PT', text:'', x:257/2100, y:1219/1500, width:1667/2100, height:43/1500, size:(0.0291*2100)/1500, oneLine:true, color:'#666', align:'right', font:'belerenbsc'},
+		pt2: {name:'Reverse PT', text:'', x:257/2100, y:1219/1500, width:1667/2100, height:43/1500, size:(0.0291*2100)/1500, oneLine:true, color:'#666', align:'right', font:'belerenbsc'},
 		defense: {name:'Defense', text:'', x:1920/2100, y:1320/1500, width:86/2100, height:123/1500, size:(0.0372*2100)/1500, color:'white', font:'belerenbsc', oneLine:true, align:'center'}
 	});
 	if (card.text.rules.text == '') {

@@ -35,7 +35,7 @@ const frameNames = new Map ([
 	['Devoid (Zendikar)', 'M15Devoid'],
 	['Aftermath (Amonkhet)', 'Aftermath'],
 	['Flip (Kamigawa)', 'Flip'],
-	['Levelers (Zendikar)', 'Levelers'],
+	['Levelers (Zendikar)', 'Leveler'],
 	['Split Cards', 'Split'],
 	['Fuse Cards', 'Fuse'],
 	['Conspiracies (Draft Matters)', 'Conspiracy'],

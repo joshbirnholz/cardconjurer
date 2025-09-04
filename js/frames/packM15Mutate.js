@@ -27,7 +27,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'm15Mutate';
+	card.version = 'mutate';
 	//art bounds
 	card.artBounds = {x:0.0614, y:0.1129, width:0.8774, height:0.6434};
 	autoFitArt();
@@ -43,7 +43,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
 		type: {name:'Type', text:'', x:0.0854, y:0.5664, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
 		mutate: {name:'Mutate Cost', text:'Mutate {20} {i}(If you cast this spell for its mutate cost, put it over or under target non-Human creature you own. They mutate into the creature on top plus all abilities from under it.)', x:0.086, y:0.6303, width:0.828, height:0.1215, size:0.0291},
-		rules: {name:'Rules Text', text:'', x:0.086, y:0.7567, width:0.828, height:0.1615, size:0.0291},
+		rules2: {name:'Rules Text', text:'', x:0.086, y:0.7567, width:0.828, height:0.1615, size:0.0291},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'}
 	});
 }

@@ -36,10 +36,12 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		title: {name:'Title 1', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
 		type: {name:'Type 1', text:'', x:0.0854, y:0.3467, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
 		rules: {name:'Rules Text 1', text:'', x:0.086, y:0.4139, width:0.828, height:0.12, size:0.0362},
+		pt: {name:'Power/Toughness 1', text:'', x:0.4667, y:0.462, width:0.828, height:0.12, size:0.0286, font:'belerenbsc', oneLine:true, align:'center'},
 		mana2: {name:'Mana Cost 2', text:'', x:0.9074, y:0.5039, width:0.58, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:90},
 		title2: {name:'Title 2', text:'', x:0.92, y:0.5648, width:0.48, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:90},
 		type2: {name:'Type 2', text:'', x:0.7247, y:0.5648, width:0.48, height:0.3239, oneLine:true, font:'belerenb', size:0.0324, rotation:90},
 		rules2: {name:'Rules Text 2', text:'', x:0.4494, y:0.57, width:0.47, height:0.2715, size:0.0362, rotation:90},
+		pt2: {name:'Power/Toughness 2', text:'', x:0.1750, y:0.5900, width:0.828, height:0.12, size:0.0286, font:'belerenbsc', oneLine:true, align:'center', rotation:90}
 	});
 }
 //loads available frames

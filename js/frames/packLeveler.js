@@ -28,7 +28,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'levelers';
+	card.version = 'leveler';
 	//art bounds
 	card.artBounds = {x:0.0767, y:0.1129, width:0.8476, height:0.4429};
 	autoFitArt();
@@ -43,7 +43,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
 		type: {name:'Type', text:'', x:0.0854, y:0.5664, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
-		rules: {name:'Rules Text 1', text:'Level up {1}{c} {i}({1}{c}: Put a level counter on this. Level up only as a sorcery.){/i}', x:0.086, y:0.6303, width:0.6834, height:0.0905, size:0.0296},
+		levelup: {name:'Level Up', text:'Level up {1}{c} {i}({1}{c}: Put a level counter on this. Level up only as a sorcery.){/i}', x:0.086, y:0.6303, width:0.6834, height:0.0905, size:0.0296},
 		rules2: {name:'Rules Text 2', text:'', x:0.2067, y:0.7229, width:0.5627, height:0.0953, size:0.0296},
 		rules3: {name:'Rules Text 3', text:'', x:0.2067, y:0.8220, width:0.5627, height:0.0953, size:0.0296},
 		pt: {name:'Power/Toughness 1', text:'', x:0.7928, y:0.6591, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'},
