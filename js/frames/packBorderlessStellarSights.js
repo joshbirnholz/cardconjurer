@@ -37,6 +37,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7912, width:0.75, height:0.2305};
 	resetWatermark();
+	await document.fonts.load('1em Magic-Fomalhaut');
 	//text
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', x:+20/2010, y:0.0693, width:0.9190, height:71/2100, oneLine:true, size:71/1638, align:'right', outlineWidth:0.010, manaCost:true, manaSpacing:0,},
