@@ -624,6 +624,30 @@
 								<input id='enableCollectorInfo' type='checkbox' onchange='enableCollectorInfo();'>
 								<span class='checkmark'></span>
 							</label>
+							<!--Section Created for issue #117. Reqeust is to only show Artist info --DSKZ -->
+							<div id='enableArtistOnly' class='hidden margin-top'>
+    							<label class='checkbox-container input'>Show artist info only
+      								<input type='checkbox' id='enableArtistOnlyCheck' onchange='setBottomInfoStyle();'>
+      								<span class='checkmark'></span>
+   								</label>
+							</div>
+							<!--Script verifies if the "Show collector info" is checked, show the second option and verify state of check marks --DSKZ -->
+							<!--If the second box is checked, display Artist only info, and if you uncheck "Show collector info", the info is reset to default-->
+							<script>
+  								const firstCheck = document.getElementById('enableCollectorInfo');
+  								const secondCheckbox = document.getElementById('enableArtistOnly');
+								const secondCheck = document.getElementById('enableArtistOnlyCheck');
+  								firstCheck.addEventListener('change', () => {
+    								if (firstCheck.checked){
+										secondCheckbox.classList.remove('hidden');
+									}else{
+										secondCheckbox.classList.add('hidden');
+										secondCheck.checked = false;
+										setBottomInfoStyle();
+									}
+								});
+							</script>			
+							<!--Section Created for issue #117. Reqeust is to only show Artist info --DSKZ-->
 						</div>
 
 						<div class='readable-background padding margin-bottom'>
