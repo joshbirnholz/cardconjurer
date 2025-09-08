@@ -43,6 +43,7 @@ const frameNames = new Map ([
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
 	['Borderless Stellar Sights (EOE)', 'BorderlessStellarSights'],
+	['Through The Ages (FCA)', 'FCA'],
 	['Draconic (TDM)', 'Draconic'],
 	['Ghostfire (TDM)', 'Ghostfire'],
 	['Japan Showcase', 'JapanShowcase'],
