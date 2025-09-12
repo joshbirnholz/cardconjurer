@@ -54,6 +54,7 @@ const frameNames = new Map ([
 	['Breaking News (OTP)', 'BreakingNews'],
 	['Vault (BIG)', 'Vault'],
 	['Wanted Poster (OTJ)', 'Wanted'],
+	['Showcase Magnified (MKM)', 'ShowcaseMagnified'],
 	['Dossier (MKM)', 'Dossier'],
 	['Legends of Ixalan - Pattern 1 (LCI)', 'IxalanLegends1'],
 	['Legends of Ixalan - Pattern 2 (LCI)', 'IxalanLegends2'],
