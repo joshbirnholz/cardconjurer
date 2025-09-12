@@ -7,21 +7,11 @@ var masks = [
 	{src:'/img/frames/m15/japanShowcase/mask/MaskBottom.png', name:'Border'}];
 	
 var masks2 = [
-	{src:'/img/frames/m15/japanShowcase/mana/1.png', name:'1 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/2.png', name:'2 Mana Symbol'}, 
-	{src:'/img/frames/m15/japanShowcase/mana/3.png', name:'3 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/4.png', name:'4 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/5.png', name:'5 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/6.png', name:'6 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/7.png', name:'7 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/8.png', name:'8 Mana Symbol'},
-	{src:'/img/frames/m15/japanShowcase/mana/9.png', name:'9 Mana Symbol'}];
-	
-var masks3 = [
     {src:'/img/frames/m15/japanShowcase/mask/MaskPtBoxPinline.png', name:'PT Box Pinline'}];
 
 var bounds = {x:0.7771, y:0.8876, width:0.1720, height:0.0593};
-var boundsStamp = {x:0.4365, y:0.902, width:0.1264, height:0.0452};
+var bounds2 = {x:1562/2010, y:2525/2814, width:0.1720, height:0.0593};
+var boundsStamp = {x:877/2010, y:2537/2814, width:0.1264, height:0.0452};
 var bounds3 = {x:0, y:0, width:1, height:1};
 
 //defines available frames
@@ -35,21 +25,20 @@ availableFrames = [
 	{name:'Multicolored Frame', src:'/img/frames/m15/japanShowcase/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/japanShowcase/a.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/japanShowcase/Land.png', masks:masks},
+	{name:'Black Frame (Alt)', src:'/img/frames/m15/japanShowcase/bAlt.png', masks:masks},
 	{name:'Border', src:'/img/frames/m15/japanShowcase/border.png', bounds:bounds3},
 	
-
-	{name:'White Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/w.png', masks:masks3, bounds:bounds},
-	{name:'Blue Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/u.png', masks:masks3, bounds:bounds},
-	{name:'Black Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/b.png', masks:masks3, bounds:bounds},
-	{name:'Red Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/r.png', masks:masks3, bounds:bounds},
-	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', masks:masks3, bounds:bounds},
-	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', masks:masks3, bounds:bounds},
-	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', masks:masks3, bounds:bounds},
-	{name:'Land Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/l.png', masks:masks3, bounds:bounds},
-	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', masks:masks3, bounds:bounds},
-
-	{name:'Mana Symbol Backing (10)', src:'/img/frames/m15/japanShowcase/mana/10mana.png', masks:masks2, bounds:bounds3},
-
+	{name:'White Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/w.png', masks:masks2, bounds:bounds},
+	{name:'Blue Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/u.png', masks:masks2, bounds:bounds},
+	{name:'Black Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/b.png', masks:masks2, bounds:bounds},
+	{name:'Red Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/r.png', masks:masks2, bounds:bounds},
+	{name:'Green Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/g.png', masks:masks2, bounds:bounds},
+	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/m.png', masks:masks2, bounds:bounds},
+	{name:'Artifact Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/a.png', masks:masks2, bounds:bounds},
+	{name:'Land Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/l.png', masks:masks2, bounds:bounds},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/japanShowcase/pt/v.png', masks:masks2, bounds:bounds},
+	{name:'Black Power/Toughness (Alt)', src:'/img/frames/m15/japanShowcase/pt/bAlt.png', masks:masks2, bounds:bounds},
+	{name:'PT Bottom Outline', src:'/img/frames/m15/japanShowcase/pt/bottomPTOutline.png', bounds:bounds2},
 
 	{name:'White Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/w.png', bounds:boundsStamp},
 	{name:'Blue Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/u.png', bounds:boundsStamp},
@@ -59,6 +48,7 @@ availableFrames = [
 	{name:'Multicolored Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/m.png', bounds:boundsStamp},
 	{name:'Artifact Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/a.png', bounds:boundsStamp},
 	{name:'Land Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/l.png', bounds:boundsStamp},
+	{name:'Black (Alt) Holo Stamp', src:'/img/frames/m15/japanShowcase/stamp/bAlt.png', bounds:boundsStamp},
 
 ];
 //disables/enables the "Load Frame Version" button
