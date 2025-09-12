@@ -176,23 +176,23 @@
 	src: url('../fonts/NotoSans-Regular.ttf') format('truetype');
 }
 @font-face {
-	font-family: plantinmtprobold;
+	font-family: "Plantin-MT-Pro-Bold";
 	src: url('../fonts/PlantinMTProBold.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprorg;
+	font-family: "Plantin-MT-Pro-Rg";
 	src: url('../fonts/PlantinMTProRg.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprorgit;
+	font-family: "Plantin-MT-Pro-Rg-It";
 	src: url('../fonts/PlantinMTProRgIt.woff2') format("woff2");
 }
 @font-face {
-	font-family: plantinmtprosemiboldit;
+	font-family: "Plantin-MT-Pro-SemiBd-It";
 	src: url('../fonts/PlantinMTProSemiBdIt.woff2') format("woff2");
 }
 @font-face {
-	font-family: fomalhaut;
+	font-family: "Magic-Fomalhaut";
 	src: url('../fonts/Magic-Fomalhaut.woff2') format("woff2");
 }
 @font-face {
