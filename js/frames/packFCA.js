@@ -31,12 +31,54 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//text
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', y:173/2814, width:1863/2010, height:71/2100, oneLine:true, size:71/1638, align:'right', outlineWidth:0.010, manaCost:true, manaSpacing:0,},
-		nickname: {name:'Nickname', text:'', x:163/2010, y:139/2814, width:1667/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
-		title: {name:'Title', text:'', x:172/2010, y:315/2814, width:0.768, height:0.0243, oneLine:true, outlineWidth:0.0080, font:'mplantini', size:0.0240, color:'white', align:'left'},
+		title: {name:'Title', text:'', x:163/2010, y:139/2814, width:1667/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
 		type: {name:'Type', text:'', x:172/2010, y:1582/2814, width:1542/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0319, outlineWidth:0.008, color:'white'},
-		rules: {name:'Rules Text', text:'', x:173/2010, y:1770/2814, width:1679/2010, height:775/2814, size:0.036, outlineWidth:0.008, font:'Plantin MT Pro', color:'white', noVerticalCenter:true},
+		rules: {name:'Rules Text', text:'', x:173/2010, y:1770/2814, width:1679/2010, height:775/2814, size:0.036, lineSpacing: -0.11, outlineWidth:0.008, font:'Plantin MT Pro', color:'white', noVerticalCenter:true},
 		pt: {name:'Power/Toughness', text:'', x:1598/2010, y:2464/2814, width:246/2010, height:138/2814, size:0.04,  outlineWidth:0.008, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
+
+	// Override the addTextbox function for this frame pack
+    const originalAddTextbox = addTextbox;
+    addTextbox = function(textboxType) {
+        if (textboxType == 'Nickname' && !card.text.nickname) {
+            // Preserve the existing title text
+            const existingTitleText = card.text.title ? card.text.title.text : '';
+            
+            // When nickname is added, switch title to lower position and smaller size and add nickname textbox
+            loadTextOptions({
+                nickname: {name:'Nickname', text:'', x:163/2010, y:139/2814, width:1667/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
+                title: {name:'Title', text:existingTitleText, x:172/2010, y:315/2814, width:0.768, height:0.0243, oneLine:true, outlineWidth:0.0080, font:'mplantini', size:0.0240, color:'white', align:'left'}
+            }, false);
+            
+            // Refresh the text options UI
+            document.querySelector('#text-options').innerHTML = null;
+            Object.entries(card.text).forEach(item => {
+                var textOptionElement = document.createElement('h4');
+                textOptionElement.innerHTML = item[1].name;
+                textOptionElement.classList = 'selectable text-option'
+                textOptionElement.onclick = textOptionClicked;
+                document.querySelector('#text-options').appendChild(textOptionElement);
+            });
+            
+            // Select the newly added nickname textbox
+            const nicknameIndex = Object.keys(card.text).indexOf('nickname');
+            if (nicknameIndex >= 0) {
+                document.querySelector('#text-options').children[nicknameIndex].click();
+            }
+        } else {
+            originalAddTextbox(textboxType);
+        }
+    };
+	
+    // Override textEdited to automatically use {lns} instead of line breaks
+    const originalTextEdited = textEdited;
+    textEdited = function() {
+        // Convert line breaks to {lns} for tighter spacing
+        if (card.text && card.text.rules && card.text.rules.text) {
+            card.text.rules.text = card.text.rules.text.replace(/\n/g, '{lns}').replace(/\{line\}/g, '{lns}');
+        }
+        originalTextEdited();
+    };
 }
 //loads available frames
 loadFramePack();

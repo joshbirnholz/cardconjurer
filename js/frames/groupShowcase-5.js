@@ -1,7 +1,7 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
 	{name:'Borderless Stellar Sights (EOS)', value:'BorderlessStellarSights'},
-	{name:'Through The Ages (FCA)', value:'FCA'},
+	{name:'Borderless Source Material', value:'FCA'},
 	{name:'Draconic (TDM)', value:'Draconic'},
 	{name:'Ghostfire (TDM)', value:'Ghostfire'},
 	{name:'Japan Showcase', value:'JapanShowcase'},
