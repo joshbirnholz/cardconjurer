@@ -33,7 +33,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		mana: {name:'Mana Cost', text:'', y:173/2814, width:1863/2010, height:71/2100, oneLine:true, size:71/1638, align:'right', outlineWidth:0.010, manaCost:true, manaSpacing:0,},
 		title: {name:'Title', text:'', x:163/2010, y:139/2814, width:1667/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
 		type: {name:'Type', text:'', x:172/2010, y:1582/2814, width:1542/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0319, outlineWidth:0.008, color:'white'},
-		rules: {name:'Rules Text', text:'', x:173/2010, y:1770/2814, width:1679/2010, height:775/2814, size:0.036, lineSpacing: -0.11, outlineWidth:0.008, font:'Plantin MT Pro', color:'white', noVerticalCenter:true},
+		rules: {name:'Rules Text', text:'', x:173/2010, y:1770/2814, width:1679/2010, height:775/2814, size:0.036, lineSpacing: -0.02, outlineWidth:0.008, font:'Plantin MT Pro', color:'white', noVerticalCenter:true},
 		pt: {name:'Power/Toughness', text:'', x:1598/2010, y:2464/2814, width:246/2010, height:138/2814, size:0.04,  outlineWidth:0.008, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
 
