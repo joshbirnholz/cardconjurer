@@ -47,7 +47,7 @@ function getStandardHeight() {
 }
 
 //card object
-var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
+var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, watermarkCutout:false, watermarkFrameCutout:false, version:'', manaSymbols:[]};
 //core images/masks
 const black = new Image(); black.crossOrigin = 'anonymous'; black.src = fixUri('/img/black.png');
 const blank = new Image(); blank.crossOrigin = 'anonymous'; blank.src = fixUri('/img/blank.png');
@@ -4730,12 +4730,25 @@ function watermarkEdited() {
 	if (card.watermarkLeft == "none" && document.querySelector('#watermark-left').value != "none") {
 		card.watermarkLeft = document.querySelector('#watermark-left').value;
 	}
-	// card.watermarkLeft = document.querySelector('#watermark-left').value;
-	// card.watermarkRight =  document.querySelector('#watermark-right').value;
-	card.watermarkOpacity = document.querySelector('#watermark-opacity').value / 100;
+	const firstBox = document.querySelector('#watermark-frame-cutout');
+	const secondBox = document.querySelector('#watermark-cutout')
+
+	if (firstBox.checked) {
+	secondBox.disabled = false
+	} else if (!secondBox.disabled) {
+	secondBox.disabled = true
+	secondBox.checked = false
+	}
+	// Store original opacity
+	const originalOpacity = document.querySelector('#watermark-opacity').value / 100;
+	// Set opacity based on cutout checkbox
+	card.watermarkOpacity = document.querySelector('#watermark-cutout').checked ? 1 : originalOpacity;
 	watermarkContext.globalCompositeOperation = 'source-over';
 	watermarkContext.globalAlpha = 1;
 	watermarkContext.clearRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
+	// Store original colors
+	const originalLeft = card.watermarkLeft;
+	const originalRight = card.watermarkRight;
 	if (card.watermarkLeft != 'none' && !card.watermarkSource.includes('/blank.png') && card.watermarkZoom > 0) {
 		if (card.watermarkRight != 'none') {
 			watermarkContext.drawImage(right, scaleX(0), scaleY(0), scaleWidth(1), scaleHeight(1));
@@ -4759,6 +4772,14 @@ function watermarkEdited() {
 		watermarkContext.globalAlpha = card.watermarkOpacity;
 		watermarkContext.fillRect(0, 0, watermarkCanvas.width, watermarkCanvas.height);
 	}
+	// Restore original colors
+	card.watermarkLeft = originalLeft;
+	card.watermarkRight = originalRight;
+
+	// Store cutout preferences for later use in drawCard
+	card.watermarkCutout = document.querySelector('#watermark-cutout').checked;
+	card.watermarkFrameCutout = document.querySelector('#watermark-frame-cutout').checked;
+
 	drawCard();
 }
 function resetWatermark() {
@@ -4989,6 +5010,45 @@ function drawCard() {
 		cardContext.drawImage(planeswalkerPreFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	}
 	cardContext.drawImage(frameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	// Apply watermark
+	if (card.watermarkCutout) {
+		// Use destination-out to create transparency (cuts through everything)
+		cardContext.globalCompositeOperation = 'destination-out';
+		cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+		cardContext.globalCompositeOperation = 'source-over';
+	} else if (card.watermarkFrameCutout) {
+		// Frame-only cutout: save current state, draw watermark as cutout on frames only
+		var tempCanvas = document.createElement('canvas');
+		tempCanvas.width = cardCanvas.width;
+		tempCanvas.height = cardCanvas.height;
+		var tempContext = tempCanvas.getContext('2d');
+		
+		// Copy current card state (art + frames)
+		tempContext.drawImage(cardCanvas, 0, 0);
+		
+		// Apply cutout to the temporary canvas (this affects frames but not the original art layer)
+		tempContext.globalCompositeOperation = 'destination-out';
+		tempContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+		
+		// Clear the main canvas and redraw art first
+		cardContext.clearRect(0, 0, cardCanvas.width, cardCanvas.height);
+		
+		// Redraw art (this will be preserved)
+		cardContext.save();
+		cardContext.translate(scaleX(card.artX), scaleY(card.artY));
+		cardContext.rotate(Math.PI / 180 * (card.artRotate || 0));
+		if (document.querySelector('#grayscale-art').checked) {
+			cardContext.filter='grayscale(1)';
+		}
+		cardContext.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
+		cardContext.restore();
+		
+		// Draw the modified frames (with cutout) on top
+		cardContext.drawImage(tempCanvas, 0, 0);
+	} else {
+		// Draw normal watermark if cutout is not enabled
+		cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	}
 	if (card.version.toLowerCase().includes('planeswalker') && typeof planeswalkerPostFrameCanvas !== "undefined") {
 		cardContext.drawImage(planeswalkerPostFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	} else if (card.version.toLowerCase().includes('planeswalker') && typeof planeswalkerCanvas !== "undefined") {
@@ -5000,22 +5060,10 @@ function drawCard() {
 	if (document.querySelector('#show-guidelines').checked) {
 		cardContext.drawImage(guidelinesCanvas, scaleX(card.marginX) / 2, scaleY(card.marginY) / 2, cardCanvas.width, cardCanvas.height);
 	}
-	// watermark
-	cardContext.drawImage(watermarkCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	// custom elements for sagas, classes, and dungeons
-	if (card.version.toLowerCase().includes('saga') && typeof sagaCanvas !== "undefined") {
-		cardContext.drawImage(sagaCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	} else if (card.version.includes('class') && !card.version.includes('classic') && typeof classCanvas !== "undefined") {
-		cardContext.drawImage(classCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	} else if (card.version.toLowerCase().includes('dungeon') && typeof dungeonCanvas !== "undefined") {
-		cardContext.drawImage(dungeonCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
-	}
 	// text
 	cardContext.drawImage(textCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	// set symbol
-	if (card.setSymbolBounds) {
-		drawSetSymbol(cardContext, setSymbol, card.setSymbolBounds); 
-	}
+	cardContext.drawImage(setSymbol, scaleX(card.setSymbolX), scaleY(card.setSymbolY), setSymbol.width * card.setSymbolZoom, setSymbol.height * card.setSymbolZoom);
 	// serial
 	if (card.serialNumber || card.serialTotal) {
 		var x = parseInt(card.serialX) || 172;
