@@ -454,20 +454,6 @@ function drawFrames() {
 	}
 	drawCard();
 }
-function loadFramePacks(framePackOptions = []) {
-	document.querySelector('#selectFramePack').innerHTML = null;
-	framePackOptions.forEach(item => {
-		var framePackOption = document.createElement('option');
-		framePackOption.innerHTML = item.name;
-		if (item.value == 'disabled') {
-			framePackOption.disabled = true;
-		} else {
-			framePackOption.value = item.value;
-		}
-		document.querySelector('#selectFramePack').appendChild(framePackOption);
-	});
-	loadScript("/js/frames/pack" + document.querySelector('#selectFramePack').value + ".js");
-}
 function loadFramePack(frameOptions = availableFrames) {
 	resetDoubleClick();
 	document.querySelector('#frame-picker').innerHTML = null;
@@ -945,7 +931,7 @@ async function autoUBFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoUBNewFrame(colors, mana_cost, type_line, power) {
@@ -997,7 +983,7 @@ async function autoCircuitFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoM15Frame(colors, mana_cost, type_line, power) {
@@ -1055,7 +1041,7 @@ async function autoM15Frame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoM15NewFrame(colors, mana_cost, type_line, power, style = 'regular') {
@@ -1132,7 +1118,7 @@ async function autoM15NewFrame(colors, mana_cost, type_line, power, style = 'reg
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoM15EighthFrame(colors, mana_cost, type_line, power) {
@@ -1190,7 +1176,7 @@ async function autoM15EighthFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoM15EighthUBFrame(colors, mana_cost, type_line, power) {
@@ -1248,7 +1234,7 @@ async function autoM15EighthUBFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoBorderlessFrame(colors, mana_cost, type_line, power) {
@@ -1298,7 +1284,7 @@ async function autoBorderlessFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoBorderlessUBFrame(colors, mana_cost, type_line, power) {
@@ -1352,7 +1338,7 @@ async function autoBorderlessUBFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function auto8thEditionFrame(colors, mana_cost, type_line, power, colorshifted = false) {
@@ -1386,7 +1372,7 @@ async function auto8thEditionFrame(colors, mana_cost, type_line, power, colorshi
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoExtendedArtFrame(colors, mana_cost, type_line, power, short) {
@@ -1448,7 +1434,7 @@ async function autoExtendedArtFrame(colors, mana_cost, type_line, power, short) 
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoEtchedFrame(colors, mana_cost, type_line, power) {
@@ -1499,7 +1485,7 @@ async function autoEtchedFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoPhyrexianFrame(colors, mana_cost, type_line, power) {
@@ -1540,7 +1526,7 @@ async function autoPhyrexianFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 async function autoSeventhEditionFrame(colors, mana_cost, type_line, power) {
@@ -1564,7 +1550,7 @@ async function autoSeventhEditionFrame(colors, mana_cost, type_line, power) {
 
 	card.frames = frames;
 	card.frames.reverse();
-	await card.frames.forEach(item => addFrame([], item));
+	await Promise.all(card.frames.map(item => addFrame([], item)));
 	card.frames.reverse();
 }
 function makeM15FrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
@@ -5603,7 +5589,7 @@ async function loadCard(selectedCardKey) {
 		serialInfoEdited();
 
 		card.frames.reverse();
-		await card.frames.forEach(item => addFrame([], item));
+		await Promise.all(card.frames.map(item => addFrame([], item)));
 		card.frames.reverse();
 		if (card.onload) {
 			await loadScript(card.onload);
@@ -5775,13 +5761,19 @@ async function imageLocal(event, destination, otherParams) {
 	await reader.readAsDataURL(event.target.files[0]);
 }
 function loadScript(scriptPath) {
-	var script = document.createElement('script');
-	script.setAttribute('type', 'text/javascript');
-	script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');}
-	script.setAttribute('src', scriptPath);
-	if (typeof script != 'undefined') {
-		document.querySelectorAll('head')[0].appendChild(script);
-	}
+	return new Promise((resolve, reject) => {
+		var script = document.createElement('script');
+		script.setAttribute('type', 'text/javascript');
+		script.onload = resolve;
+		script.onerror = function(){
+			notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');
+			reject();
+		}
+		script.setAttribute('src', scriptPath);
+		if (typeof script != 'undefined') {
+			document.querySelectorAll('head')[0].appendChild(script);
+		}
+	});
 }
 // Stretchable SVGs
 function stretchSVG(frameObject) {
@@ -6043,6 +6035,9 @@ bindInputs('#frame-editor-hsl-lightness', '#frame-editor-hsl-lightness-slider');
 bindInputs('#show-guidelines', '#show-guidelines-2', true);
 
 // Load / init whatever
-loadScript('/js/frames/groupStandard-3.js');
+loadScript("/js/frames/framePackGroups.js")
+	.then(() => {
+		loadFramePacks('standard');
+	});
 loadAvailableCards();
 initDraggableArt();
