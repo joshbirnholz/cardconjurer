@@ -6,6 +6,7 @@ loadFramePacks([
 	{name:'Floating Legend Crowns', value:'M15LegendCrownsFloating'},
 	{name:'Inner Crowns', value:'M15InnerCrowns'},
 	{name:'Nicknames', value:'M15Nickname-2'},
+	{name:'Smooth Nickname Legend Crowns', value:'M15SmoothNickname'},
 	{name:'Miracle', value:'M15Miracle'},
 	{name:'Holo Stamps', value:'M15HoloStamps'},
 	{name:'Dark Power/Toughness', value:'M15DarkPT'},

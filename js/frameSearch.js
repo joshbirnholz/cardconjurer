@@ -12,6 +12,7 @@ const frameNames = new Map ([
 	['Miracle', 'M15Miracle'],
 	['Holo Stamps', 'M15HoloStamps'],
 	['Nicknames', 'M15Nickname-2'],
+	['Smooth Nickname Legend Crowns', 'M15SmoothNickname'],
 	['Dark Power/Toughness', 'M15DarkPT'],
 	['Colored Borders', 'M15Borders'],
 	['Color Identity Pips', 'M15CIPips'],
