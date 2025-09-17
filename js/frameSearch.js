@@ -49,6 +49,7 @@ const frameNames = new Map ([
 	['Japan Showcase', 'JapanShowcase'],
 	['Japan Showcase Nicknames', 'JapanShowcaseNicknames'],
 	['Paranormal (DSK)', 'Paranormal'],
+	['Borderless Room (DSK)', 'BorderlessRoom'],
 	['Bloomburrow Borderless (BLB)', 'BloomburrowBorderless'],
 	['Woodland (BLB)', 'Woodland'],
 	['Memory Corridor (ACR) (Assassin\'s Creed)', 'MemoryCorridor'],
@@ -276,6 +277,7 @@ const frameNames = new Map ([
 	['Magrao\'s Kaldheim', 'CustomMagraoKaldheim'],
 	['Pokemon', 'Pokemon'],
 	['Circuit', 'Circuit'],
+	['Borderless Room Short', 'BorderlessRoomShort'],
 ]);
 
 frameSearch = (str) => {

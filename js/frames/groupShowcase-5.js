@@ -6,6 +6,7 @@ loadFramePacks([
 	{name:'Ghostfire (TDM)', value:'Ghostfire'},
 	{name:'Japan Showcase', value:'JapanShowcase'},
 	{name:'Paranormal (DSK)', value:'Paranormal'},
+	{name:'Borderless Room (DSK)', value:'BorderlessRoom'},
 	{name:'Bloomburrow Borderless (BLB)', value:'BloomburrowBorderless'},
 	{name:'Woodland (BLB)', value:'Woodland'},
 	{name:'Memory Corridor (ACR)', value:'MemoryCorridor'},
