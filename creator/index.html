@@ -9,67 +9,70 @@
 	<link rel="preload" href="/fonts/mplantin-i.ttf" as="font" type="font/ttf" crossorigin="anonymous" as='font'>
 	<div class='main-content'>
 		<!-- Popups -->
-		<div id='frame-element-editor' class='frame-element-editor'>
-			<h2 class='frame-element-editor-title'>Frame Image Editor</h2>
-			<h2 class='frame-element-editor-close' onclick='this.parentElement.classList.remove("opened");'>X</h2>
-			<div>
-				<h5 class='input-description'>X</h5>
-				<input id='frame-editor-x' class='input' type='number' placeholder='X' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Y</h5>
-				<input id='frame-editor-y' class='input' type='number' placeholder='X' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Width</h5>
-				<input id='frame-editor-width' class='input' type='number' placeholder='X' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Height</h5>
-				<input id='frame-editor-height' class='input' type='number' placeholder='X' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Opacity</h5>
-				<input id='frame-editor-opacity' class='input' type='number' placeholder='Opacity' max='100' min='0' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Erase</h5>
-				<label class='checkbox-container input'>Erase Card
-					<input id='frame-editor-erase' type='checkbox' placeholder='Erase'>
-					<span class='checkmark'></span>
-				</label>
-			</div>
-			<div>
-				<h5 class='input-description'>Blending Mode</h5>
-				<label class='checkbox-container input'>Preserve Alpha
-					<input id='frame-editor-alpha' type='checkbox' placeholder='Preserve Alpha'>
-					<span class='checkmark'></span>
-				</label>
-			</div>
-			<div>
-				<label class='checkbox-container input'>Color Overlay
-					<input id='frame-editor-color-overlay-check' type='checkbox' placeholder='Color Overlay'>
-					<span class='checkmark'></span>
-				</label>
-				<input id='frame-editor-color-overlay' class='input' type='color' placeholder='Color' value='#000000'>
-			</div>
-			<div>
-				<h5 class='input-description'>HSL Adjustments</h5>
-				<input id='frame-editor-hsl-hue-slider' class='input' type='range' min='-180' max='180' value='0' step='1'>
-				<input id='frame-editor-hsl-hue' class='input' type='number' min='-180' max='180' value='0' step='1'>
-				<input id='frame-editor-hsl-saturation-slider' class='input' type='range' min='-100' max='100' value='0' step='1'>
-				<input id='frame-editor-hsl-saturation' class='input' type='number' min='-100' max='100' value='0' step='1'>
-				<input id='frame-editor-hsl-lightness-slider' class='input' type='range' min='-100' max='100' value='0' step='1'>
-				<input id='frame-editor-hsl-lightness' class='input' type='number' min='-100' max='100' value='0' step='1'>
-			</div>
-			<div>
-				<h5 class='input-description'>Select and remove masks</h5>
-				<select id='frame-editor-masks' class='input margin-bottom'></select>
-				<button onclick='frameElementMaskRemoved();' class='input'>Remove mask</button>
-			</div>
-			<div class='drop-area'>
-	            <h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
-	            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
+		<!--Additional DIV element added to identify the Draggable Window --DSKZ -->
+		<div id='frame-element-editor-header'>
+			<div id='frame-element-editor' class='frame-element-editor'>
+				<h2 class='frame-element-editor-title'>Frame Image Editor</h2>
+				<h2 class='frame-element-editor-close' onclick='this.parentElement.classList.remove("opened");'>X</h2>
+				<div>
+					<h5 class='input-description'>X</h5>
+					<input id='frame-editor-x' class='input' type='number' placeholder='X' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Y</h5>
+					<input id='frame-editor-y' class='input' type='number' placeholder='X' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Width</h5>
+					<input id='frame-editor-width' class='input' type='number' placeholder='X' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Height</h5>
+					<input id='frame-editor-height' class='input' type='number' placeholder='X' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Opacity</h5>
+					<input id='frame-editor-opacity' class='input' type='number' placeholder='Opacity' max='100' min='0' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Erase</h5>
+					<label class='checkbox-container input'>Erase Card
+						<input id='frame-editor-erase' type='checkbox' placeholder='Erase'>
+						<span class='checkmark'></span>
+					</label>
+				</div>
+				<div>
+					<h5 class='input-description'>Blending Mode</h5>
+					<label class='checkbox-container input'>Preserve Alpha
+						<input id='frame-editor-alpha' type='checkbox' placeholder='Preserve Alpha'>
+						<span class='checkmark'></span>
+					</label>
+				</div>
+				<div>
+					<label class='checkbox-container input'>Color Overlay
+						<input id='frame-editor-color-overlay-check' type='checkbox' placeholder='Color Overlay'>
+						<span class='checkmark'></span>
+					</label>
+					<input id='frame-editor-color-overlay' class='input' type='color' placeholder='Color' value='#000000'>
+				</div>
+				<div>
+					<h5 class='input-description'>HSL Adjustments</h5>
+					<input id='frame-editor-hsl-hue-slider' class='input' type='range' min='-180' max='180' value='0' step='1'>
+					<input id='frame-editor-hsl-hue' class='input' type='number' min='-180' max='180' value='0' step='1'>
+					<input id='frame-editor-hsl-saturation-slider' class='input' type='range' min='-100' max='100' value='0' step='1'>
+					<input id='frame-editor-hsl-saturation' class='input' type='number' min='-100' max='100' value='0' step='1'>
+					<input id='frame-editor-hsl-lightness-slider' class='input' type='range' min='-100' max='100' value='0' step='1'>
+					<input id='frame-editor-hsl-lightness' class='input' type='number' min='-100' max='100' value='0' step='1'>
+				</div>
+				<div>
+					<h5 class='input-description'>Select and remove masks</h5>
+					<select id='frame-editor-masks' class='input margin-bottom'></select>
+					<button onclick='frameElementMaskRemoved();' class='input'>Remove mask</button>
+				</div>
+				<div class='drop-area'>
+					<h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
+					<input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
+				</div>
 			</div>
 		</div>
 		<div id='textbox-editor' class='textbox-editor'>
@@ -963,4 +966,6 @@
 	</div>
 	<script defer src='/js/creator-23.js'></script>
 	<script defer src='/js/frameSearch.js'></script>
+	<!--Line added to call the script for the drag feature --DSKZ -->
+	<script defer src='/js/Draggable_Window.js'></script>	
 <!-- END OF CONTENT -->
