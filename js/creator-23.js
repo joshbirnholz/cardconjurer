@@ -6732,6 +6732,7 @@ function processScryfallCard(card, responseCards) {
 			face.rarity = card.rarity;
 			face.collector_number = card.collector_number;
 			face.lang = card.lang;
+			face.layout = card.layout; // Add layout from parent card
 			face.illustration_id = card.illustration_id;
 			// Store original name before any modifications
 			face.original_name = face.name;
