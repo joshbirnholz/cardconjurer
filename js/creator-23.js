@@ -47,7 +47,7 @@ function getStandardHeight() {
 }
 
 //card object
-var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
+var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, setSymbolRotate:0, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
 //core images/masks
 const black = new Image(); black.crossOrigin = 'anonymous'; black.src = fixUri('/img/black.png');
 const blank = new Image(); blank.crossOrigin = 'anonymous'; blank.src = fixUri('/img/blank.png');
@@ -4468,7 +4468,7 @@ function artEdited() {
 	drawCard();
 }
 function autoFitArt() {
-	document.querySelector('#art-rotate').value = 0;
+        document.querySelector('#art-rotate').value = card.artBounds.rotation || 0;
 	if (art.width / art.height > scaleWidth(card.artBounds.width) / scaleHeight(card.artBounds.height)) {
 		document.querySelector('#art-y').value = Math.round(scaleY(card.artBounds.y) - scaleHeight(card.marginY));
 		document.querySelector('#art-zoom').value = (scaleHeight(card.artBounds.height) / art.height * 100).toFixed(1);
@@ -4638,6 +4638,7 @@ function setSymbolEdited() {
 	card.setSymbolX = document.querySelector('#setSymbol-x').value / card.width;
 	card.setSymbolY = document.querySelector('#setSymbol-y').value / card.height;
 	card.setSymbolZoom = document.querySelector('#setSymbol-zoom').value / 100;
+	card.setSymbolRotate = document.querySelector('#setSymbol-rotate').value || 0;
 	drawCard();
 }
 function resetSetSymbol() {
@@ -4646,6 +4647,7 @@ function resetSetSymbol() {
 	}
 	document.querySelector('#setSymbol-x').value = Math.round(scaleX(card.setSymbolBounds.x));
 	document.querySelector('#setSymbol-y').value = Math.round(scaleY(card.setSymbolBounds.y));
+	document.querySelector('#setSymbol-rotate').value = card.setSymbolBounds.rotation || 0;
 	var setSymbolZoom;
 	if (setSymbol.width / setSymbol.height > scaleWidth(card.setSymbolBounds.width) / scaleHeight(card.setSymbolBounds.height)) {
 		setSymbolZoom = (scaleWidth(card.setSymbolBounds.width) / setSymbol.width * 100).toFixed(1);
@@ -4921,6 +4923,19 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
     const symbolHeight = setSymbol.height * card.setSymbolZoom; 
     const x = scaleX(card.setSymbolX);
     const y = scaleY(card.setSymbolY);
+    const rotation = card.setSymbolRotate || 0;
+
+    // Save context for rotation
+    cardContext.save();
+    
+    // Apply rotation if needed
+    if (rotation !== 0) {
+        const centerX = x + symbolWidth / 2;
+        const centerY = y + symbolHeight / 2;
+        cardContext.translate(centerX, centerY);
+        cardContext.rotate(Math.PI / 180 * rotation);
+        cardContext.translate(-centerX, -centerY);
+    }
 
     if (bounds.outlineWidth && bounds.outlineWidth > 0) {
         // Create temp canvas for outlined symbol
@@ -4974,21 +4989,29 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
         // Draw main symbol without outline (simple path)
         cardContext.drawImage(setSymbol, x, y, symbolWidth, symbolHeight);
     }
+    cardContext.restore();
 }
 //DRAWING THE CARD (putting it all together)
 function drawCard() {
 	// reset
 	cardContext.globalCompositeOperation = 'source-over';
 	cardContext.clearRect(0, 0, cardCanvas.width, cardCanvas.height);
-	// art
-	cardContext.save();
-	cardContext.translate(scaleX(card.artX), scaleY(card.artY));
-	cardContext.rotate(Math.PI / 180 * (card.artRotate || 0));
-	if (document.querySelector('#grayscale-art').checked) {
-		cardContext.filter='grayscale(1)';
-	}
-	cardContext.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
-	cardContext.restore();
+    // art
+    cardContext.save();
+    if (card.artRotate) {
+        // Calculate art center
+        const artCenterX = scaleX(card.artX) + (art.width * card.artZoom) / 2;
+        const artCenterY = scaleY(card.artY) + (art.height * card.artZoom) / 2;
+        // Rotate around center
+        cardContext.translate(artCenterX, artCenterY);
+        cardContext.rotate(Math.PI / 180 * card.artRotate);
+        cardContext.translate(-artCenterX, -artCenterY);
+    }
+    if (document.querySelector('#grayscale-art').checked) {
+        cardContext.filter = 'grayscale(1)';
+    }
+    cardContext.drawImage(art, scaleX(card.artX), scaleY(card.artY), art.width * card.artZoom, art.height * card.artZoom);
+    cardContext.restore();
 	// frame elements
 	if (card.version.includes('planeswalker') && typeof planeswalkerPreFrameCanvas !== "undefined") {
 		cardContext.drawImage(planeswalkerPreFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
@@ -5075,7 +5098,7 @@ function drawCard() {
 	// cutout the corners
 	cardContext.globalCompositeOperation = 'destination-out';
 	if (!card.noCorners && (card.marginX == 0 && card.marginY == 0)) {
-		var w = card.version == 'battle' ? 2100 : getStandardWidth();
+		var w = getStandardWidth();
 
 		cardContext.drawImage(corner, 0, 0, scaleWidth(59/w), scaleWidth(59/w));
 		cardContext.rotate(Math.PI / 2);
@@ -5127,7 +5150,6 @@ function downloadCard(alt = false, jpeg = false) {
 }
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
-	console.log('Import card called with:', cardObject); // Log initial import data
 	scryfallCard = cardObject;
 	const importIndex = document.querySelector('#import-index');
 	importIndex.innerHTML = null;
@@ -5266,311 +5288,8 @@ function extractSagaReminderText(text) {
   return match ? match[0] : null;
 }
 
-function parseClassAbilities(text) {
-    const lines = text.split('\n'); // Split text into lines
-    const abilities = [];
-    let reminderText = '';
-    let currentLevel = 1;
-
-    // Check if the first line is reminder text
-    if (lines[0].startsWith('(')) {
-            reminderText = lines.shift(); // Extract reminder text
-    }
-
-    // Process each line
-    for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-
-            // Check for "{cost}: Level X" format
-            const levelMatch = line.match(/^(\{.*?\}):\s*Level \d+/); // Match cost and level
-            if (levelMatch) {
-                    const cost = `${levelMatch[1]}:`; // Extract cost (e.g., "{G}")
-                    const ability = lines[i + 1]?.trim() || ''; // Get the next line as ability text
-                    abilities.push({ cost, ability });
-                    i++; // Skip the next line since it's already processed
-                    currentLevel++;
-            } else if (abilities.length === 0) {
-                    // Handle the first level's ability text without "Level" heading
-                    abilities.push({ cost: '', ability: line });
-            }
-    }
-
-    // Prepend reminder text to the first ability if it exists
-    if (reminderText && abilities.length > 0) {
-            abilities[0].ability = `${reminderText}{lns}{bar}{lns}${abilities[0].ability}`;
-    }
-
-    return abilities;
-}
-
-function parseMultiFacedCards(card) {
-    let [frontFace, backFace] = card.card_faces ?? []
-    
-    if (card.object === "card_face") {
-        // Battle cards: find faces from scryfallCard array
-        frontFace = card;
-        backFace = scryfallCard.find(face => 
-            face.object === "card_face" && 
-            face.name !== card.name
-        );
-    }
-    
-    if (!frontFace || !backFace) {
-        console.error('Could not find both faces for multi-faced card');
-        return null;
-    }
-    
-    // Single processing logic for both types
-    const faces = {
-        front: {
-            name: frontFace.name || '',
-            type: frontFace.type_line || '',
-            rules: frontFace.oracle_text || '',
-            mana: frontFace.mana_cost || '',
-            pt: frontFace.power ? `${frontFace.power}/${frontFace.toughness}` : '',
-            defense: frontFace.defense || '',
-            flavor: frontFace.flavor_text || ''
-        },
-        back: {
-            name: backFace.name || '',
-            type: backFace.type_line || '',
-            rules: backFace.oracle_text || '',
-            mana: backFace.mana_cost || '',
-            pt: backFace.power ? `${backFace.power}/${backFace.toughness}` : '',
-            defense: backFace.defense || '',
-            flavor: backFace.flavor_text || ''
-        }
-    };
-    
-    return faces;
-}
-
-function parseLevelerCard(card) {
-    if (card.layout !== 'leveler' || !card.oracle_text) {
-        console.error('Not a valid leveler card');
-        return null;
-    }
-
-    const oracleText = card.oracle_text;
-    
-    // Parse the oracle text sections
-    const sections = oracleText.split('\n');
-    
-    // Find level up cost (first line)
-    const levelUpMatch = sections[0].match(/Level up (.+?) \((.+?)\)/);
-    const levelUpCost = levelUpMatch ? levelUpMatch[1] : '';
-    const levelUpReminder = levelUpMatch ? levelUpMatch[2] : '';
-    
-    // Find level ranges and their content
-    const levelSections = [];
-    let currentSection = null;
-    
-    for (let i = 1; i < sections.length; i++) {
-        const line = sections[i];
-        
-        // Check if this line defines a level range
-        const levelMatch = line.match(/^LEVEL (.+)$/);
-        if (levelMatch) {
-            if (currentSection) {
-                levelSections.push(currentSection);
-            }
-            currentSection = {
-                levelRange: levelMatch[1],
-                content: []
-            };
-        } else if (currentSection && line.trim()) {
-            currentSection.content.push(line);
-        }
-    }
-    
-    // Add the last section if it exists
-    if (currentSection) {
-        levelSections.push(currentSection);
-    }
-    
-    // Extract data for each level
-    const parsedData = {
-        layout: 'leveler', // Add this line for consistency
-        name: card.name || '',
-        type: card.type_line || '',
-        mana: card.mana_cost || '',
-        basePT: card.power && card.toughness ? `${card.power}/${card.toughness}` : '',
-        levelUpCost: levelUpCost,
-        levelUpText: `Level up ${levelUpCost} {i}(${levelUpReminder}){/i}`,
-        levels: []
-    };
-    
-    // Process each level section
-    levelSections.forEach(section => {
-        const levelData = {
-            range: section.levelRange,
-            pt: '',
-            abilities: []
-        };
-        
-        // Look for P/T in the content (usually looks like "2/3")
-        const ptMatch = section.content.find(line => /^\d+\/\d+$/.test(line.trim()));
-        if (ptMatch) {
-            levelData.pt = ptMatch.trim();
-            // Remove P/T from abilities
-            levelData.abilities = section.content.filter(line => line.trim() !== ptMatch.trim());
-        } else {
-            levelData.abilities = section.content;
-        }
-        
-        // Join abilities into a single text block
-        levelData.rulesText = levelData.abilities.join('\n');
-        
-        parsedData.levels.push(levelData);
-    });
-    
-    return parsedData;
-}
-
-function parsePrototypeLayout(card) {
-    if (card.layout !== 'prototype' || !card.oracle_text) {
-        console.error('Not a valid prototype card');
-        return null;
-    }
-
-    const oracleText = card.oracle_text;
-    
-    // Match the entire prototype line: "Prototype {1}{U}{U} — 2/1 (reminder text)"
-    const prototypeMatch = oracleText.match(/^Prototype (.+?) — (\d+)\/(\d+) \((.+?)\)/);
-    
-    if (!prototypeMatch) {
-        console.error('Could not parse prototype information');
-        return null;
-    }
-    
-    const prototypeCost = prototypeMatch[1];
-    const prototypePower = prototypeMatch[2];
-    const prototypeToughness = prototypeMatch[3];
-    const prototypeReminder = prototypeMatch[4];
-    
-    // Split by newlines and remove the first line (which contains the prototype)
-    const lines = oracleText.split('\n');
-    const mainRules = lines.slice(1).join('\n').trim();
-    
-    return {
-        layout: 'prototype',
-        name: card.name || '',
-        type: card.type_line || '',
-        mana: card.mana_cost || '',
-        basePT: card.power && card.toughness ? `${card.power}/${card.toughness}` : '',
-        rules: mainRules,
-        prototype: {
-            cost: prototypeCost,
-            pt: `${prototypePower}/${prototypeToughness}`,
-            reminderText: `Prototype ${prototypeCost} — ${prototypePower}/${prototypeToughness} {i}(${prototypeReminder}){/i}`
-        }
-    };
-}
-
-function parseMutateLayout(card) {
-    if (card.layout !== 'mutate' || !card.oracle_text) {
-        console.error('Not a valid mutate card');
-        return null;
-    }
-
-    const oracleText = card.oracle_text;
-    
-    // Match the mutate line: "Mutate {3}{B} (reminder text)"
-    const mutateMatch = oracleText.match(/^Mutate (.+?) \((.+?)\)/);
-    
-    if (!mutateMatch) {
-        console.error('Could not parse mutate information');
-        return null;
-    }
-    
-    const mutateCost = mutateMatch[1];
-    const mutateReminder = mutateMatch[2];
-    
-    // Split by newlines and remove the first line (which contains the mutate)
-    const lines = oracleText.split('\n');
-    const mainRules = lines.slice(1).join('\n').trim();
-    
-    return {
-        layout: 'mutate',
-        name: card.name || '',
-        type: card.type_line || '',
-        mana: card.mana_cost || '',
-        basePT: card.power && card.toughness ? `${card.power}/${card.toughness}` : '',
-        rules: mainRules,
-        mutate: {
-            cost: mutateCost,
-            reminderText: `Mutate ${mutateCost} {i}(${mutateReminder}){/i}`
-        }
-    };
-}
-
-function parseVanguardLayout(card) {
-    if (card.layout !== 'vanguard' || !card.oracle_text) {
-        console.error('Not a valid vanguard card');
-        return null;
-    }
-
-    return {
-        layout: 'vanguard',
-        name: card.name || '',
-        type: card.type_line || '',
-        rules: card.oracle_text || '',
-        flavor: card.flavor_text || '',
-        handModifier: card.hand_modifier || '',
-        lifeModifier: card.life_modifier || ''
-    };
-}
-
 function changeCardIndex() {
 	var cardToImport = scryfallCard[document.querySelector('#import-index').value];
-	// Add debug logging for card Layout detection
-	console.log('Card layout:', cardToImport.layout);
-	console.log('Card version:', card.version);
-
-    // Clear all existing text fields to prevent old data from persisting BUT preserve Multi Face reminder text if we're using a Multi Face frame
-    var savedFuseReminderText = '';
-	var savedDescriptiveTexts = {};
-    if (card.text && card.text.reminder && card.version === 'fuse' || card.version === 'room') {
-        savedFuseReminderText = card.text.reminder.text;
-    }
-	// Save descriptive texts for vanguard
-	if (card.text) {
-		// Save static descriptive texts that shouldn't be overwritten
-		const descriptiveFields = ['left', 'right'];
-		descriptiveFields.forEach(field => {
-			if (card.text[field] && card.text[field].text) {
-				savedDescriptiveTexts[field] = card.text[field].text;
-			}
-		});
-    
-        // Clear all text fields
-        Object.keys(card.text).forEach(key => {
-            card.text[key].text = '';
-        });
-        
-        // Restore descriptive texts
-        Object.keys(savedDescriptiveTexts).forEach(field => {
-            if (card.text[field]) {
-                card.text[field].text = savedDescriptiveTexts[field];
-            }
-        });
-    }
-
-    // Update reminder text from imported card if available
-    var importedReminderText = '';
-    if (cardToImport.oracle_text) {
-        // Extract reminder text from oracle text (text in parentheses)
-        var reminderMatch = cardToImport.oracle_text.match(/\([^)]+\)/);
-        if (reminderMatch) {
-            importedReminderText = reminderMatch[0];
-        }
-    }
-
-    // Restore reminder text: use imported if available, otherwise use saved
-    if (card.text && card.text.reminder && (card.version === 'fuse' || card.version === 'room')) {
-        card.text.reminder.text = importedReminderText || savedFuseReminderText;
-    }
-		
 	//text
 	var langFontCode = "";
 	if (cardToImport.lang == "ph") {langFontCode = "{fontphyrexian}"}
@@ -5909,11 +5628,9 @@ function changeCardIndex() {
 		}
 		planeswalkerEdited();
 	} else if (card.version.includes('saga')) {
-		if (card.text.rules2) {
-			const combinedText = [cardToImport.flavor_text, ...(cardToImport.keywords || [])]
-				.filter(Boolean)
-				.join('\n');
-			card.text.rules2.text = combinedText;
+		if (card.text.flavor) {
+			// future support sagas with flavor text
+			card.text.flavor.text = cardToImport.flavor_text || '';
 		}
 		const abilities = parseSagaAbilities(cardToImport.oracle_text);
 		for (let i = 0; i < abilities.length; i++) {
@@ -5922,23 +5639,6 @@ function changeCardIndex() {
 		card.text.reminder.text = `{i}${extractSagaReminderText(cardToImport.oracle_text)}{/i}`;
 		card.saga = {...card.saga, abilities: abilities.map(a => a.steps).concat(Array.from({ length: 4 - abilities.length}, () => 0)), count: abilities.length};
 		updateAbilityHeights()
-	} else if (card.version.toLowerCase().includes('class') && !card.version.includes('classicshifted') && typeof classCanvas !== "undefined") {
-		if (card.text.flavor) {
-			// future support classes with flavor text
-			card.text.flavor.text = cardToImport.flavor_text || '';
-		}
-		const abilities = parseClassAbilities(cardToImport.oracle_text);
-		for (let i = 0; i < abilities.length; i++) {
-			const { cost, ability } = abilities[i];
-			if (cost) {
-				card.text[`level${i}a`].text = abilities[i].cost.replace('\u2212', '-');
-			}
-			if (i !== 0) {
-				card.text[`level${i}b`].text = `Level ${i + 1}`;
-			}
-			card.text[`level${i}c`].text = ability.replace('(', '{i}(').replace(')', '){/i}');
-		}
-		card.class = {...card.class, abilities: abilities.map(a => a.cost).concat(Array.from({ length: 4 - abilities.length}, () => '')), count: abilities.length};
 	} else if (card.version.includes('battle')) {
 		card.text.defense.text = cardToImport.defense || '';
 	}
@@ -6103,6 +5803,7 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
 		document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
 		document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
+		document.querySelector('#setSymbol-rotate').value = card.setSymbolRotate || 0;
 		uploadSetSymbol(card.setSymbolSource);
 		document.querySelector('#watermark-x').value = scaleX(card.watermarkX) - scaleWidth(card.marginX);
 		document.querySelector('#watermark-y').value = scaleY(card.watermarkY) - scaleHeight(card.marginY);
@@ -6364,10 +6065,10 @@ function processScryfallCard(card, responseCards) {
 			}
 		});
 	} else {
-		if (card.lang != 'en' || card.printed_name) {
-			card.oracle_text = card.printed_text || card.oracle_text;
-			card.name = card.printed_name || card.name;
-			card.type_line = card.printed_type_line || card.type_line;
+		if (card.lang != 'en') {
+			card.oracle_text = card.printed_text;
+			card.name = card.printed_name;
+			card.type_line = card.printed_type_line;
 		}
 		// Ensure layout is set even for single-faced cards
 		if (!card.layout) {
