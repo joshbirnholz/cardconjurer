@@ -63,6 +63,9 @@ var loadMarginVersion = async () => {
 	if (card.version.includes('class') && !card.version.includes('classic')) {
 		classEdited();
 	}
+	if (card.version.includes('station')) {
+		stationEdited();
+	}
 	drawTextBuffer();
 	drawFrames();
 	bottomInfoEdited();

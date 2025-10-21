@@ -4998,6 +4998,11 @@ function drawCard() {
 		cardContext.drawImage(planeswalkerPostFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	} else if (card.version.toLowerCase().includes('planeswalker') && typeof planeswalkerCanvas !== "undefined") {
 		cardContext.drawImage(planeswalkerCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	} else if (card.version.toLowerCase().includes('station') && typeof stationPreFrameCanvas !== "undefined") {
+		cardContext.drawImage(stationPreFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	}
+	if (card.version.toLowerCase().includes('station') && typeof stationPostFrameCanvas !== "undefined") {
+		cardContext.drawImage(stationPostFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	} else if (card.version.toLowerCase().includes('qrcode') && typeof qrCodeCanvas !== "undefined") {
 		cardContext.drawImage(qrCodeCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	} // REMOVE/DELETE PLANESWALKERCANVAS AFTER A FEW WEEKS
@@ -5549,6 +5554,38 @@ function parseRollAbilities(text) {
     return modifiedText;
 }
 
+function parseStationCard(oracleText) {
+    if (!oracleText || !oracleText.includes('STATION')) {
+        return null;
+    }
+
+    // Split the oracle text by STATION markers to get the pre-station text
+    const parts = oracleText.split(/STATION \d+\+/);
+    
+    // The first part is the pre-station text (before any STATION abilities)
+    let preStationText = parts[0].trim();
+    
+    // Format station reminder text with italics
+    preStationText = preStationText.replace(/Station (\([^)]+\))/g, 'Station {i}$1{/i}');
+    
+    // Find all STATION abilities with their numbers - more flexible regex
+    const stationRegex = /STATION (\d+\+)\s*\n([^]*?)(?=\nSTATION \d+\+|$)/g;
+    const stationAbilities = [];
+    
+    let match;
+    while ((match = stationRegex.exec(oracleText)) !== null) {
+        stationAbilities.push({
+            number: match[1], // e.g., "1+", "8+"
+            text: match[2].trim()
+        });
+    }
+
+    return {
+        preStationText: preStationText,
+        stationAbilities: stationAbilities
+    };
+}
+
 function changeCardIndex() {
 	var cardToImport = scryfallCard[document.querySelector('#import-index').value];
 	// Add debug logging for card Layout detection
@@ -5790,6 +5827,150 @@ function changeCardIndex() {
 
         textEdited();
     }
+
+else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION') && card.version.includes('station')) {
+
+    // Clear existing station fields
+    if (card.text) {
+        ['ability0', 'ability1', 'ability2'].forEach(field => {
+            if (card.text[field]) card.text[field].text = '';
+        });
+    }
+    
+    // Clear station badge values immediately
+    if (card.station?.badgeValues) {
+        card.station.badgeValues[1] = '';
+        card.station.badgeValues[2] = '';
+    }
+    
+    const stationData = parseStationCard(cardToImport.oracle_text);
+    const name = (cardToImport.printed_name || cardToImport.name || '').replace(/^A-/, '{alchemy}');
+
+    // Populate basic text fields
+    const basicFields = [
+        ['title', curlyQuotes(name)],
+        ['type', cardToImport.type_line],
+        ['mana', cardToImport.mana_cost || ''],
+        ['pt', cardToImport.power && cardToImport.toughness ? `${cardToImport.power}/${cardToImport.toughness}` : '']
+    ];
+    
+    basicFields.forEach(([field, value]) => {
+        if (card.text?.[field]) card.text[field].text = langFontCode + value;
+    });
+    
+    // Station ability placement logic
+    if (stationData) {
+        // Better regex to separate pre-text from Station reminder text
+        let preText = '';
+        let reminderText = '';
+        
+        if (stationData.preStationText) {
+            // Look for Station reminder text (either already italicized or not)
+            const stationReminderMatch = stationData.preStationText.match(/(.*?)(Station \{i\}\([^)]+\)\{\/i\}|Station \([^)]+\))/s);
+            
+            if (stationReminderMatch) {
+                preText = stationReminderMatch[1].trim();
+                
+                // Format the reminder text with italics if not already done
+                if (stationReminderMatch[2].includes('{i}')) {
+                    reminderText = stationReminderMatch[2];
+                } else {
+                    reminderText = stationReminderMatch[2].replace(/Station (\([^)]+\))/, 'Station {i}$1{/i}');
+                }
+            } else {
+                // If no Station reminder found, treat entire text as pre-text
+                preText = stationData.preStationText.trim();
+            }
+        }
+        
+        const numAbilities = stationData.stationAbilities.length;
+        
+        // AUTO-CHECK DISABLE FIRST SQUARE FOR SINGLE ABILITIES
+        const shouldDisableFirstSquare = numAbilities === 1;
+        
+        // Define placement scenarios as configuration
+        const scenarios = {
+            // [hasPreText, numAbilities]: [ability0, ability1, ability2, badgeSlots]
+            [false + ',' + 1]: ['', reminderText, stationData.stationAbilities[0]?.text, [null, stationData.stationAbilities[0]?.number]],
+            [true + ',' + 1]: [preText, reminderText, stationData.stationAbilities[0]?.text, [null, stationData.stationAbilities[0]?.number]],
+            [false + ',' + 2]: [reminderText, stationData.stationAbilities[0]?.text, stationData.stationAbilities[1]?.text, [stationData.stationAbilities[0]?.number, stationData.stationAbilities[1]?.number]],
+            [true + ',' + 2]: [preText + (reminderText ? '\n' + reminderText : ''), stationData.stationAbilities[0]?.text, stationData.stationAbilities[1]?.text, [stationData.stationAbilities[0]?.number, stationData.stationAbilities[1]?.number]]
+        };
+        
+        const scenario = scenarios[Boolean(preText) + ',' + numAbilities];
+        if (scenario) {
+            const [ability0, ability1, ability2, badges] = scenario;
+            
+            // Set abilities
+            [ability0, ability1, ability2].forEach((text, i) => {
+                if (text && card.text[`ability${i}`]) {
+                    card.text[`ability${i}`].text = langFontCode + text;
+                }
+            });
+            
+            // Set disable first square checkbox and station setting
+			setTimeout(() => {
+				const disableCheckbox = document.querySelector('#station-disable-first-ability');
+				if (disableCheckbox) {
+					disableCheckbox.checked = shouldDisableFirstSquare;
+				}
+				if (card.station) {
+					card.station.disableFirstAbility = shouldDisableFirstSquare;
+				}
+				
+				// SET STATION-SPECIFIC UI VALUES FOR SINGLE ABILITY IMPORTS
+				if (shouldDisableFirstSquare && !Boolean(preText) && card.station?.importSettings?.singleAbility) {
+					// Get version-specific settings or fall back to default
+					const versionOverrides = card.station.importSettings.versionOverrides || {};
+					const versionSettings = versionOverrides[card.version] || card.station.importSettings.singleAbility;
+					
+					// Set Y offset
+					const yOffsetInput = document.querySelector('#station-square-y');
+					if (yOffsetInput) {
+						yOffsetInput.value = versionSettings.yOffset;
+						if (card.station.squares && card.station.squares[1]) {
+							card.station.squares[1].y = versionSettings.yOffset + 76;
+						}
+					}
+					
+					// Set first square height
+					const height1Input = document.querySelector('#station-square-height-1');
+					if (height1Input) {
+						height1Input.value = versionSettings.height1;
+						if (card.station.squares && card.station.squares[1]) {
+							card.station.squares[1].height = versionSettings.height1;
+						}
+					}
+				}
+		
+				
+				// Clear DOM inputs first
+				['#station-badge-value-1', '#station-badge-value-2'].forEach(selector => {
+					const input = document.querySelector(selector);
+					if (input) input.value = '';
+				});
+                
+                // Set new badge values
+                badges.forEach((badge, i) => {
+                    if (badge) {
+                        const input = document.querySelector(`#station-badge-value-${i + 1}`);
+                        if (input) input.value = badge;
+                        if (card.station?.badgeValues) card.station.badgeValues[i + 1] = badge;
+                    }
+                });
+                
+                // Force station redraw after all values are set
+                setTimeout(() => {
+                    if (typeof stationEdited === 'function') {
+                        stationEdited();
+                    }
+                }, 50);
+            }, 100);
+        }
+    }
+    
+    textEdited();
+}
   
 	var name = cardToImport.printed_name || cardToImport.name || '';
 	if (name.startsWith('A-')) { name = name.replace('A-', '{alchemy}'); }

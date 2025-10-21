@@ -18,6 +18,8 @@ const frameNames = new Map ([
 	['Color Identity Pips', 'M15CIPips'],
 	['"The List" Stamp', 'TheList'],
 	['Lands', 'M15Lands'],
+	['Stations', 'StationRegular'],
+	['Borderless Stations', 'StationBorderless'],
 	['Omens (Tarkir Dragonstorm)', 'Omen'],
 	['Rooms (Duskmourn)', 'Room'],
 	['Rooms (Universes Beyond)', 'RoomUB'],
