@@ -6404,7 +6404,24 @@ function stretchSVGReal(data, frameObject) {
 			}
 		}
 		returnData = returnData.replace(oldData, newData);
+		
+		// Apply color overrides
+		const colorOverride = frameObject.colorOverrides?.[name];
+		if (colorOverride && colorOverride.mode === 'manual') {
+			console.log(`Applying color override for ${name}: ${colorOverride.color}`);
+			
+			// URL encode the color for SVG compatibility
+			const encodedColor = encodeURIComponent(colorOverride.color);
+			
+			// Replace URL-encoded fill colors in style attributes
+			const styleRegex = new RegExp(`(id="${name}"[^>]*style="[^"]*fill:\\s*)(%23[0-9a-fA-F]{6}|%23[0-9a-fA-F]{3})([^"]*)`, 'g');
+			returnData = returnData.replace(styleRegex, function(match, p1, p2, p3) {
+				console.log(`URL-encoded style pattern matched: ${match} -> replacing ${p2} with ${encodedColor}`);
+				return p1 + encodedColor + p3;
+			});
+		}
 	});
+	
 	return returnData;
 }
 function processScryfallCard(card, responseCards) {
