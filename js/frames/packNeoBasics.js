@@ -1,10 +1,10 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/neo/basics/masks/w.svg', name:'Plains Symbol'}];
-var masks2 = [{src:'/img/frames/neo/basics/masks/u.svg', name:'Island Symbol'}];
-var masks3 = [{src:'/img/frames/neo/basics/masks/b.svg', name:'Swamp Symbol'}];
-var masks4 = [{src:'/img/frames/neo/basics/masks/r.svg', name:'Mountain Symbol'}];
-var masks5 = [{src:'/img/frames/neo/basics/masks/g.svg', name:'Forest Symbol'}];
-var masks6 = [{src:'/img/frames/neo/basics/masks/c.svg', name:'Colorless Symbol'}];
+var masks = [{src:'/img/frames/neo/basics/masks/w.svg', name:'Plains Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks2 = [{src:'/img/frames/neo/basics/masks/u.svg', name:'Island Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks3 = [{src:'/img/frames/neo/basics/masks/b.svg', name:'Swamp Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks4 = [{src:'/img/frames/neo/basics/masks/r.svg', name:'Mountain Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks5 = [{src:'/img/frames/neo/basics/masks/g.svg', name:'Forest Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks6 = [{src:'/img/frames/neo/basics/masks/c.svg', name:'Colorless Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
 var stretch = [
 	{name:'outline', targets: [3, 11], change:[0, 0]},
 	{name:'top', targets: [0, -2], change:[0, 0]},
