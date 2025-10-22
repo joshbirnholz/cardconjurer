@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = []//[{src:'/img/frames/mysticalArchive/jp/pinline.svg', name:'Pinline'}, {src:'/img/frames/mysticalArchive/jp/rightHalf.svg', name:'Right Half'}];
+var masks = [{src:'/img/frames/neo/basics/border.svg', name:'Border'}];
 var stretch = [
 	{name:'outline', targets: [3, 11], change:[0, 0]},
 	{name:'top', targets: [0, -2], change:[0, 0]},
