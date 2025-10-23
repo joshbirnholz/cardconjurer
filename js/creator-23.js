@@ -3503,10 +3503,39 @@ async function drawText() {
 	textContext.clearRect(0, 0, textCanvas.width, textCanvas.height);
 	prePTContext.clearRect(0, 0, prePTCanvas.width, prePTCanvas.height);
 	drawTextBetweenFrames = false;
-	for (var textObject of Object.entries(card.text)) {
-		await writeText(textObject[1], textContext);
-		continue;
+	
+	// Check if any textbox has an outline
+	const hasAnyOutlines = Object.values(card.text).some(textObj => 
+		(textObj.outlineWidth || 0) > 0
+	);
+	
+	if (!hasAnyOutlines) {
+		// Simple single-pass rendering
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+	} else {
+		// Two-pass rendering for outlined text
+		textContext.isOutlinePass = true;
+		textContext.isFillPass = false;
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+		
+		textContext.isOutlinePass = false;
+		textContext.isFillPass = true;
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+		
+		// Clean up flags (only needed when we set them)
+		delete textContext.isOutlinePass;
+		delete textContext.isFillPass;
 	}
+	
 	if (drawTextBetweenFrames || redrawFrames) {
 		drawFrames();
 		if (!drawTextBetweenFrames) {
@@ -3532,6 +3561,9 @@ function writeText(textObject, targetContext) {
 	var textManaCost = textObject.manaCost || false;
 	var textAllCaps = textObject.allCaps || false;
 	var textManaSpacing = scaleWidth(textObject.manaSpacing) || 0;
+    // Check for drawing mode flags on the context
+    var isOutlinePass = targetContext.isOutlinePass || false;
+    var isFillPass = targetContext.isFillPass || false;
 	//Buffers the canvases accordingly
 	var canvasMargin = 300;
 	paragraphCanvas.width = textWidth + 2 * canvasMargin;
@@ -4336,24 +4368,39 @@ function writeText(textObject, targetContext) {
 					maxSpaceSize: 6,
 					minSpaceSize: 0
 				};
-
+			
 				if (textArcRadius > 0) {
-					lineContext.fillTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX, textOutlineWidth);
+					// For text WITHOUT outline, only draw on fill pass (or if no passes)
+					if (textOutlineWidth <= 0 && isOutlinePass) {
+						// Skip this text during outline pass
+					} else if (textOutlineWidth > 0 && isOutlinePass) {
+						// Draw outline only for arc text
+						lineContext.strokeTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX);
+					} else if (isFillPass || (!isOutlinePass && !isFillPass)) {
+						// Draw fill for arc text (in fill pass OR when not doing multi-pass)
+						lineContext.fillTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX, 0);
+					}
 				} else {
-					if (textOutlineWidth >= 1) {
+					// For text WITHOUT outline, only draw on fill pass (or if no passes)
+					if (textOutlineWidth <= 0 && isOutlinePass) {
+						// Skip this text during outline pass
+					} else if (textOutlineWidth > 0 && isOutlinePass) {
+						// Draw outline only
 						if (fillJustify) {
 							lineContext.strokeJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
 						} else {
 							lineContext.strokeText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
 						}
-					}
-					if (fillJustify) {
-						lineContext.fillJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
-					} else {
-						lineContext.fillText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
+					} else if (isFillPass || (!isOutlinePass && !isFillPass)) {
+						// Draw fill (in fill pass OR when not doing multi-pass)
+						if (fillJustify) {
+							lineContext.fillJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
+						} else {
+							lineContext.fillText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
+						}
 					}
 				}
-
+			
 				if (fillJustify) {
 					currentX += lineContext.measureJustifiedText(wordToWrite, justifyWidth, justifySettings);
 				} else {
@@ -4412,10 +4459,26 @@ CanvasRenderingContext2D.prototype.fillTextArc = function(text, x, y, radius, st
 	this.rotate(startRotation + widthToAngle(distance, radius));
 	for (var i = 0; i < text.length; i++) {
 		var letter = text[i];
+		// Only draw outline if outlineWidth is specified and > 0
 		if (outlineWidth >= 1) {
 			this.strokeText(letter, 0, -radius);
+		} else {
+			// Only draw fill when outlineWidth is 0
+			this.fillText(letter, 0, -radius);
 		}
-		this.fillText(letter, 0, -radius);
+		this.rotate(widthToAngle(this.measureText(letter).width, radius));
+	}
+	this.restore();
+}
+
+// Add a stroke-only version for arc text
+CanvasRenderingContext2D.prototype.strokeTextArc = function(text, x, y, radius, startRotation, distance = 0) {
+	this.save();
+	this.translate(x - distance + scaleWidth(0.5), y + radius);
+	this.rotate(startRotation + widthToAngle(distance, radius));
+	for (var i = 0; i < text.length; i++) {
+		var letter = text[i];
+		this.strokeText(letter, 0, -radius);
 		this.rotate(widthToAngle(this.measureText(letter).width, radius));
 	}
 	this.restore();
