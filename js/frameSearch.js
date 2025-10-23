@@ -45,6 +45,7 @@ const frameNames = new Map ([
 	// Showcase
 	['Borderless Stellar Sights (EOS)', 'BorderlessStellarSights'],
 	['Poster Stellar Sights (EOS)', 'PosterStellarSights'],
+	['Borderless Source Material', 'FCA'],
 	['Draconic (TDM)', 'Draconic'],
 	['Ghostfire (TDM)', 'Ghostfire'],
 	['Japan Showcase', 'JapanShowcase'],
