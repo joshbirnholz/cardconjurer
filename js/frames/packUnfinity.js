@@ -7,9 +7,8 @@ availableFrames = [
 	{name:'Black Frame', src:'/img/frames/unfinity/b.png', masks:masks},
 	{name:'Red Frame', src:'/img/frames/unfinity/r.png', masks:masks},
 	{name:'Green Frame', src:'/img/frames/unfinity/g.png', masks:masks},
-	{name:'Multicolored Frame', src:'/img/frames/unfinity/m.png', masks:masks},
-	{name:'Artifact Frame', src:'/img/frames/unfinity/a.png', masks:masks},
-	{name:'Colorless Frame', src:'/img/frames/unfinity/c.png', masks:masks}
+	{name:'Waste Frame', src:'/img/frames/unfinity/L.png', masks:masks}
+
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
