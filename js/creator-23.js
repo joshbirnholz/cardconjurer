@@ -4150,7 +4150,8 @@ function writeText(textObject, targetContext) {
 						shadowColor: textShadowColor,
 						shadowOffsetX: textShadowOffsetX,
 						shadowOffsetY: textShadowOffsetY,
-						shadowBlur: textShadowBlur
+						shadowBlur: textShadowBlur,
+						outlineColor: lineContext.strokeStyle
 					});
 					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
 
@@ -4243,7 +4244,8 @@ function writeText(textObject, targetContext) {
 				// First pass: Draw outlines only
 				manaSymbolsToRender.forEach(symbolData => {
 					if (!symbolData.hasOutline) return;
-					outlineContext.fillStyle = 'black';
+					// Use the outline color from the textbox instead of hardcoded 'black'
+					outlineContext.fillStyle = symbolData.outlineColor || 'black';
 					outlineContext.beginPath();
 					var centerX = symbolData.x + symbolData.width/2;
 					var centerY = symbolData.y + symbolData.height/2;
