@@ -71,24 +71,24 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	};
 	
 	// Override textEdited to automatically use {lns} instead of line breaks
-const originalTextEdited = textEdited;
-textEdited = function() {
-    // Convert line breaks to {lns} for tighter spacing
-    if (card.text && card.text.rules && card.text.rules.text) {
-        card.text.rules.text = card.text.rules.text
-            .replace(/\{line\}/g, '{lns}{down20}')  // Replace {line} first
-            .replace(/\n/g, '{lns}{down30}');       // Then replace newlines
-    }
-    
-    // Reset indent tracking for this frame pack since we're using {lns}
-    if (card.text && card.text.rules && card.text.rules.text) {
-        card.text.rules.text = card.text.rules.text
-            .replace(/\{indent\}([^{]*){lns}/g, '{indent}$1{/indent}{lns}') // Only add {/indent} if there's an active {indent}
-            .replace(/{\/indent}{lns}{down30}/g, '{/indent}{lns}{down40}'); // Use {down40} for indented lines
-    }
-    
-    originalTextEdited();
-};
+	const originalTextEdited = textEdited;
+	textEdited = function() {
+		// Convert line breaks to {lns} for tighter spacing
+		if (card.text && card.text.rules && card.text.rules.text) {
+			card.text.rules.text = card.text.rules.text
+				.replace(/\{line\}/g, '{lns}{down20}')  // Replace {line} first
+				.replace(/\n/g, '{lns}{down30}');       // Then replace newlines
+		}
+		
+		// Reset indent tracking for this frame pack since we're using {lns}
+		if (card.text && card.text.rules && card.text.rules.text) {
+			card.text.rules.text = card.text.rules.text
+				.replace(/\{indent\}([^{]*){lns}/g, '{indent}$1{/indent}{lns}') // Only add {/indent} if there's an active {indent}
+				.replace(/{\/indent}{lns}{down30}/g, '{/indent}{lns}{down40}'); // Use {down40} for indented lines
+		}
+		
+		originalTextEdited();
+	};
 }
 //loads available frames
 loadFramePack();
