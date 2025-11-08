@@ -76,7 +76,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		// Convert line breaks to {lns} for tighter spacing
 		if (card.text && card.text.rules && card.text.rules.text) {
 			card.text.rules.text = card.text.rules.text
-				.replace(/\{line\}/g, '{lns}{down20}')  // Replace {line} first
+				.replace(/\{line\}/g, '{lns}{down30}')  // Replace {line} first
 				.replace(/\n/g, '{lns}{down30}');       // Then replace newlines
 		}
 		
