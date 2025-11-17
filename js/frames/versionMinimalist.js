@@ -430,32 +430,41 @@ function updateTextPositions(rulesHeight) {
 	const setSymbolOffsetAboveDivider = 0.025;
 	const setSymbolY = dividerY - setSymbolOffsetAboveDivider;
 
-	// Update text positions
-	if (card.text.rules) {
-		card.text.rules.y = rulesY;
-		card.text.rules.height = rulesHeight;
-	}
-	if (card.text.type) card.text.type.y = typeY;
-	if (card.text.title) card.text.title.y = titleY;
-	if (card.text.mana) card.text.mana.y = manaY;
-	
-	// Update set symbol position
-	if (card.setSymbolBounds) {
-		card.setSymbolBounds.y = setSymbolY;
-		resetSetSymbol();
-	}
+    // Update text positions - all using 0.090 for x coordinate
+    if (card.text.rules) {
+        card.text.rules.y = rulesY;
+        card.text.rules.height = rulesHeight;
+    }
+    if (card.text.type) {
+        card.text.type.y = typeY;
+        card.text.type.x = 0.090;
+    }
+    if (card.text.title) {
+        card.text.title.y = titleY;
+        card.text.title.x = 0.090;
+    }
+    if (card.text.mana) {
+        card.text.mana.y = manaY;
+        card.text.mana.x = 0.090;
+    }
+    
+    // Update set symbol position
+    if (card.setSymbolBounds) {
+        card.setSymbolBounds.y = setSymbolY;
+        resetSetSymbol();
+    }
 
-	// Update background gradient
-	updateBackgroundGradient(manaY, rulesY);
-	
-	// Update divider
-	const dividerEnabled = getMinimalistSetting('divider-enabled');
-	if (dividerEnabled) {
-		drawDividerGradient();
-	}
-	
-	drawCard();
-	return { rulesY, typeY, titleY, manaY, setSymbolY };
+    // Update background gradient
+    updateBackgroundGradient(manaY, rulesY);
+    
+    // Update divider
+    const dividerEnabled = getMinimalistSetting('divider-enabled');
+    if (dividerEnabled) {
+        drawDividerGradient();
+    }
+    
+    drawCard();
+    return { rulesY, typeY, titleY, manaY, setSymbolY };
 }
 
 
