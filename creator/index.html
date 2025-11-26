@@ -314,7 +314,12 @@
 						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");' data-dropFunction='uploadArt' data-otherParams='autoFit'>
 						        </div>
 						        <div>
-									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
+									<input type='url' placeholder='Via URL' class='input margin-bottom' onchange='imageURL(this.value, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
+									<div class="local-art-dropdown flex">
+										<select id='select-local-art' onchange='onLocalArtSelect(this.value)' class='input'>
+										</select>
+										<div class="local-art-refresh input width-auto" onclick='loadLocalArtDropdown("/local_art/")'>Refresh</div>
+									</div>
 									<h5 class='input-description margin-bottom'></h5>
 										<label class='checkbox-container input'>Autofit when setting art
 											<input id='art-update-autofit' type='checkbox' onchange='setAutofit();'>
