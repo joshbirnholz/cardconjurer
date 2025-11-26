@@ -6370,12 +6370,22 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 		}
 	}
 	//art
-	document.querySelector('#art-name').value = cardToImport.name;
-	fetchScryfallData(cardToImport.name, artFromScryfall, 'art');
-	if (document.querySelector('#importAllPrints').checked) {
-		// document.querySelector('#art-index').value = document.querySelector('#import-index').value;
-		// changeArtIndex();
-	}
+	var artSearchName = cardToImport.original_name || cardToImport.name;
+	document.querySelector('#art-name').value = artSearchName;
+	// If importing all prints, modify the callback to select the correct art after data loads
+	const callback = document.querySelector('#importAllPrints').checked 
+		? (scryfallResponse) => {
+			artFromScryfall(scryfallResponse);
+			// Find and select the matching art
+			const illustrationID = cardToImport.illustration_id;
+			const index = scryfallArt.findIndex(card => card.illustration_id === illustrationID);
+			if (index >= 0) {
+				document.querySelector('#art-index').value = index;
+				changeArtIndex();
+			}
+		}
+		: artFromScryfall;
+	fetchScryfallData(artSearchName, callback, 'art');
 	//set symbol
 	if (!document.querySelector('#lockSetSymbolCode').checked) {
 		document.querySelector('#set-symbol-code').value = cardToImport.set;
@@ -6722,10 +6732,17 @@ function processScryfallCard(card, responseCards) {
 			face.rarity = card.rarity;
 			face.collector_number = card.collector_number;
 			face.lang = card.lang;
-      face.layout = card.layout; // Add layout from parent card
-			if (card.lang != 'en' || face.printed_name) {
+			face.layout = card.layout; // Add layout from parent card
+			face.illustration_id = card.illustration_id;
+			// Store original name before any modifications
+			face.original_name = face.name;
+			// Apply printed name if it exists
+			if (face.printed_name) {
+				face.name = face.printed_name;
+			}
+			// Apply other printed text for non-English cards
+			if (card.lang != 'en') {
 				face.oracle_text = face.printed_text || face.oracle_text;
-				face.name = face.printed_name || face.name;
 				face.type_line = face.printed_type_line || face.type_line;
 			}
 			responseCards.push(face);
@@ -6734,9 +6751,15 @@ function processScryfallCard(card, responseCards) {
 			}
 		});
 	} else {
-		if (card.lang != 'en' || card.printed_name) {
+		// Store original name before any modifications
+		card.original_name = card.name;
+		// Apply printed name if it exists
+		if (card.printed_name) {
+			card.name = card.printed_name;
+		}
+		// Apply other printed text for non-English cards
+		if (card.lang != 'en') {
 			card.oracle_text = card.printed_text || card.oracle_text;
-			card.name = card.printed_name || card.name;
 			card.type_line = card.printed_type_line || card.type_line;
 		}
 		// Ensure layout is set even for single-faced cards
