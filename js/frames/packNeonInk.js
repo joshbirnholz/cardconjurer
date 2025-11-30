@@ -23,21 +23,22 @@ availableFrames = [
 	{name:'Multicolored Power/Toughness', src:'/img/frames/neonInk/pt/m.png', bounds:bounds, masks:masks2},
     {name:'Artifact Power/Toughness', src:'/img/frames/neonInk/pt/a.png', bounds:bounds, masks:masks2},
 	{name:'Colorless Power/Toughness', src:'/img/frames/neonInk/pt/c.png', bounds:bounds, masks:masks2},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/neonInk/pt/v.png', bounds:bounds, masks:masks2},
 	{name:'Land Power/Toughness', src:'/img/frames/neonInk/pt/L.png', bounds:bounds, masks:masks2},
     {name:'Black Power/Toughness (Alt)', src:'/img/frames/neonInk/pt/b(Alt).png', bounds:bounds, masks:masks2},
 	
-	{name:'White Crown', src:'/img/frames/neonInk/crowns/w.png', bounds:bounds, complementary:30},
-	{name:'Blue Crown', src:'/img/frames/neonInk/crowns/u.png', bounds:bounds, complementary:30},
-	{name:'Black Crown', src:'/img/frames/neonInk/crowns/b.png', bounds:bounds, complementary:30},
-	{name:'Red Crown', src:'/img/frames/neonInk/crowns/r.png', bounds:bounds, complementary:30},
-	{name:'Green Crown', src:'/img/frames/neonInk/crowns/g.png', bounds:bounds, complementary:30},
-	{name:'Multicolored Crown', src:'/img/frames/neonInk/crowns/m.png', bounds:bounds, complementary:30},
-    {name:'Artifact Crown', src:'/img/frames/neonInk/crowns/a.png', bounds:bounds, complementary:30},
-	{name:'Colorless Crown', src:'/img/frames/neonInk/crowns/c.png', bounds:bounds, complementary:30},
-	{name:'Land Crown', src:'/img/frames/neonInk/crowns/L.png', bounds:bounds, complementary:30},
-    {name:'Black Crown (Alt)', src:'/img/frames/neonInk/crowns/b(Alt).png', bounds:bounds, complementary:30},
+	{name:'White Crown', src:'/img/frames/neonInk/crowns/w.png', bounds:bounds, complementary:31},
+	{name:'Blue Crown', src:'/img/frames/neonInk/crowns/u.png', bounds:bounds, complementary:31},
+	{name:'Black Crown', src:'/img/frames/neonInk/crowns/b.png', bounds:bounds, complementary:31},
+	{name:'Red Crown', src:'/img/frames/neonInk/crowns/r.png', bounds:bounds, complementary:31},
+	{name:'Green Crown', src:'/img/frames/neonInk/crowns/g.png', bounds:bounds, complementary:31},
+	{name:'Multicolored Crown', src:'/img/frames/neonInk/crowns/m.png', bounds:bounds, complementary:31},
+    {name:'Artifact Crown', src:'/img/frames/neonInk/crowns/a.png', bounds:bounds, complementary:31},
+	{name:'Colorless Crown', src:'/img/frames/neonInk/crowns/c.png', bounds:bounds, complementary:31},
+	{name:'Land Crown', src:'/img/frames/neonInk/crowns/L.png', bounds:bounds, complementary:31},
+    {name:'Black Crown (Alt)', src:'/img/frames/neonInk/crowns/b(Alt).png', bounds:bounds, complementary:31},
 	
-    {name:'Legend Crown Border Cover (Auto Erase Title Under Crown)', src:'/img/black.png', bounds:{x:0.0394, y:0.0355, width:0.9214, height:0.0177}, erase:true,  complementary:31},
+    {name:'Legend Crown Border Cover (Auto Erase Title Under Crown)', src:'/img/black.png', bounds:{x:0.0394, y:0.0355, width:0.9214, height:0.0177}, erase:true,  complementary:32},
     {name:'Legend Crown Lower Cutout (Auto Erase Title Under Crown)' , src:'/img/black.png', bounds:{x:0.0734, y:0.1136, width:0.8532, height:0.012}, erase:true}
 ];
 //disables/enables the "Load Frame Version" button

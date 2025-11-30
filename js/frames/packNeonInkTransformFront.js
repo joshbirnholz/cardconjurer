@@ -23,6 +23,7 @@ availableFrames = [
 	{name:'Multicolored Power/Toughness', src:'/img/frames/neonInk/pt/m.png', bounds:bounds, masks:masks2},
     {name:'Artifact Power/Toughness', src:'/img/frames/neonInk/pt/a.png', bounds:bounds, masks:masks2},
 	{name:'Colorless Power/Toughness', src:'/img/frames/neonInk/pt/c.png', bounds:bounds, masks:masks2},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/neonInk/pt/v.png', bounds:bounds, masks:masks2},
 	{name:'Land Power/Toughness', src:'/img/frames/neonInk/pt/L.png', bounds:bounds, masks:masks2},
     {name:'Black Power/Toughness (Alt)', src:'/img/frames/neonInk/pt/b(Alt).png', bounds:bounds, masks:masks2}
     
