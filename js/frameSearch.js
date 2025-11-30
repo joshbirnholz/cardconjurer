@@ -45,6 +45,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
+	['Neon Ink (TLA)', 'NeonInk'],
 	['Avatar Elemental (TLA)', 'Elemental'],
 	['Borderless Stellar Sights (EOS)', 'BorderlessStellarSights'],
 	['Poster Stellar Sights (EOS)', 'PosterStellarSights'],
@@ -167,6 +168,8 @@ const frameNames = new Map ([
 	['DFC Legend Crowns', 'TransformLegendCrowns'],
 	['DFC Floating Legend Crowns', 'TransformLegendCrownsFloating'],
 	['DFC Nickname Legend Crowns', 'TransformLegendCrownsNickname'],
+	['Neon Ink Transform (Front) (TLA)', 'NeonInkTransformFront'],
+	['Neon Ink Transform (Back) (TLA)', 'NeonInkTransformBack'],
 	//modal
 	['Modal DFC', 'ModalRegular'],
 	['Modal DFC Borderless', 'ModalBorderless'],
@@ -239,6 +242,9 @@ const frameNames = new Map ([
 	['Extended Art Invocations', 'AKHInvocationExtended'],
 	['Textless Inventions', 'TextlessInvention'],
 	['Textless Seventh', 'SeventhTextless'],
+	['Neon Ink Textless(TLA)', 'NeonInkTextless'],
+	['Neon Ink Transform Textless (Front) (TLA)', 'NeonInkTransformFrontTextless'],
+	['Neon Ink Transform Textless (Back) (TLA)', 'NeonInkTransformBackTextless'],
 	//custom
 	['Misc Custom Frames', 'MiscCustom'],
 	['Deck Covers', 'CustomDeckCover'],
