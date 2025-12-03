@@ -5257,6 +5257,446 @@ function downloadCard(alt = false, jpeg = false) {
 		}
 	}
 }
+async function downloadCardAsPSD() {
+    if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
+        notify('You must credit an artist before downloading!', 5);
+        return;
+    }
+
+    // Check if ag-psd library is loaded
+    if (typeof agPsd === 'undefined') {
+        notify('PSD library is still loading. Please try again in a moment.', 3);
+        console.error('ag-psd library not loaded');
+        return;
+    }
+
+    try {
+        // Use actual canvas dimensions which include margins
+        const psdWidth = cardCanvas.width;
+        const psdHeight = cardCanvas.height;
+        
+        // Define Y offset multipliers for each text field
+        const textOffsets = {
+            'title': 0.95,
+            'type': 1.1,
+            'rules': 0.999,
+            'pt': 0.80,
+            'mana': 0.8,
+            // Add more field names and their offsets as needed
+            'default': 0.95  // fallback for unlisted fields
+        };
+
+        // Define X offset for each text field (in pixels)
+        const textXOffsets = {
+            'pt': +10,  // Move PT left by 10 pixels
+            'default': 0  // no offset for other fields
+        };
+        
+        // Create PSD structure
+        const psd = {
+            width: psdWidth,
+            height: psdHeight,
+            children: []
+        };
+
+        // Add art layer
+        const artCanvas = document.createElement('canvas');
+        artCanvas.width = psdWidth;
+        artCanvas.height = psdHeight;
+        const artCtx = artCanvas.getContext('2d');
+        artCtx.save();
+        artCtx.translate(scaleX(card.artX), scaleY(card.artY));
+        artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
+        if (document.querySelector('#grayscale-art').checked) {
+            artCtx.filter = 'grayscale(1)';
+        }
+        artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
+        artCtx.restore();
+        
+        psd.children.push({
+            name: 'Art',
+            canvas: artCanvas
+        });
+
+        // Create frame group with all frame layers inside
+        const frameGroup = {
+            name: 'Frame',
+            children: []
+        };
+
+        // Add frame layers to the group (in reverse order to match display)
+        card.frames.slice().reverse().forEach((frame, index) => {
+            const frameCanvas = document.createElement('canvas');
+            frameCanvas.width = psdWidth;
+            frameCanvas.height = psdHeight;
+            const frameCtx = frameCanvas.getContext('2d');
+            
+            if (frame.image) {
+                const bounds = frame.bounds || {};
+                const ogBounds = frame.ogBounds || bounds;
+                const frameX = Math.round(scaleX(bounds.x || 0));
+                const frameY = Math.round(scaleY(bounds.y || 0));
+                const frameWidth = Math.round(scaleWidth(bounds.width || 1));
+                const frameHeight = Math.round(scaleHeight(bounds.height || 1));
+                
+                // Create temporary masking canvas
+                const tempMaskCanvas = document.createElement('canvas');
+                tempMaskCanvas.width = psdWidth;
+                tempMaskCanvas.height = psdHeight;
+                const tempMaskCtx = tempMaskCanvas.getContext('2d');
+                
+                // Draw black background for mask
+                tempMaskCtx.globalCompositeOperation = 'source-over';
+                tempMaskCtx.drawImage(black, 0, 0, psdWidth, psdHeight);
+                
+                // Apply all masks
+                tempMaskCtx.globalCompositeOperation = 'source-in';
+                frame.masks.forEach(mask => {
+                    tempMaskCtx.drawImage(mask.image, 
+                        scaleX((bounds.x || 0) - (ogBounds.x || 0) - ((ogBounds.x || 0) * ((bounds.width || 1) / (ogBounds.width || 1) - 1))), 
+                        scaleY((bounds.y || 0) - (ogBounds.y || 0) - ((ogBounds.y || 0) * ((bounds.height || 1) / (ogBounds.height || 1) - 1))), 
+                        scaleWidth((bounds.width || 1) / (ogBounds.width || 1)), 
+                        scaleHeight((bounds.height || 1) / (ogBounds.height || 1))
+                    );
+                });
+                
+                // Draw the frame image with mask applied
+                tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
+                
+                // Apply color overlay if needed
+                if (frame.colorOverlayCheck) {
+                    tempMaskCtx.globalCompositeOperation = 'source-in';
+                    tempMaskCtx.fillStyle = frame.colorOverlay;
+                    tempMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
+                }
+                
+                // Apply HSL adjustments if needed
+                if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
+                    hsl(tempMaskCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
+                }
+                
+                // Copy masked result to frame canvas
+                frameCtx.drawImage(tempMaskCanvas, 0, 0);
+            }
+            
+            frameGroup.children.push({
+                name: frame.name || `Frame ${index + 1}`,
+                canvas: frameCanvas,
+                opacity: (frame.opacity || 100) / 100,
+                blendMode: convertBlendMode(frame.mode)
+            });
+        });
+
+        // Add the frame group to the PSD
+        psd.children.push(frameGroup);
+
+        // Add watermark layer (after frames, before set symbol)
+        psd.children.push({
+            name: 'Watermark',
+            canvas: watermarkCanvas
+        });
+
+        // Create text group with individual text fields AND editable text layers
+        const textGroup = {
+            name: 'Text',
+            children: []
+        };
+
+        // Track flavor divider position during text rendering
+        let actualFlavorDividerY = null;
+        let actualFlavorDividerX = null;
+
+        // Render each text field separately with BOTH raster and editable text
+        for (const [key, textObject] of Object.entries(card.text)) {
+            // Check if this text has flavor text - we'll capture the actual position during rendering
+            const hasFlavorBar = textObject.text && (textObject.text.includes('{flavor}') || textObject.text.includes('{bar}'));
+
+            // Create raster text canvas (with mana symbols)
+            const textFieldCanvas = document.createElement('canvas');
+            textFieldCanvas.width = psdWidth;
+            textFieldCanvas.height = psdHeight;
+            const textFieldCtx = textFieldCanvas.getContext('2d');
+            
+            // Render this specific text field
+            await writeText(textObject, textFieldCtx);
+            
+            // If this field had a flavor bar, scan the canvas to find where it was actually drawn
+            if (hasFlavorBar && card.showsFlavorBar) {
+                const imageData = textFieldCtx.getImageData(0, 0, psdWidth, psdHeight);
+                const barSymbol = getManaSymbol('bar');
+                
+                // Scan for the flavor bar (look for non-transparent pixels in likely Y range)
+                const textBoxY = scaleY(textObject.y || 0);
+                const textBoxHeight = scaleHeight(textObject.height || 1);
+                const fontSize = scaleHeight(textObject.size || 0.038);
+                
+                // Search within the text box area
+                const searchStartY = textBoxY;
+                const searchEndY = textBoxY + textBoxHeight;
+                
+                // Look for a horizontal line of pixels (the bar is wide)
+                for (let y = searchStartY; y < searchEndY; y++) {
+                    let consecutivePixels = 0;
+                    let firstX = -1;
+                    
+                    for (let x = 0; x < psdWidth; x++) {
+                        const index = (y * psdWidth + x) * 4;
+                        const alpha = imageData.data[index + 3];
+                        
+                        if (alpha > 0) {
+                            if (firstX === -1) firstX = x;
+                            consecutivePixels++;
+                            
+                            // If we found a long horizontal line, this is likely our bar
+                            if (consecutivePixels > scaleWidth(0.5)) {
+                                actualFlavorDividerY = y;
+                                actualFlavorDividerX = firstX;
+                                break;
+                            }
+                        } else {
+                            consecutivePixels = 0;
+                            firstX = -1;
+                        }
+                    }
+                    
+                    if (actualFlavorDividerY !== null) break;
+                }
+            }
+            
+            textGroup.children.push({
+                name: textObject.name || key,
+                canvas: textFieldCanvas
+            });
+
+		// Add editable text layer if there's actual text content
+		if (textObject.text && textObject.text.trim()) {
+			// Clean text of special codes for PSD, preserving line breaks
+			let cleanText = textObject.text
+				.replace(/\{line\}/g, '\n')
+				.replace(/\{lns\}/g, '\n')
+				.replace(/\{[^}]+\}/g, '')
+				.trim();
+			
+			if (cleanText) {
+				// Convert normalized coordinates to actual pixel coordinates
+				const textBoxX = scaleX(textObject.x || 0);
+				const textBoxY = scaleY(textObject.y || 0);
+				const textBoxWidth = scaleWidth(textObject.width || 1);
+				const textBoxHeight = scaleHeight(textObject.height || 1);
+				const fontSize = scaleHeight(textObject.size || 0.038);
+				
+				// Parse color from textObject
+				let fillColor = { r: 0, g: 0, b: 0 }; // default black
+				const color = textObject.color || 'black';
+				if (color.startsWith('#')) {
+					const hex = color.slice(1);
+					fillColor = {
+						r: parseInt(hex.substr(0, 2), 16),
+						g: parseInt(hex.substr(2, 2), 16),
+						b: parseInt(hex.substr(4, 2), 16)
+					};
+				} else {
+					const colorMap = {
+						'black': { r: 0, g: 0, b: 0 },
+						'white': { r: 255, g: 255, b: 255 },
+						'red': { r: 255, g: 0, b: 0 },
+						'green': { r: 0, g: 255, b: 0 },
+						'blue': { r: 0, g: 0, b: 255 },
+					};
+					fillColor = colorMap[color.toLowerCase()] || { r: 0, g: 0, b: 0 };
+				}
+
+				// Get alignment
+				let alignment = 'left';
+				if (textObject.align === 'center') alignment = 'center';
+				else if (textObject.align === 'right') alignment = 'right';
+
+				// Map font names
+				const fontMap = {
+					'mplantin': 'MPlantin',
+					'mplantini': 'MPlantin-It',
+					'belerenb': 'Beleren-Bold',
+					'beleren': 'Beleren',
+					'belerenbsc': 'BelerenSmallCaps-Bold',
+					'matrix': 'MatrixBoldSmallCaps',
+					'matrixb': 'MatrixBoldSmallCaps',
+					'gothammedium': 'GothamMedium',
+					'gothambold': 'GothamBold',
+					'goudymedieval': 'GoudyMediaeval',
+				};
+				// Get the actual font being used, not just the mapped version
+				const actualFont = textObject.font || 'mplantin';
+				const fontName = fontMap[actualFont.toLowerCase()] || fontMap['mplantin'];
+
+				// Get the Y offset for this specific text field
+				const offsetMultiplier = textOffsets[key] || textOffsets['default'];
+				const baselineOffset = fontSize * offsetMultiplier;
+
+				// Get the X offset for this specific text field
+				const xOffset = textXOffsets[key] || textXOffsets['default'];
+
+				// Check if this is the rules text field
+			const isRulesText = key === 'rules' || (textObject.name && textObject.name.toLowerCase().includes('rules'));
+
+			if (isRulesText) {
+				// Create PARAGRAPH text layer for rules text
+				// Convert normalized coordinates (0-1) to actual pixels
+				const boxLeft = scaleX(textObject.x || 0);
+				const boxTop = scaleY(textObject.y || 0);
+				const boxRight = boxLeft + scaleWidth(textObject.width || 1);
+				const boxBottom = boxTop + scaleHeight(textObject.height || 1);
+				
+				textGroup.children.push({
+					name: (textObject.name || key) + ' (Editable)',
+					text: {
+						text: cleanText,
+						transform: [1, 0, 0, 1, 0, 0],
+						shapeType: 'box',  // This makes it a paragraph/area text
+						// Bounding box for the text area - [top, left, bottom, right]
+						boxBounds: [
+							boxTop,
+							boxLeft + xOffset,
+							boxBottom,
+							boxRight + xOffset
+						],
+						style: {
+							font: { name: fontName },
+							fontSize: fontSize,
+							fillColor: fillColor,
+							leading: fontSize * 1.2, // Line spacing
+						},
+						paragraphStyle: {
+							alignment: alignment,
+							firstLineIndent: 0,
+							startIndent: 0,
+							endIndent: 0,
+							spaceBefore: 0,
+							spaceAfter: 0,
+						}
+					},
+					top: boxTop,
+					left: boxLeft + xOffset,
+					bottom: boxBottom,
+					right: boxRight + xOffset
+				});
+				} else {
+					// Create POINT text layer for other text (title, type, pt, etc.)
+					textGroup.children.push({
+						name: (textObject.name || key) + ' (Editable)',
+						text: {
+							text: cleanText,
+							transform: [1, 0, 0, 1, textBoxX + xOffset, textBoxY + baselineOffset],
+							style: {
+								font: { name: fontName },
+								fontSize: fontSize,
+								fillColor: fillColor,
+							},
+							paragraphStyle: {
+								alignment: alignment
+							}
+						},
+						top: textBoxY,
+						left: textBoxX + xOffset,
+						bottom: textBoxY + textBoxHeight,
+						right: textBoxX + textBoxWidth + xOffset
+					});
+				}
+			}
+		}
+	}
+
+
+        // Add flavor divider if we found its actual position
+        if (actualFlavorDividerY !== null && card.showsFlavorBar) {
+            const dividerCanvas = document.createElement('canvas');
+            dividerCanvas.width = psdWidth;
+            dividerCanvas.height = psdHeight;
+            const dividerCtx = dividerCanvas.getContext('2d');
+            
+            // Get the flavor bar mana symbol
+            const barSymbol = getManaSymbol('bar');
+            if (barSymbol && barSymbol.image) {
+                const barWidth = scaleWidth(0.96);
+                const barHeight = scaleHeight(0.03);
+                const barX = (psdWidth - barWidth) / 2;
+                
+                // Use the actual Y position we found
+                dividerCtx.drawImage(barSymbol.image, barX, actualFlavorDividerY, barWidth, barHeight);
+            }
+            
+            textGroup.children.push({
+                name: 'Flavor Divider',
+                canvas: dividerCanvas
+            });
+        }
+
+        psd.children.push(textGroup);
+
+        // Add set symbol layer
+        if (card.setSymbolBounds && !setSymbol.src.includes('/img/blank.png')) {
+            const setSymbolCanvas = document.createElement('canvas');
+            setSymbolCanvas.width = psdWidth;
+            setSymbolCanvas.height = psdHeight;
+            const setSymbolCtx = setSymbolCanvas.getContext('2d');
+            
+            drawSetSymbol(setSymbolCtx, setSymbol, card.setSymbolBounds);
+            
+            psd.children.push({
+                name: 'Set Symbol',
+                canvas: setSymbolCanvas
+            });
+        }
+        
+        // Add bottom info layer
+        psd.children.push({
+            name: 'Bottom Info',
+            canvas: bottomInfoCanvas
+        });
+
+        // Write PSD file
+        const buffer = agPsd.writePsd(psd, { generateThumbnail: true });
+        
+        // Download
+        const blob = new Blob([buffer], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const downloadElement = document.createElement('a');
+        downloadElement.download = getCardName() + '.psd';
+        downloadElement.href = url;
+        document.body.appendChild(downloadElement);
+        downloadElement.click();
+        downloadElement.remove();
+        URL.revokeObjectURL(url);
+        
+        notify('PSD exported successfully with editable text!', 3);
+    } catch (error) {
+        console.error('PSD export failed:', error);
+        notify('PSD export failed. See console for details.', 5);
+    }
+		}
+
+
+// Helper function to convert Canvas blend modes to Photoshop blend modes
+function convertBlendMode(mode) {
+    const modeMap = {
+        'source-over': 'normal',
+        'multiply': 'multiply',
+        'screen': 'screen',
+        'overlay': 'overlay',
+        'darken': 'darken',
+        'lighten': 'lighten',
+        'color-dodge': 'color dodge',
+        'color-burn': 'color burn',
+        'hard-light': 'hard light',
+        'soft-light': 'soft light',
+        'difference': 'difference',
+        'exclusion': 'exclusion',
+        'hue': 'hue',
+        'saturation': 'saturation',
+        'color': 'color',
+        'luminosity': 'luminosity'
+    };
+    return modeMap[mode] || 'normal';
+}
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
 	console.log('Import card called with:', cardObject); // Log initial import data
