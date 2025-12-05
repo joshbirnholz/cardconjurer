@@ -6857,13 +6857,13 @@ function toggleHighRes() {
 
 function keepCardInView() {	
 	document.onscroll = () => {
-		if ( window.innerWidth >= 1250) {
+		if (window.innerHeight > previewCanvas.offsetHeight && window.innerWidth >= 1250) {
 			previewCanvas.style.marginTop = `${Math.max(window.scrollY - 141, 0)}px`;
 		}		
 	}
 	
 	window.onresize = () => {
-		if ( window.innerWidth < 1250) {
+		if (window.innerWidth < 1250) {
 			previewCanvas.style.marginTop = 0;
 		}
 	}
@@ -6954,3 +6954,4 @@ loadScript('/js/frames/groupStandard-3.js');
 loadAvailableCards();
 initDraggableArt();
 keepCardInView();
+
