@@ -6437,48 +6437,34 @@ function writeLayerInfo(tempBuffer, writer, psd, globalAlpha, options) {
         }
     }, true, options.psb);
 }
-function writeLayerMaskData(writer, _a, layerData) {
-    var mask = _a.mask;
+function writeLayerMaskData(writer, layer, layerData) {
+    var mask = layer.mask;
     writeSection(writer, 1, function () {
-        if (!mask)
-            return;
+        if (!mask) return;
+        
         var m = layerData.mask || {};
         writeInt32(writer, m.top);
         writeInt32(writer, m.left);
         writeInt32(writer, m.bottom);
         writeInt32(writer, m.right);
-        writeUint8(writer, mask.defaultColor);
-        var params = 0;
-        if (mask.userMaskDensity !== undefined)
-            params |= 1 /* UserMaskDensity */;
-        if (mask.userMaskFeather !== undefined)
-            params |= 2 /* UserMaskFeather */;
-        if (mask.vectorMaskDensity !== undefined)
-            params |= 4 /* VectorMaskDensity */;
-        if (mask.vectorMaskFeather !== undefined)
-            params |= 8 /* VectorMaskFeather */;
+        writeUint8(writer, mask.defaultColor || 255); // White default for erase mode
+        
         var flags = 0;
-        if (mask.disabled)
-            flags |= 2 /* LayerMaskDisabled */;
-        if (mask.positionRelativeToLayer)
-            flags |= 1 /* PositionRelativeToLayer */;
-        if (mask.fromVectorData)
-            flags |= 8 /* LayerMaskFromRenderingOtherData */;
-        if (params)
-            flags |= 16 /* MaskHasParametersAppliedToIt */;
+        if (mask.disabled) flags |= 2;
+        if (mask.positionRelativeToLayer) flags |= 1;
+        if (mask.fromVectorData) flags |= 8;
+        
         writeUint8(writer, flags);
-        if (params) {
-            writeUint8(writer, params);
-            if (mask.userMaskDensity !== undefined)
-                writeUint8(writer, Math.round(mask.userMaskDensity * 0xff));
-            if (mask.userMaskFeather !== undefined)
-                writeFloat64(writer, mask.userMaskFeather);
-            if (mask.vectorMaskDensity !== undefined)
-                writeUint8(writer, Math.round(mask.vectorMaskDensity * 0xff));
-            if (mask.vectorMaskFeather !== undefined)
-                writeFloat64(writer, mask.vectorMaskFeather);
+        
+        // FIX: Add proper mask parameters if gradient is involved
+        if (mask.userMaskDensity !== undefined || mask.userMaskFeather !== undefined) {
+            flags |= 16; // Parameters applied flag
+            writeUint8(writer, mask.userMaskDensity || 255);
+            writeUint8(writer, mask.userMaskFeather || 0);
+            writeUint8(writer, mask.vectorMaskDensity || 255);
+            writeUint8(writer, mask.vectorMaskFeather || 0);
         }
-        // TODO: handle rest of the fields
+        
         writeZeros(writer, 2);
     });
 }
@@ -6617,39 +6603,41 @@ function createThumbnail(psd) {
 function getChannels(tempBuffer, layer, background, options) {
     var layerData = getLayerChannels(tempBuffer, layer, background, options);
     var mask = layer.mask;
+    
     if (mask) {
-        var _a = mask.top, top_2 = _a === void 0 ? 0 : _a, _b = mask.left, left = _b === void 0 ? 0 : _b, _c = mask.right, right = _c === void 0 ? 0 : _c, _d = mask.bottom, bottom = _d === void 0 ? 0 : _d;
-        var _e = getLayerDimentions(mask), width = _e.width, height = _e.height;
+        var top = mask.top || 0;
+        var left = mask.left || 0;
+        var right = mask.right || 0;
+        var bottom = mask.bottom || 0;
+        var width = right - left;
+        var height = bottom - top;
         var imageData = mask.imageData;
+        
         if (!imageData && mask.canvas && width && height) {
             imageData = mask.canvas.getContext('2d').getImageData(0, 0, width, height);
         }
+        
         if (width && height && imageData) {
-            right = left + width;
-            bottom = top_2 + height;
-            var buffer = helpers_1.writeDataRLE(tempBuffer, imageData, width, height, [0], !!options.psb);
-            if (helpers_1.RAW_IMAGE_DATA && layer.maskDataRaw) {
-                // console.log('written raw layer image data');
-                buffer = layer.maskDataRaw;
-            }
-            layerData.mask = { top: top_2, left: left, right: right, bottom: bottom };
+            // FIX: Ensure proper compression and channel writing
+            var buffer = helpers_1.writeDataRLE(
+                tempBuffer, 
+                imageData, 
+                width, 
+                height, 
+                [3], // Alpha channel for mask
+                !!options.psb
+            );
+            
+            layerData.mask = { top: top, left: left, right: right, bottom: bottom };
             layerData.channels.push({
-                channelId: -2 /* UserMask */,
-                compression: 1 /* RleCompressed */,
+                channelId: -2, // User mask channel
+                compression: 1, // RLE compression
                 buffer: buffer,
                 length: 2 + buffer.length,
             });
         }
-        else {
-            layerData.mask = { top: 0, left: 0, right: 0, bottom: 0 };
-            layerData.channels.push({
-                channelId: -2 /* UserMask */,
-                compression: 0 /* RawData */,
-                buffer: new Uint8Array(0),
-                length: 0,
-            });
-        }
     }
+    
     return layerData;
 }
 function getLayerDimentions(_a) {
