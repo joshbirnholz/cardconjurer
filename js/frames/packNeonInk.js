@@ -61,10 +61,10 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//text
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', x:-15/2010, y:197/2814, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
-		title: {name:'Title', text:'', x:0.0854, y:163/2814, width:0.8292, height:0.0543, shadowX:-0.0015, shadowY:0.001, oneLine:true, font:'belerenb', size:0.0381, color:'white'},
-		type: {name:'Type (Left)', text:'', x:0.0854, y:2342/2814, width:0.8292, height:0.0543, shadowX:-0.0015, shadowY:0.001, oneLine:true, font:'belerenb', size:0.0324, color:'white'},
+		title: {name:'Title', text:'', x:0.0854, y:163/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, color:'white'},
+		type: {name:'Type (Left)', text:'', x:0.0854, y:2342/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324, color:'white'},
 		rules: {name:'Rules Text', text:'', x:0.086, y:1600/2814, width:0.828, height:0.2455, shadowX:-0.0015, shadowY:0.001, size:0.0362, color:'white'},
-		pt: {name:'Power/Toughness', text:'', x:0.7928, y:2526/2814, width:0.1367, height:0.0372, size:0.0372, shadowX:-0.0015, shadowY:0.001, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
+		pt: {name:'Power/Toughness', text:'', x:0.7928, y:2526/2814, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
 }
 //loads available frames
