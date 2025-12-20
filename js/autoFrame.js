@@ -204,6 +204,46 @@ function getFrameTypeConfig(frameType) {
 			supportsPT: true,
 			supportsStamp: false,
 			filterFrames: (frame) => frame.name.includes('Extension')
+		},
+		
+		// Japan Showcase frame
+		'JapanShowcase': {
+			group: 'Showcase-5',
+			makeFrameFunction: makeJapanShowcaseFrameByLetter,
+			supportsCrown: false,
+			supportsPT: true,
+			supportsStamp: true,
+			filterFrames: (frame) => frame.name.includes('Extension')
+		},
+		
+		// Vault (BIG) frame
+		'Vault': {
+			group: 'Showcase-5',
+			makeFrameFunction: makeVaultFrameByLetter,
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: true,
+			filterFrames: (frame) => frame.name.includes('Extension')
+		},
+		
+		// Adventure frame
+		'Adventure': {
+			group: 'Showcase-5',
+			makeFrameFunction: makeAdventureFrameByLetter,
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			filterFrames: (frame) => frame.name.includes('Extension')
+		},
+		
+		// Omen frame
+		'Omen': {
+			group: 'Showcase-5',
+			makeFrameFunction: makeOmenFrameByLetter,
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			filterFrames: (frame) => frame.name.includes('Extension')
 		}
 	};
 	
@@ -658,6 +698,188 @@ function getFrameLetterConfig(frameType) {
 				if (letter === 'ML') return 'L';
 				return letter;
 			}
+		},
+		'JapanShowcase': {
+			frameNames: {
+				...standardFrameNames,
+				'bAlt': 'Black (Alt)'  // Special alternate black variant
+			},
+			basePath: '/img/frames/m15/japanShowcase/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				pt: {x: 0.7771, y: 0.8876, width: 0.1720, height: 0.0593},
+				stamp: {x: 877/2010, y: 2537/2814, width: 0.1264, height: 0.0452}
+			},
+			pathBuilder: (letter, mask) => {
+				const colorLetter = letter === 'bAlt' ? 'bAlt' : letter.toLowerCase();
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				if (mask === 'Stamp') return `stamp/${colorLetter}.png`;
+				// Main frame - handle special case for land
+				if (letter === 'L') return 'Land.png';
+				return `${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				// Map mask names to Japan Showcase mask files
+				const maskMap = {
+					'Pinline': 'mask/MaskPinline.png',
+					'Title': 'mask/MaskTitle.png',
+					'Type': 'mask/MaskType.png',
+					'Rules': 'mask/MaskBottom.png',  // Rules uses the bottom mask
+					'Border Pinline': 'mask/MaskBottomPinline.png',
+					'Border': 'mask/MaskBottom.png',
+					'Frame': 'border.png',  // Frame uses the border.png
+					'PT Box Pinline': 'mask/MaskPtBoxPinline.png'
+				};
+				return maskMap[mask] || `mask/Mask${mask}.png`;
+			},
+			letterTransform: (letter, mask) => {
+				// Strip land indicator 'L' for all masks except main frame
+				if (letter.includes('L') && letter.length > 1 && mask) {
+					return letter[0];
+				}
+				// For vehicles, use artifact
+				if (letter === 'V') return 'A';
+				return letter;
+			}
+		},
+		'Vault': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/vault/',
+			bounds: {
+				crown: {x: -88/2010, y: -80/2814, width: 2187/2010, height: 2975/2814},
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				pt: {x: 0, y: 0, width: 1, height: 1},
+				stamp: {x: 835/2010, y: 2507/2814, width: 341/2010, height: 151/2814},
+				plainStamp: {x: 917/2010, y: 2563/2814, width: 0.0894, height: 0.0320}
+			},
+			pathBuilder: (letter, mask) => {
+				const colorLetter = letter.toLowerCase();
+				if (mask === 'Crown') return `crown/${colorLetter}.png`;
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				if (mask === 'Stamp') return `stamp/${colorLetter}.png`;
+				if (mask === 'Plain Stamp') return '../m15/holoStamps/stamp.png';
+				return `${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				// Map mask names to Vault mask files
+				const maskMap = {
+					'Pinline': 'masks/maskPinlines.png',
+					'Title': 'masks/maskTitle.png',
+					'Type': 'masks/maskType.png',
+					'Rules': 'masks/maskRules.png',
+					'Text Boxes': 'masks/maskTextBoxes.png',
+					'Frame': 'masks/maskFrame.png',
+					'Borderless': 'masks/maskBorderless.png',
+					'Bottom Frame': 'masks/maskBottomFrame.png',
+					'Bottom Frame No Border': 'masks/maskBottomFrameNoBorder.png',
+					'No Border': 'masks/maskNoBorder.png',
+					'Border': 'masks/maskBorder.png'
+				};
+				return maskMap[mask] || `masks/mask${mask}.png`;
+			},
+			letterTransform: (letter, mask) => {
+				// Strip land indicator 'L' for all masks except main frame
+				if (letter.includes('L') && letter.length > 1 && mask) {
+					return letter[0];
+				}
+				// For vehicles, use artifact
+				if (letter === 'V') return 'A';
+				return letter;
+			}
+		},
+		'Adventure': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventure/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				pt: {x: 0.7573, y: 0.8848, width: 0.188, height: 0.0733}
+			},
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				if (mask === 'Crown') return `../m15/crowns/m15Crown${letter}.png`;  // Use M15 crowns
+				if (mask === 'PT') return `../m15/regular/m15PT${letter}.png`;  // Use M15 PT boxes
+				// Handle Nyx style
+				if (style === 'Nyx') return `nyx/${colorLetter}.png`;
+				// Main frame
+				return `regular/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				// Map mask names to Adventure mask files
+				const maskMap = {
+					'Pinline': 'regular/pinline.svg',
+					'Title': '../m15/regular/m15MaskTitle.png',
+					'Type': '../m15/regular/m15MaskType.png',
+					'Rules': 'regular/book.svg',
+					'Rules (Left)': 'regular/bookLeft.png',
+					'Rules (Left, Multicolor)': 'regular/bookLeftMulticolor.png',
+					'Rules (Right)': 'regular/bookRight.png',
+					'Rules (Right, Multicolor)': 'regular/bookRightMulticolor.png',
+					'Frame': 'regular/maskFrame.png',
+					'Border': '../m15/regular/m15MaskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				// Strip land indicator 'L' for all masks except main frame
+				if (letter.includes('L') && letter.length > 1 && mask) {
+					return letter[0];
+				}
+				// For vehicles, use artifact
+				if (letter === 'V') return 'A';
+				return letter;
+			}
+		},
+		'Omen': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/omen/',
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				pt: {x: 0.7573, y: 0.8848, width: 0.188, height: 0.0733}
+			},
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				if (mask === 'Crown') return `../m15/crowns/m15Crown${letter}.png`;  // Use M15 crowns
+				if (mask === 'PT') return `../m15/regular/m15PT${letter}.png`;  // Use M15 PT boxes
+				// Handle special Omen masks - these are separate colored overlays
+				if (mask === 'Omen' || mask === 'Omen (Right Half)') {
+					// Return null to use maskPath instead
+					return null;
+				}
+				// Handle Nyx (enchantment) style
+				if (style === 'nyx') return `nyx/${colorLetter}.png`;
+				// Main frame
+				return `regular/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				// Map mask names to Omen mask files
+				const maskMap = {
+					'Pinline': 'regular/pinline.png',
+					'Title': '../m15/regular/m15MaskTitle.png',
+					'Type': '../m15/regular/m15MaskType.png',
+					'Rules': 'regular/rules.png',
+					'Frame': 'regular/maskFrame.png',
+					'Rules (Right Half)': 'regular/rulesRight.png',
+					'Omen': 'regular/omen.png',
+					'Omen (Right Half)': 'regular/omenRight.png',
+					'Border': '../m15/regular/m15MaskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				// Strip land indicator 'L' for all masks except main frame
+				if (letter.includes('L') && letter.length > 1 && mask) {
+					return letter[0];
+				}
+				// For vehicles, use artifact
+				if (letter === 'V') return 'A';
+				return letter;
+			}
 		}
 	};
 
@@ -791,6 +1013,16 @@ function makeFrameByLetterUnified(frameType, letter, mask = false, maskToRightHa
 		return frame;
 	}
 
+	// Plain Stamp: Base holo stamp for Vault frames
+	if (mask === "Plain Stamp") {
+		return {
+			'name': 'Plain Holo Stamp',
+			'src': config.basePath + config.pathBuilder(letter, mask, style, extraParam),
+			'masks': [],
+			'bounds': config.bounds.plainStamp
+		};
+	}
+
 	// Stamp Pinline: Color overlay mask for M15EighthUB multicolor stamps
 	// This applies a color tint through a pinline mask onto the base multicolor stamp
 	if (mask === "Stamp Pinline") {
@@ -816,6 +1048,22 @@ function makeFrameByLetterUnified(frameType, letter, mask = false, maskToRightHa
 			'src': config.basePath + config.pathBuilder(letter, mask, style, extraParam),
 			'masks': [],
 			'bounds': config.bounds.pt
+		};
+	}
+
+	// Omen Mask: Special overlay mask for Omen frame type - applies to colored base frame
+	if (mask === 'Omen' || mask === 'Omen (Right Half)') {
+		let maskPathResult = config.maskPath(mask);
+		if (!maskPathResult) return null;
+		
+		return {
+			'name': frameName + ' Frame',
+			'src': config.basePath + config.pathBuilder(letter, false, style, extraParam),
+			'masks': [{
+				'src': config.basePath + maskPathResult,
+				'name': mask
+			}],
+			'bounds': {x: 0, y: 0, width: 1, height: 1}
 		};
 	}
 
@@ -921,6 +1169,22 @@ function makeSeventhEditionFrameByLetter(letter, mask = false, maskToRightHalf =
 	return makeFrameByLetterUnified('SeventhEdition', letter, mask, maskToRightHalf, 'regular');
 }
 
+function makeJapanShowcaseFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('JapanShowcase', letter, mask, maskToRightHalf, style);
+}
+
+function makeVaultFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('Vault', letter, mask, maskToRightHalf, style);
+}
+
+function makeAdventureFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('Adventure', letter, mask, maskToRightHalf, style);
+}
+
+function makeOmenFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('Omen', letter, mask, maskToRightHalf, style);
+}
+
 
 // ============================================================================
 // SECTION 5: AUTO FRAME ORCHESTRATION
@@ -956,6 +1220,28 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 		frameType === 'Borderless' || frameType === 'BorderlessUB' ? 'Borderless' : 
 		frameType === 'Etched' ? 'Etched' : 
 		frameType === 'Seventh' ? 'Seventh' : undefined);
+	
+	// ----------------------------------------------------------------
+	// VAULT SPECIAL HANDLING FOR TWO-COLOR CARDS
+	// ----------------------------------------------------------------
+	// Vault frames use split colors (first color base + second color right half) for 2-color cards
+	if (frameType === 'Vault' && colors.length === 2) {
+		// Override frame to use split colors instead of multicolor
+		properties.frame = colors[0];
+		properties.frameRight = colors[1];
+		// Rules should also be split
+		properties.rules = colors[0];
+		properties.rulesRight = colors[1];
+	}
+	
+	// ----------------------------------------------------------------
+	// JAPAN SHOWCASE SPECIAL HANDLING FOR TWO-COLOR CARDS
+	// ----------------------------------------------------------------
+	// Japan Showcase PT boxes use the second color instead of multicolor for 2-color cards
+	if (frameType === 'JapanShowcase' && colors.length === 2) {
+		// Use second color for PT box
+		properties.pt = colors[1];
+	}
 	
 	// ----------------------------------------------------------------
 	// STYLE DETERMINATION
@@ -1013,13 +1299,15 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 			});
 		}
 		
-		// Crown border cover hides the border under the crown
-		let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
-		// Only Borderless uses erase blend mode to cut through layers below
-		if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
-			crownBorderCover.erase = true;
+		// Crown border cover hides the border under the crown (not used for Vault)
+		if (frameType !== 'Vault') {
+			let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
+			// Only Borderless uses erase blend mode to cut through layers below
+			if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
+				crownBorderCover.erase = true;
+			}
+			frames.push(crownBorderCover);
 		}
-		frames.push(crownBorderCover);
 	}
 	
 	// HOLO STAMPS (security stamps at bottom center)
@@ -1048,6 +1336,14 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 				// Single color non-land: use standard colored stamp
 				frames.push(config.makeFrameFunction(properties.pinline, "Stamp", false, style));
 			}
+		} else if (frameType === 'Vault') {
+			// Vault uses plain holo stamp as base, then adds colored stamp overlay
+			frames.push(config.makeFrameFunction('plain', 'Plain Stamp', false, style));
+			// Add colored stamp overlays
+			if (properties.pinlineRight) {
+				frames.push(config.makeFrameFunction(properties.pinlineRight, 'Stamp', true, style));
+			}
+			frames.push(config.makeFrameFunction(properties.pinline, "Stamp", false, style));
 		} else {
 			// Standard stamp handling for all other frame types
 			if (properties.pinlineRight) {
@@ -1084,6 +1380,77 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 		// Standard layer order for modern frames
 		frames.push(config.makeFrameFunction(properties.typeTitle, 'Type', false, style));
 		frames.push(config.makeFrameFunction(properties.typeTitle, 'Title', false, style));
+		
+		// ADVENTURE SPECIAL HANDLING - Rules (Left) for adventure side
+		if (frameType === 'Adventure') {
+			// Detect adventure cost colors from card.text.mana2 (adventure mana cost)
+			let adventureColors = [];
+			if (card.text.mana2 && card.text.mana2.text) {
+				let manaText = card.text.mana2.text.toUpperCase();
+				
+				// For hybrid mana (contains /), only use the second color
+				if (manaText.includes('/')) {
+					// Extract all colors from hybrid symbols like {G/W}, then use the second one
+					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
+					if (colors.length >= 2) adventureColors = [colors[1]];
+					else if (colors.length === 1) adventureColors = [colors[0]]; // fallback
+				} else {
+					// For non-hybrid mana, extract all unique colors
+					adventureColors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+				}
+			}
+			
+			if (adventureColors.length === 1) {
+				// Single color adventure: use Rules (Left) with that color
+				let rulesLeft = config.makeFrameFunction(adventureColors[0], 'Rules (Left)', false, style);
+				if (rulesLeft) frames.push(rulesLeft);
+			} else if (adventureColors.length >= 2) {
+				// Multicolor adventure: multicolor mask first, then base color on top
+				let rulesLeftMulti = config.makeFrameFunction(adventureColors[1], 'Rules (Left, Multicolor)', false, style);
+				if (rulesLeftMulti) frames.push(rulesLeftMulti);
+				let rulesLeft = config.makeFrameFunction(adventureColors[0], 'Rules (Left)', false, style);
+				if (rulesLeft) frames.push(rulesLeft);
+			}
+		}
+		
+		// OMEN SPECIAL HANDLING - Omen masks for omen side
+		if (frameType === 'Omen') {
+			// Detect omen cost colors from card.text.mana2 (omen mana cost)
+			let omenColors = [];
+			if (card.text.mana2 && card.text.mana2.text) {
+				let manaText = card.text.mana2.text.toUpperCase();
+				
+				// For hybrid mana (contains /), only use the second color
+				if (manaText.includes('/')) {
+					// Extract all colors from hybrid symbols like {G/W}, then use the second one
+					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
+					if (colors.length >= 2) omenColors = [colors[1]];
+					else if (colors.length === 1) omenColors = [colors[0]]; // fallback
+				} else {
+					// For non-hybrid mana, extract all unique colors
+					omenColors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+				}
+			}
+			
+			// If no colors detected, default to artifact
+			if (omenColors.length === 0) {
+				omenColors = ['A'];
+			}
+			
+			// Add Omen mask(s) based on color count
+			if (omenColors.length === 1) {
+				// Single color omen: use Omen mask with that color
+				let omen = config.makeFrameFunction(omenColors[0], 'Omen', false, style);
+				if (omen) frames.push(omen);
+			} else if (omenColors.length >= 2) {
+				// Multicolor omen: right half first, then base color on top
+				let omenRight = config.makeFrameFunction(omenColors[1], 'Omen (Right Half)', false, style);
+				if (omenRight) frames.push(omenRight);
+				let omen = config.makeFrameFunction(omenColors[0], 'Omen', false, style);
+				if (omen) frames.push(omen);
+			}
+		}
+		
 		if (properties.pinlineRight) {
 			frames.push(config.makeFrameFunction(properties.rulesRight, 'Rules', true, style));
 		}
