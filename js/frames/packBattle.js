@@ -12,7 +12,7 @@ availableFrames = [
 	{name:'Land Frame', src:'/img/frames/m15/battle/l.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/m15/battle/c.png', masks:masks},
 
-	{name:'Holo Stamp', src:'/img/frames/m15/battle/holostamp.png', bounds:{x:103/2100, y:657/1500, width:93/2100, height:186/1500}}
+	{name:'Holo Stamp', src:'/img/frames/m15/battle/holostamp.png', bounds:{x:878/2010, y:2549/2814, width:251/2010, height:128/2814}}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
@@ -20,41 +20,31 @@ document.querySelector('#loadFrameVersion').disabled = false;
 document.querySelector('#loadFrameVersion').onclick = async function() {
 	// Notification
 	//resets things so that every frame doesn't have to
-	var previousCardHeight = card.height
-	await resetCardIrregularities({canvas:[2814, 2010, 0, 0]});
+	await resetCardIrregularities();
 	replacementMasks = {'Right Half':'/img/frames/m15/battle/maskRightHalf.png'};
 	//sets card version
 	card.version = 'battle';
-	//rotation
-	card.landscape = true;
-	previewContext.translate(0, previousCardHeight / 2);
-	previewContext.rotate(-Math.PI / 2);
-	previewContext.scale(7/5, 5/7);
-	//art bounds
-	card.artBounds = {x:167/2100, y:60/1500, width:1873/2100, height:1371/1500};
+	//art bounds - rotation adjusted for portrait orientation
+	card.artBounds = {x:0.1689, y:0.1369, width:0.6820, height:0.6750, rotation:-90};
 	autoFitArt();
-	//set symbol bounds
-	card.setSymbolBounds = {x:1945/2100, y:925/1500, width:180/2100, height:86/1500, vertical:'center', horizontal: 'right'};
+	//set symbol bounds - rotation adjusted for portrait orientation
+	card.setSymbolBounds = {x:1242/2010, y:310/2814, width:0.12, height:0.0360, vertical:'center', horizontal: 'center', rotation:-90};
 	resetSetSymbol();
 	//watermark bounds
-	card.watermarkBounds = {x:0, y:0, width:0, height:0};
+	card.watermarkBounds = {x:0, y:0, width:0.1, height:0.1};
 	resetWatermark();
 	//text
 	loadTextOptions({
-		mana: {name:'Mana Cost', text:'', x: 0/2100, y:100/1500, width:1957/2100, height:71/1500, oneLine:true, size:((71/1638)*2100)/1500, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
-		title: {name:'Title', text:'', x:387/2100, y:81/1500, width:1547/2100, height:114/1500, oneLine:true, font:'belerenb', size:(0.0381*2100)/1500},
-		type: {name:'Type', text:'', x:268/2100, y:873/1500, width:1667/2100, height:114/1500, oneLine:true, font:'belerenb', size:(0.0324*2100)/1500},
-		rules: {name:'Rules Text', text:'', x:272/2100, y:1008/1500, width:1661/2100, height:414/1500, size:(0.0362*2100)/1500},
-		pt: {name:'Front PT', text:'', x:257/2100, y:1219/1500, width:1667/2100, height:43/1500, size:(0.0291*2100)/1500, oneLine:true, color:'#666', align:'right', font:'belerenbsc'},
-		pt2: {name:'Reverse PT', text:'', x:257/2100, y:1219/1500, width:1667/2100, height:43/1500, size:(0.0291*2100)/1500, oneLine:true, color:'#666', align:'right', font:'belerenbsc'},
-		defense: {name:'Defense', text:'', x:1920/2100, y:1320/1500, width:86/2100, height:123/1500, size:(0.0372*2100)/1500, color:'white', font:'belerenbsc', oneLine:true, align:'center'}
+		mana: {name:'Mana Cost', text:'', x:0.0677, y:0.4561, width:0.5367, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0, rotation:-90},
+		title: {name:'Title', text:'', x:0.052, y:0.8170, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
+		type: {name:'Type', text:'', x:0.58, y:0.8750, width:0.5367, height:0.0543, oneLine:true, font:'belerenb', size:0.0381, rotation:-90},
+		rules: {name:'Rules Text', text:'', x:1350/2010, y:2453/2814, width:3010/2814, height:410/2010, size:0.0362, rotation:-90},
+		pt2: {name:'Reverse PT', text:'', x:825/2010, y:285/2814, width:86/2100, height:1667/2814, size:0.0291, oneLine:true, color:'#666', align:'right', font:'belerenbsc', rotation:-90},
+		defense: {name:'Defense', text:'', x:1895/2100, y:245/2814, width:123/2100, height:86/2814, size:0.0372, color:'white', font:'belerenbsc', oneLine:true, align:'center', rotation:-90}
 	});
 	if (card.text.rules.text == '') {
 		card.text.rules.text = '{i}(As a Siege enters, choose an opponent to protect it. You and others can attack it. When it’s defeated, exile it, then cast it transformed.){/i}\n';
 	}
-	card.bottomInfoTranslate = {x: -123, y:-2814};
-	card.bottomInfoRotate = 90;
-	card.bottomInfoZoom = 1.4;
 }
 //loads available frames
 loadFramePack();
