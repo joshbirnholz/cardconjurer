@@ -10,7 +10,13 @@ async function initializeStationFrame(frameType = 'regular', preservedData = nul
 
 	// Preserve existing station data AND current colors if they exist (for reloads)
 	const existingStation = preservedData || card.station || {};
-	const preservedColors = existingStation.squares ? {
+	// Only preserve colors if NOT in auto mode (let auto mode regenerate from mana)
+	const isAutoMode = existingStation.colorModes?.[1] === 'auto' || !existingStation.colorModes?.[1];
+	
+	// Always preserve disableFirstAbility regardless of color mode
+	const preservedDisableFirstAbility = existingStation.disableFirstAbility;
+	
+	const preservedColors = (existingStation.squares && !isAutoMode) ? {
 		square1Color: existingStation.squares[1]?.color,
 		square2Color: existingStation.squares[2]?.color,
 		square1Opacity: existingStation.squares[1]?.opacity,
@@ -57,6 +63,11 @@ async function initializeStationFrame(frameType = 'regular', preservedData = nul
 			if (preservedColors.badgeValues) {
 				card.station.badgeValues = preservedColors.badgeValues;
 			}
+		}
+		
+		// Always restore disableFirstAbility regardless of color mode
+		if (preservedDisableFirstAbility !== undefined) {
+			card.station.disableFirstAbility = preservedDisableFirstAbility;
 		}
 	}
 	
@@ -138,6 +149,31 @@ if (!loadedVersions.includes('/js/frames/versionStation.js')) {
 	
 	// Just refresh the UI inputs
 	fixStationInputs(stationEdited);
+}
+
+// Override textEdited function to handle station-specific updates
+if (typeof window.originalTextEdited === 'undefined' && typeof textEdited === 'function') {
+	window.originalTextEdited = textEdited;
+	window.textEdited = function() {
+		// Call the original function
+		window.originalTextEdited();
+		
+		// Add station-specific handling
+		if (typeof updateBadgeImageFromMana === 'function' && typeof updatePTImageFromMana === 'function') {
+			const textKey = Object.keys(card.text)[selectedTextIndex];
+			if (textKey === 'mana') {
+				// Mana cost changed - update badge, PT image, and square colors
+				updateBadgeImageFromMana();
+				updatePTImageFromMana();
+				updateSquareColorsFromMana();
+				if (typeof stationEdited === 'function') stationEdited();
+			} else if (textKey === 'pt') {
+				// P/T changed - update text positions
+				if (typeof updateStationTextPositions === 'function') updateStationTextPositions();
+				if (typeof stationEdited === 'function') stationEdited();
+			}
+		}
+	};
 }
 
 //=====================================
@@ -420,7 +456,11 @@ function setupManaPropertyWatcher() {
 		return;
 	}
 	
+	// Save current value BEFORE deleting the property
 	let currentManaValue = card.text.mana.text || '';
+	
+	// Delete existing property so we can redefine it with getter/setter
+	delete card.text.mana.text;
 	
 	// Create a property descriptor that watches for changes
 	Object.defineProperty(card.text.mana, 'text', {
@@ -464,7 +504,11 @@ function setupPTPropertyWatcher() {
 		return;
 	}
 	
+	// Save current value BEFORE deleting the property
 	let currentPTValue = card.text.pt.text || '';
+	
+	// Delete existing property so we can redefine it with getter/setter
+	delete card.text.pt.text;
 	
 	// Create a property descriptor that watches for changes
 	Object.defineProperty(card.text.pt, 'text', {
@@ -1084,6 +1128,7 @@ function applyPresetColor(index, mode) {
 function resetStationSettings() {
 	const preservedBadgeValues = card.station?.badgeValues ? [...card.station.badgeValues] : ['', '', ''];
 	const preservedBorderlessOffset = card.station?.borderlessXOffset;
+	const preservedDisableFirstAbility = card.station?.disableFirstAbility;
 	
 	// Clear existing watchers before reset
 	clearStationListeners();
@@ -1091,6 +1136,11 @@ function resetStationSettings() {
 	delete card.station;
 	initializeStationDefaults();
 	card.station.badgeValues = preservedBadgeValues;
+	
+	// Restore disableFirstAbility
+	if (preservedDisableFirstAbility !== undefined) {
+		card.station.disableFirstAbility = preservedDisableFirstAbility;
+	}
 	
 	// Re-establish watchers after reset
 	setupStationListeners();
