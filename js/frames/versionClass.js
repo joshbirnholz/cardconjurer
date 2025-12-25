@@ -62,7 +62,7 @@ function classEdited() {
 	var lastY = card.text.level0c.y;
 	for (var i = 0; i < 4; i ++) {
 	 	var height = parseFloat((parseInt(document.querySelector('#class-height-' + i).value) / card.height).toFixed(4));
-	 	card.text['level' + i + 'c'].height = height || 1;
+	 	card.text['level' + i + 'c'].height = height || (i === 0 ? 1 : 0);
 	 	if (i > 0) {
 	 		if (height > 0) {
 				classCount ++;
