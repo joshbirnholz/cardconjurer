@@ -22,88 +22,14 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.version = 'stationBorderless';
 	card.onload = '/js/frames/versionStation.js';
 
-	// Initialize station canvases
-	sizeCanvas('stationPreFrame');
-	sizeCanvas('stationPostFrame');
-
-	// Preserve existing station data AND current colors if they exist (for reloads)
+	// Preserve existing station data
 	const existingStation = card.station || {};
-	const preservedColors = existingStation.squares ? {
-		square1Color: existingStation.squares[1]?.color,
-		square2Color: existingStation.squares[2]?.color,
-		square1Opacity: existingStation.squares[1]?.opacity,
-		square2Opacity: existingStation.squares[2]?.opacity,
-		colorModes: existingStation.colorModes || {},
-		badgeValues: existingStation.badgeValues || ['', '', '']
-	} : null;
 	
 	// Load the version file which will handle full initialization
-	loadScript('/js/frames/versionStation.js');
+	await loadScript('/js/frames/versionStation.js');
 
-	// Handle station data restoration and frame-specific settings
-	setTimeout(() => {
-		if (existingStation) {
-			// Merge the existing data back after version file loads
-			card.station = {
-				...card.station, // Keep the initialized defaults
-				...existingStation // Restore any existing customizations
-			};
-			
-			// Restore preserved colors if they existed
-			if (preservedColors && card.station.squares) {
-				if (preservedColors.square1Color) {
-					card.station.squares[1].color = preservedColors.square1Color;
-					card.station.squares[1].opacity = preservedColors.square1Opacity;
-				}
-				if (preservedColors.square2Color) {
-					card.station.squares[2].color = preservedColors.square2Color;
-					card.station.squares[2].opacity = preservedColors.square2Opacity;
-				}
-				if (preservedColors.colorModes) {
-					card.station.colorModes = preservedColors.colorModes;
-				}
-				if (preservedColors.badgeValues) {
-					card.station.badgeValues = preservedColors.badgeValues;
-				}
-			}
-		}
-		
-		// Apply borderless frame-specific settings
-		if (card.station && card.station.squares) {
-			card.station.borderlessXOffset = 1;
-			card.station.squares[1].width = 1712;
-			card.station.squares[1].x = 1;
-			card.station.squares[2].width = 1712;
-			card.station.squares[2].x = 1; //
-		}
-		
-		// Update UI to reflect correct values
-		if (typeof fixStationInputs === 'function') {
-			fixStationInputs();
-		}
-		
-		// Only reset if we don't have preserved colors
-		if (!preservedColors && typeof resetStationSettings === 'function') {
-			resetStationSettings();
-		}
-		
-		// Only trigger color updates if we don't have preserved colors
-		if (!preservedColors) {
-			// Trigger color updates based on current mana
-			if (card.text?.mana?.text && typeof updateBadgeImageFromMana === 'function') {
-				updateBadgeImageFromMana();
-				updatePTImageFromMana();
-				updateSquareColorsFromMana();
-			}
-		}
-		
-		// Trigger redraw
-		if (typeof stationEdited === 'function') {
-			setTimeout(() => {
-				stationEdited();
-			}, 50);
-		}
-	}, 50);
+	// Initialize station frame after script loads
+	await initializeStationFrame('borderless', existingStation);
 	
 	//art bounds
 	card.artBounds = {x:0, y:0, width:1, height:0.9224};
