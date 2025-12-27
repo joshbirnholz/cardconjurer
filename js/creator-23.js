@@ -5314,7 +5314,7 @@ async function downloadCardAsPSD() {
 			'default': 0  // no offset for other fields
 		};
 		
-		// Create PSD structure with proper metadata
+		// Create PSD structure with metadata
 		const psd = {
 			width: psdWidth,
 			height: psdHeight,
@@ -5324,7 +5324,7 @@ async function downloadCardAsPSD() {
 			children: []
 		};
 
-		// Add art layer only if art is loaded
+		// Add art layer only if art is present
 		if (!card.artSource.includes('/img/blank.png') && card.artZoom > 0) {
 			const artCanvas = document.createElement('canvas');
 			artCanvas.width = psdWidth;
@@ -5399,13 +5399,6 @@ async function downloadCardAsPSD() {
 						);
 					});
 					
-					// Apply color overlay if needed
-					if (frame.colorOverlayCheck) {
-						eraseCtx.globalCompositeOperation = 'source-atop';
-						eraseCtx.fillStyle = frame.colorOverlay;
-						eraseCtx.fillRect(0, 0, psdWidth, psdHeight);
-					}
-					
 					// Apply HSL adjustments if needed
 					if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
 						hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
@@ -5467,12 +5460,7 @@ async function downloadCardAsPSD() {
 				
 				tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
 				
-				if (frame.colorOverlayCheck) {
-					tempMaskCtx.globalCompositeOperation = 'source-in';
-					tempMaskCtx.fillStyle = frame.colorOverlay;
-					tempMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
-				}
-				
+				// Apply HSL adjustments if needed
 				if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
 					hsl(tempMaskCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
 				}
@@ -5498,7 +5486,8 @@ async function downloadCardAsPSD() {
 				name: layerName,
 				canvas: frameCanvas,
 				opacity: (frame.opacity || 100) / 100,
-				blendMode: convertBlendMode(frame.mode)
+				blendMode: convertBlendMode(frame.mode),
+				colorOverlay: frame.colorOverlayCheck ? frame.colorOverlay : null // Store for later
 			};
 			
 			// Categorize layers into PT, Crown, or regular frame layers
@@ -5608,25 +5597,71 @@ async function downloadCardAsPSD() {
 			};
 		});
 
+		// Helper function to add layer with optional color overlay clipping mask
+		const addLayerWithColorOverlay = (layer, targetArray) => {
+			// Add the base layer
+			targetArray.push({
+				name: layer.name,
+				canvas: layer.canvas,
+				left: 0,
+				top: 0,
+				right: psdWidth,
+				bottom: psdHeight,
+				opacity: layer.opacity,
+				blendMode: layer.blendMode,
+				mask: layer.mask
+			});
+			
+			// If there's a color overlay, add it as a clipping mask layer
+			if (layer.colorOverlay) {
+				const colorCanvas = document.createElement('canvas');
+				colorCanvas.width = psdWidth;
+				colorCanvas.height = psdHeight;
+				const colorCtx = colorCanvas.getContext('2d');
+				colorCtx.fillStyle = layer.colorOverlay;
+				colorCtx.fillRect(0, 0, psdWidth, psdHeight);
+				
+				targetArray.push({
+					name: layer.name + ' Color Overlay',
+					canvas: colorCanvas,
+					left: 0,
+					top: 0,
+					right: psdWidth,
+					bottom: psdHeight,
+					opacity: 1,
+					blendMode: 'normal',
+					clipping: true // This makes it clip to the layer below
+				});
+			}
+		};
+
 		// Add regular frame layers last
 		frameLayers.forEach(layer => {
-			frameGroup.children.push(layer);
+			addLayerWithColorOverlay(layer, frameGroup.children);
 		});
 
 		// Add PT layers group second if there are any
 		if (ptLayers.length > 0) {
+			const ptChildren = [];
+			ptLayers.forEach(layer => {
+				addLayerWithColorOverlay(layer, ptChildren);
+			});
 			frameGroup.children.push({
 				name: 'Power/Toughness Box',
-				children: ptLayers,
+				children: ptChildren,
 				opened: false
 			});
 		}
 
 		// Add Crown layers group first if there are any
 		if (crownLayers.length > 0) {
+			const crownChildren = [];
+			crownLayers.forEach(layer => {
+				addLayerWithColorOverlay(layer, crownChildren);
+			});
 			frameGroup.children.push({
 				name: 'Crowns',
-				children: crownLayers,
+				children: crownChildren,
 				opened: false
 			});
 		}
@@ -5715,14 +5750,12 @@ async function downloadCardAsPSD() {
 				// Look for a horizontal line of pixels (the bar is wide)
 				for (let y = searchStartY; y < searchEndY; y++) {
 					let consecutivePixels = 0;
-					let firstX = -1;
 					
 					for (let x = 0; x < psdWidth; x++) {
 						const index = (y * psdWidth + x) * 4;
 						const alpha = imageData.data[index + 3];
 						
 						if (alpha > 0) {
-							if (firstX === -1) firstX = x;
 							consecutivePixels++;
 							
 							// If we found a long horizontal line, this is likely our bar
@@ -5732,7 +5765,6 @@ async function downloadCardAsPSD() {
 							}
 						} else {
 							consecutivePixels = 0;
-							firstX = -1;
 						}
 					}
 					
@@ -5924,7 +5956,7 @@ async function downloadCardAsPSD() {
 
 		const textLayersChildren = [];
 
-		// Add static text layers group FIRST (will appear at bottom in PSD)
+		// Add static text layers group FIRST (will appear at bottom of text group in PSD)
 		if (staticTextLayers.length > 0) {
 			textLayersChildren.push({
 				name: 'Static Text Layers',
@@ -5933,13 +5965,13 @@ async function downloadCardAsPSD() {
 			});
 		}
 
-		// Add editable text layers group LAST if there are any (will appear at top in PSD)
+		// Add editable text layers group LAST if there are any (will appear at top of text group in PSD)
 		if (editableTextLayers.length > 0) {
 			textLayersChildren.push({
 				name: 'Editable Text',
 				children: editableTextLayers,
-				opened: false,
-				hidden: true
+				opened: false, // Collapsed by default
+				hidden: true // Hidden by default to avoid clutter
 			});
 		}
 
@@ -5990,7 +6022,7 @@ async function downloadCardAsPSD() {
 	const buffer = agPsd.writePsd(psd, { 
 		generateThumbnail: true,
 		trimImageData: false,
-		logMissingFeatures: false // Use debug mode if enabled
+		logMissingFeatures: false
 	});		if (!buffer || buffer.byteLength === 0) {
 			throw new Error('Failed to generate PSD buffer - buffer is empty');
 		}
@@ -6011,7 +6043,7 @@ async function downloadCardAsPSD() {
 		downloadElement.remove();
 		URL.revokeObjectURL(url);
 		
-	notify(`PSD exported successfully (${fileSizeMB}MB)`, 3);
+	notify(`PSD exported successfully (${fileSizeMB}MB in ${timeTaken}s)`, 3);
 } catch (error) {
 	// Provide more helpful error messages
 	let errorMessage = 'PSD export failed';
