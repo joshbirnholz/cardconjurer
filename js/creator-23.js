@@ -5257,66 +5257,128 @@ function downloadCard(alt = false, jpeg = false) {
 		}
 	}
 }
+// Initialize ag-psd canvas creator if needed
+if (typeof agPsd !== 'undefined' && agPsd.initializeCanvas) {
+	agPsd.initializeCanvas((width, height) => {
+		const canvas = document.createElement('canvas');
+		canvas.width = width;
+		canvas.height = height;
+		return canvas;
+	});
+}
+
+// Helper to parse color string to RGB object
+function parseColorToRGB(color) {
+	if (color.startsWith('#')) {
+		const hex = color.slice(1);
+		return {
+			r: parseInt(hex.substr(0, 2), 16),
+			g: parseInt(hex.substr(2, 2), 16),
+			b: parseInt(hex.substr(4, 2), 16)
+		};
+	}
+	const colorMap = {
+		'black': { r: 0, g: 0, b: 0 },
+		'white': { r: 255, g: 255, b: 255 },
+		'red': { r: 255, g: 0, b: 0 },
+		'blue': { r: 0, g: 0, b: 255 },
+	};
+	return colorMap[color] || { r: 0, g: 0, b: 0 };
+}
+
+// Helper function to check memory availability for large exports
+function checkPSDMemoryAvailability(width, height) {
+	const estimatedSize = width * height * 4; // RGBA bytes
+	const estimatedMB = estimatedSize / (1024 * 1024);
+	
+	if (estimatedMB > 100) {
+		console.warn(`Large PSD detected: ~${estimatedMB.toFixed(2)}MB uncompressed`);
+		return confirm(
+			`This will create a large PSD file (~${estimatedMB.toFixed(2)}MB uncompressed).\n\n` +
+			`Continue with export? This may take a moment.`
+		);
+	}
+	return true;
+}
+
 async function downloadCardAsPSD() {
-    if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
-        notify('You must credit an artist before downloading!', 5);
-        return;
-    }
+	const startTime = performance.now();
+	const debugging = false; // Set to true for verbose console output
+	
+	if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
+		notify('You must credit an artist before downloading!', 5);
+		return;
+	}
 
-    // Check if ag-psd library is loaded
-    if (typeof agPsd === 'undefined') {
-        notify('PSD library is still loading. Please try again in a moment.', 3);
-        console.error('ag-psd library not loaded');
-        return;
-    }
+	// Check if ag-psd library is loaded
+	if (typeof agPsd === 'undefined') {
+		notify('PSD export failed: Library still loading. Try again in a moment.', 3);
+		console.error('ag-psd library not loaded');
+		return;
+	}
 
-    try {
-        // Use actual canvas dimensions which include margins
-        const psdWidth = cardCanvas.width;
-        const psdHeight = cardCanvas.height;
-        
-        // Define Y offset multipliers for each text field
-        const textOffsets = {
-            'title': 0.95,
-            'type': 1.1,
-            'rules': 0.999,
-            'pt': 0.80,
-            'mana': 0.8,
-            // Add more field names and their offsets as needed
-            'default': 0.95  // fallback for unlisted fields
-        };
+	try {
+		// Use actual canvas dimensions which include margins
+		const psdWidth = cardCanvas.width;
+		const psdHeight = cardCanvas.height;
+		
+		// Check memory availability for large files
+		if (!checkPSDMemoryAvailability(psdWidth, psdHeight)) {
+			notify('PSD export cancelled by user', 3);
+			return;
+		}
+		
+		// Define Y offset multipliers for each text field
+		const textOffsets = {
+			'title': 0.95,
+			'type': 1.1,
+			'rules': 0.999,
+			'pt': 0.80,
+			'mana': 0.8,
+			// Add more field names and their offsets as needed
+			'default': 0.95  // fallback for unlisted fields
+		};
 
-        // Define X offset for each text field (in pixels)
-        const textXOffsets = {
-            'pt': +10,  // Move PT left by 10 pixels
-            'default': 0  // no offset for other fields
-        };
-        
-        // Create PSD structure
-        const psd = {
-            width: psdWidth,
-            height: psdHeight,
-            children: []
-        };
+		// Define X offset for each text field (in pixels)
+		const textXOffsets = {
+			'pt': +10,  // Move PT left by 10 pixels
+			'default': 0  // no offset for other fields
+		};
+		
+		// Create PSD structure with proper metadata
+		const psd = {
+			width: psdWidth,
+			height: psdHeight,
+			channels: 3,  // RGB
+			bitsPerChannel: 8,
+			colorMode: 3, // ColorMode.RGB (from ag-psd)
+			children: []
+		};
 
-        // Add art layer
-        const artCanvas = document.createElement('canvas');
-        artCanvas.width = psdWidth;
-        artCanvas.height = psdHeight;
-        const artCtx = artCanvas.getContext('2d');
-        artCtx.save();
-        artCtx.translate(scaleX(card.artX), scaleY(card.artY));
-        artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
-        if (document.querySelector('#grayscale-art').checked) {
-            artCtx.filter = 'grayscale(1)';
-        }
-        artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
-        artCtx.restore();
-        
-        psd.children.push({
-            name: 'Art',
-            canvas: artCanvas
-        });
+		// Add art layer
+		const artCanvas = document.createElement('canvas');
+		artCanvas.width = psdWidth;
+		artCanvas.height = psdHeight;
+		const artCtx = artCanvas.getContext('2d');
+		artCtx.save();
+		artCtx.translate(scaleX(card.artX), scaleY(card.artY));
+		artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
+		if (document.querySelector('#grayscale-art').checked) {
+			artCtx.filter = 'grayscale(1)';
+		}
+		artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
+		artCtx.restore();
+		
+		psd.children.push({
+			name: 'Art',
+			canvas: artCanvas,
+			left: 0,
+			top: 0,
+			right: psdWidth,
+			bottom: psdHeight,
+			blendMode: 'normal',
+			opacity: 1
+		});
 
 		// Create frame group with all frame layers inside
 		const frameGroup = {
@@ -5331,7 +5393,7 @@ async function downloadCardAsPSD() {
 		const eraseMasks = [];
 		const ptLayers = [];
 		const crownLayers = [];
-
+			
 		// First pass: create all frame layers and identify erase layers
 		for (let index = 0; index < reversedFrames.length; index++) {
 			const frame = reversedFrames[index];
@@ -5351,15 +5413,14 @@ async function downloadCardAsPSD() {
 					const frameWidth = Math.round(scaleWidth(bounds.width || 1));
 					const frameHeight = Math.round(scaleHeight(bounds.height || 1));
 					
-					const tempMaskCanvas = document.createElement('canvas');
-					tempMaskCanvas.width = psdWidth;
-					tempMaskCanvas.height = psdHeight;
-					const tempMaskCtx = tempMaskCanvas.getContext('2d');
+					// Draw the frame image first
+					eraseCtx.globalCompositeOperation = 'source-over';
+					eraseCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
 					
-					tempMaskCtx.drawImage(black, 0, 0, psdWidth, psdHeight);
-					tempMaskCtx.globalCompositeOperation = 'source-in';
+					// Apply masks
+					eraseCtx.globalCompositeOperation = 'destination-in';
 					frame.masks.forEach(mask => {
-						tempMaskCtx.drawImage(mask.image, 
+						eraseCtx.drawImage(mask.image, 
 							scaleX((bounds.x || 0) - (ogBounds.x || 0) - ((ogBounds.x || 0) * ((bounds.width || 1) / (ogBounds.width || 1) - 1))), 
 							scaleY((bounds.y || 0) - (ogBounds.y || 0) - ((ogBounds.y || 0) * ((bounds.height || 1) / (ogBounds.height || 1) - 1))), 
 							scaleWidth((bounds.width || 1) / (ogBounds.width || 1)), 
@@ -5367,14 +5428,38 @@ async function downloadCardAsPSD() {
 						);
 					});
 					
-					tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
-					eraseCtx.drawImage(tempMaskCanvas, 0, 0);
+					// Apply color overlay if needed
+					if (frame.colorOverlayCheck) {
+						eraseCtx.globalCompositeOperation = 'source-atop';
+						eraseCtx.fillStyle = frame.colorOverlay;
+						eraseCtx.fillRect(0, 0, psdWidth, psdHeight);
+					}
+					
+					// Apply HSL adjustments if needed
+					if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
+						hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
+					}
+					
+					// Convert alpha to inverted grayscale mask (destination-out behavior)
+					// Invert opacity: opaque areas (alpha=255) become black (hide), transparent becomes white (show)
+					const maskImageData = eraseCtx.getImageData(0, 0, psdWidth, psdHeight);
+					const maskPixels = maskImageData.data;
+					
+					for (let i = 0; i < maskPixels.length; i += 4) {
+						const maskValue = 255 - maskPixels[i + 3]; // Invert alpha
+						maskPixels[i] = maskPixels[i + 1] = maskPixels[i + 2] = maskValue;
+						maskPixels[i + 3] = 255;
+					}
+					
+					eraseCtx.putImageData(maskImageData, 0, 0);
+					if (debugging) console.log(`Erase mask ${index} created`);
 					
 					eraseMasks.push({
 						index: index,
 						canvas: eraseCanvas
 					});
 				}
+				// IMPORTANT: Skip creating a regular frame layer for erase frames
 				continue;
 			}
 			
@@ -5458,40 +5543,120 @@ async function downloadCardAsPSD() {
 
 		// Second pass: apply erase masks to all layers before them
 		const allLayers = [...ptLayers, ...crownLayers, ...frameLayers];
+		console.log(`Total layers: ${allLayers.length}, Total erase masks: ${eraseMasks.length}`);
+
 		allLayers.forEach(layer => {
-			// Find all erase layers that come after this layer (higher index = above in stack)
+			// Only get erase masks that come AFTER this layer (higher index = drawn later = erases this layer)
 			const applicableEraseMasks = eraseMasks.filter(erase => erase.index > layer.index);
 			
-			if (applicableEraseMasks.length > 0) {
-				// Create combined mask from all applicable erase layers
-				const combinedMaskCanvas = document.createElement('canvas');
-				combinedMaskCanvas.width = psdWidth;
-				combinedMaskCanvas.height = psdHeight;
-				const combinedMaskCtx = combinedMaskCanvas.getContext('2d');
-				
-				// Start with white (fully visible)
-				combinedMaskCtx.fillStyle = 'white';
-				combinedMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
-				
-				// Apply each erase layer
-				applicableEraseMasks.forEach(erase => {
-					combinedMaskCtx.globalCompositeOperation = 'destination-out';
-					combinedMaskCtx.drawImage(erase.canvas, 0, 0);
-					combinedMaskCtx.globalCompositeOperation = 'source-over';
-				});
-				
-				// Apply the mask to this layer
-				const maskImageData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
-				layer.mask = {
-					top: 0,
-					left: 0,
-					bottom: psdHeight,
-					right: psdWidth,
-					defaultColor: 255,
-					imageData: maskImageData,
-					disabled: false
-				};
+			if (applicableEraseMasks.length === 0) {
+				console.log(`Layer "${layer.name}" (index ${layer.index}): No erase masks to apply`);
+				return; // Skip layers with no applicable erase masks
 			}
+			
+			console.log(`Layer "${layer.name}" (index ${layer.index}): ${applicableEraseMasks.length} applicable erase masks`);
+			
+			// Check if this layer would actually be affected by looking at overlap
+			// between layer content and erase masks
+			const layerCtx = layer.canvas.getContext('2d');
+			const layerData = layerCtx.getImageData(0, 0, psdWidth, psdHeight);
+			const layerPixels = layerData.data;
+			
+			// Quick check: does this layer have any non-transparent pixels?
+			let layerHasContent = false;
+			for (let i = 3; i < layerPixels.length; i += 4) {
+				if (layerPixels[i] > 0) {
+					layerHasContent = true;
+					break;
+				}
+			}
+			
+			if (!layerHasContent) {
+				console.log(`  - Layer has no content, skipping mask`);
+				return; // Skip empty layers
+			}
+			
+			// Combine all applicable erase masks
+			const combinedMaskCanvas = document.createElement('canvas');
+			combinedMaskCanvas.width = psdWidth;
+			combinedMaskCanvas.height = psdHeight;
+			const combinedMaskCtx = combinedMaskCanvas.getContext('2d');
+			
+			// Start with white (fully visible)
+			combinedMaskCtx.fillStyle = 'white';
+			combinedMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
+			
+			// Apply each erase layer
+			applicableEraseMasks.forEach(erase => {
+				// Get the erase mask data (already inverted during creation)
+				const eraseMaskData = erase.canvas.getContext('2d').getImageData(0, 0, psdWidth, psdHeight);
+				const erasePixels = eraseMaskData.data;
+				
+				// Get current combined mask data
+				const combinedData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
+				const combinedPixels = combinedData.data;
+				
+				// Multiply the masks together
+				// The erase mask is already inverted, so:
+				// White (255) in erase mask = area should stay visible (no erase)
+				// Black (0) in erase mask = area should be hidden (erased)
+				for (let i = 0; i < combinedPixels.length; i += 4) {
+					const eraseValue = erasePixels[i];
+					const currentValue = combinedPixels[i];
+					
+					// Multiply the values (both normalized to 0-1 range)
+					const finalValue = (currentValue / 255) * (eraseValue / 255) * 255;
+					
+					combinedPixels[i] = finalValue;
+					combinedPixels[i + 1] = finalValue;
+					combinedPixels[i + 2] = finalValue;
+					// Keep alpha at 255
+				}
+				
+				combinedMaskCtx.putImageData(combinedData, 0, 0);
+			});
+			
+			// Convert combined mask to ImageData for PSD
+			const finalMaskData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
+			const finalMaskPixels = finalMaskData.data;
+			
+			// Check if mask actually affects this layer (any visible pixel with mask < 255)
+			let maskWouldAffectLayer = false;
+			for (let i = 0; i < finalMaskPixels.length; i += 4) {
+				if (layerPixels[i + 3] > 0 && finalMaskPixels[i] < 255) {
+					maskWouldAffectLayer = true;
+					break;
+				}
+			}
+			
+			if (!maskWouldAffectLayer) {
+				if (debugging) console.log(`  - Mask doesn't affect "${layer.name}", skipping`);
+				return;
+			}
+			
+			if (debugging) {
+				const sampleIdx = Math.floor(finalMaskPixels.length / 8) * 4;
+				console.log(`  Layer "${layer.name}": mask sample = ${finalMaskPixels[sampleIdx]}`);
+			}
+			
+			// Use full layer bounds for mask (optimization disabled for compatibility)
+			const maskBounds = { top: 0, left: 0, bottom: psdHeight, right: psdWidth };
+			
+			if (debugging) {
+				console.log(`  Applying mask to "${layer.name}": bounds (${maskBounds.top},${maskBounds.left})`);
+			}
+			
+			layer.mask = {
+				top: maskBounds.top,
+				left: maskBounds.left,
+				bottom: maskBounds.bottom,
+				right: maskBounds.right,
+				defaultColor: 255,
+				imageData: finalMaskData,
+				disabled: false,
+				positionRelativeToLayer: false,
+				fromVectorData: false
+			};
 		});
 
 		// Add regular frame layers last
@@ -5523,7 +5688,13 @@ async function downloadCardAsPSD() {
 		// Add watermark layer (after frames, before set symbol)
 		psd.children.push({
 			name: 'Watermark',
-			canvas: watermarkCanvas
+			canvas: watermarkCanvas,
+			left: 0,
+			top: 0,
+			right: psdWidth,
+			bottom: psdHeight,
+			blendMode: 'normal',
+			opacity: card.watermarkOpacity || 0.4
 		});
 
 		// Create text group with individual text fields AND editable text layers
@@ -5603,8 +5774,7 @@ async function downloadCardAsPSD() {
 				canvas: textFieldCanvas
 			});
 
-			// Add editable text layer only if there's actual text content
-			// Clean text of special codes for PSD, preserving line breaks
+			// Add editable text layer if there's actual text content
 			let cleanText = textObject.text
 				.replace(/\{line\}/g, '\n')
 				.replace(/\{lns\}/g, '\n')
@@ -5612,33 +5782,12 @@ async function downloadCardAsPSD() {
 				.trim();
 			
 			if (cleanText) {
-				// Convert normalized coordinates to actual pixel coordinates
 				const textBoxX = scaleX(textObject.x || 0);
 				const textBoxY = scaleY(textObject.y || 0);
 				const textBoxWidth = scaleWidth(textObject.width || 1);
 				const textBoxHeight = scaleHeight(textObject.height || 1);
 				const fontSize = scaleHeight(textObject.size || 0.038);
-				
-				// Parse color from textObject
-				let fillColor = { r: 0, g: 0, b: 0 }; // default black
-				const color = textObject.color || 'black';
-				if (color.startsWith('#')) {
-					const hex = color.slice(1);
-					fillColor = {
-						r: parseInt(hex.substr(0, 2), 16),
-						g: parseInt(hex.substr(2, 2), 16),
-						b: parseInt(hex.substr(4, 2), 16)
-					};
-				} else {
-					const colorMap = {
-						'black': { r: 0, g: 0, b: 0 },
-						'white': { r: 255, g: 255, b: 255 },
-						'red': { r: 255, g: 0, b: 0 },
-						'green': { r: 0, g: 255, b: 0 },
-						'blue': { r: 0, g: 0, b: 255 },
-					};
-					fillColor = colorMap[color.toLowerCase()] || { r: 0, g: 0, b: 0 };
-				}
+				const fillColor = parseColorToRGB(textObject.color || 'black');
 
 				// Get alignment
 				let alignment = 'left';
@@ -5674,24 +5823,26 @@ async function downloadCardAsPSD() {
 
 			if (isRulesText) {
 				// Create PARAGRAPH text layer for rules text
-				// Convert normalized coordinates (0-1) to actual pixels
+				// Use the same positioning as the guideline blue rectangles
 				const boxLeft = scaleX(textObject.x || 0);
 				const boxTop = scaleY(textObject.y || 0);
-				const boxRight = boxLeft + scaleWidth(textObject.width || 1);
-				const boxBottom = boxTop + scaleHeight(textObject.height || 1);
+				const boxWidth = scaleWidth(textObject.width || 1);
+				const boxHeight = scaleHeight(textObject.height || 1);
 				
 				textGroup.children.push({
 					name: (textObject.name || key) + ' (Editable)',
 					text: {
 						text: cleanText,
-						transform: [1, 0, 0, 1, 0, 0],
+						// Transform positions the text box
+						transform: [1, 0, 0, 1, boxLeft + xOffset, boxTop],
 						shapeType: 'box',  // This makes it a paragraph/area text
 						// Bounding box for the text area - [top, left, bottom, right]
+						// These are RELATIVE to the transform position
 						boxBounds: [
-							boxTop,
-							boxLeft + xOffset,
-							boxBottom,
-							boxRight + xOffset
+							0,
+							0,
+							boxWidth,
+							boxHeight
 						],
 						style: {
 							font: { name: fontName },
@@ -5710,8 +5861,8 @@ async function downloadCardAsPSD() {
 					},
 					top: boxTop,
 					left: boxLeft + xOffset,
-					bottom: boxBottom,
-					right: boxRight + xOffset
+					bottom: boxTop + boxHeight,
+					right: boxLeft + boxWidth + xOffset
 				});
 				} else {
 					// Create POINT text layer for other text (title, type, pt, etc.)
@@ -5738,8 +5889,6 @@ async function downloadCardAsPSD() {
 			}
 		}
 	
-
-
 		// Add flavor divider if we found its actual position
 		if (actualFlavorDividerY !== null && card.showsFlavorBar) {
 			const dividerCanvas = document.createElement('canvas');
@@ -5818,18 +5967,45 @@ async function downloadCardAsPSD() {
 			
 			psd.children.push({
 				name: 'Set Symbol',
-				canvas: setSymbolCanvas
+				canvas: setSymbolCanvas,
+				left: 0,
+				top: 0,
+				right: psdWidth,
+				bottom: psdHeight,
+				blendMode: 'normal',
+				opacity: 1
 			});
 		}
 		
 		// Add bottom info layer
 		psd.children.push({
 			name: 'Bottom Info',
-			canvas: bottomInfoCanvas
+			canvas: bottomInfoCanvas,
+			left: 0,
+			top: 0,
+			right: psdWidth,
+			bottom: psdHeight,
+			blendMode: 'normal',
+			opacity: 1
 		});
 
 		// Write PSD file
-		const buffer = agPsd.writePsd(psd, { generateThumbnail: true });
+		console.log(`Writing PSD: ${psdWidth}x${psdHeight}, ${psd.children.length} layers`);
+		
+		const buffer = agPsd.writePsd(psd, { 
+			generateThumbnail: true,
+			trimImageData: false,
+			logMissingFeatures: debugging // Use debug mode if enabled
+		});
+		
+		if (!buffer || buffer.byteLength === 0) {
+			throw new Error('Failed to generate PSD buffer - buffer is empty');
+		}
+		
+		const endTime = performance.now();
+		const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+		const fileSizeMB = (buffer.byteLength / (1024 * 1024)).toFixed(2);
+		console.log(`PSD generation completed in ${timeTaken}s, file size: ${fileSizeMB}MB`);
 		
 		// Download
 		const blob = new Blob([buffer], { type: 'application/octet-stream' });
@@ -5842,13 +6018,28 @@ async function downloadCardAsPSD() {
 		downloadElement.remove();
 		URL.revokeObjectURL(url);
 		
-		notify('PSD exported successfully with editable text!', 3);
+		notify(`PSD exported successfully (${fileSizeMB}MB)`, 3);
 	} catch (error) {
 		console.error('PSD export failed:', error);
-		notify('PSD export failed. See console for details.', 5);
+		console.error('Error details:', {
+			message: error.message,
+			stack: error.stack,
+			name: error.name
+		});
+		
+		// Provide more helpful error messages
+		let errorMessage = 'PSD export failed';
+		if (error.message.includes('buffer')) {
+			errorMessage += ': Failed to generate file buffer';
+		} else if (error.message.includes('memory')) {
+			errorMessage += ': Out of memory. Try closing other tabs.';
+		} else if (error.message) {
+			errorMessage += `: ${error.message}`;
+		}
+		
+		notify(errorMessage, 5);
 	}
 		}
-
 
 // Helper function to convert Canvas blend modes to Photoshop blend modes
 function convertBlendMode(mode) {
@@ -5872,6 +6063,7 @@ function convertBlendMode(mode) {
 	};
 	return modeMap[mode] || 'normal';
 }
+
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
 	console.log('Import card called with:', cardObject); // Log initial import data
