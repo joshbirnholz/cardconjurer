@@ -6059,8 +6059,14 @@ async function downloadCardAsPSD() {
 			
 			drawSetSymbol(setSymbolCtx, setSymbol, card.setSymbolBounds);
 			
+			const setCode = document.querySelector('#set-symbol-code')?.value?.toUpperCase() || '';
+			const rarityCode = document.querySelector('#set-symbol-rarity')?.value?.toLowerCase() || '';
+			const rarityMap = { 'c': 'Common', 'u': 'Uncommon', 'r': 'Rare', 'm': 'Mythic', 'red': 'Red', 's': 'Timeshifted', 't': 'Timeshifted' };
+			const setRarity = rarityMap[rarityCode] || rarityCode;
+			const setSymbolName = [setRarity, setCode, 'Set Symbol'].filter(x => x).join(' ');
+			
 			psd.children.push({
-				name: 'Set Symbol',
+				name: setSymbolName,
 				canvas: setSymbolCanvas,
 				left: 0,
 				top: 0,
@@ -6074,7 +6080,7 @@ async function downloadCardAsPSD() {
 		// Add bottom info layer only if collector info is enabled
 		if (document.querySelector('#enableCollectorInfo').checked) {
 			psd.children.push({
-				name: 'Bottom Info',
+				name: 'Collector Info',
 				canvas: bottomInfoCanvas,
 				left: 0,
 				top: 0,
