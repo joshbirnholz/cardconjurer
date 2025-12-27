@@ -5257,15 +5257,6 @@ function downloadCard(alt = false, jpeg = false) {
 		}
 	}
 }
-// Initialize ag-psd canvas creator if needed
-if (typeof agPsd !== 'undefined' && agPsd.initializeCanvas) {
-	agPsd.initializeCanvas((width, height) => {
-		const canvas = document.createElement('canvas');
-		canvas.width = width;
-		canvas.height = height;
-		return canvas;
-	});
-}
 
 // Helper to parse color string to RGB object
 function parseColorToRGB(color) {
@@ -5286,24 +5277,8 @@ function parseColorToRGB(color) {
 	return colorMap[color] || { r: 0, g: 0, b: 0 };
 }
 
-// Helper function to check memory availability for large exports
-function checkPSDMemoryAvailability(width, height) {
-	const estimatedSize = width * height * 4; // RGBA bytes
-	const estimatedMB = estimatedSize / (1024 * 1024);
-	
-	if (estimatedMB > 100) {
-		console.warn(`Large PSD detected: ~${estimatedMB.toFixed(2)}MB uncompressed`);
-		return confirm(
-			`This will create a large PSD file (~${estimatedMB.toFixed(2)}MB uncompressed).\n\n` +
-			`Continue with export? This may take a moment.`
-		);
-	}
-	return true;
-}
-
 async function downloadCardAsPSD() {
 	const startTime = performance.now();
-	const debugging = false; // Set to true for verbose console output
 	
 	if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
 		notify('You must credit an artist before downloading!', 5);
@@ -5321,12 +5296,6 @@ async function downloadCardAsPSD() {
 		// Use actual canvas dimensions which include margins
 		const psdWidth = cardCanvas.width;
 		const psdHeight = cardCanvas.height;
-		
-		// Check memory availability for large files
-		if (!checkPSDMemoryAvailability(psdWidth, psdHeight)) {
-			notify('PSD export cancelled by user', 3);
-			return;
-		}
 		
 		// Define Y offset multipliers for each text field
 		const textOffsets = {
@@ -5355,30 +5324,32 @@ async function downloadCardAsPSD() {
 			children: []
 		};
 
-		// Add art layer
-		const artCanvas = document.createElement('canvas');
-		artCanvas.width = psdWidth;
-		artCanvas.height = psdHeight;
-		const artCtx = artCanvas.getContext('2d');
-		artCtx.save();
-		artCtx.translate(scaleX(card.artX), scaleY(card.artY));
-		artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
-		if (document.querySelector('#grayscale-art').checked) {
-			artCtx.filter = 'grayscale(1)';
+		// Add art layer only if art is loaded
+		if (!card.artSource.includes('/img/blank.png') && card.artZoom > 0) {
+			const artCanvas = document.createElement('canvas');
+			artCanvas.width = psdWidth;
+			artCanvas.height = psdHeight;
+			const artCtx = artCanvas.getContext('2d');
+			artCtx.save();
+			artCtx.translate(scaleX(card.artX), scaleY(card.artY));
+			artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
+			if (document.querySelector('#grayscale-art').checked) {
+				artCtx.filter = 'grayscale(1)';
+			}
+			artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
+			artCtx.restore();
+			
+			psd.children.push({
+				name: 'Art',
+				canvas: artCanvas,
+				left: 0,
+				top: 0,
+				right: psdWidth,
+				bottom: psdHeight,
+				blendMode: 'normal',
+				opacity: 1
+			});
 		}
-		artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
-		artCtx.restore();
-		
-		psd.children.push({
-			name: 'Art',
-			canvas: artCanvas,
-			left: 0,
-			top: 0,
-			right: psdWidth,
-			bottom: psdHeight,
-			blendMode: 'normal',
-			opacity: 1
-		});
 
 		// Create frame group with all frame layers inside
 		const frameGroup = {
@@ -5452,7 +5423,6 @@ async function downloadCardAsPSD() {
 					}
 					
 					eraseCtx.putImageData(maskImageData, 0, 0);
-					if (debugging) console.log(`Erase mask ${index} created`);
 					
 					eraseMasks.push({
 						index: index,
@@ -5541,22 +5511,16 @@ async function downloadCardAsPSD() {
 			}
 		}
 
-		// Second pass: apply erase masks to all layers before them
-		const allLayers = [...ptLayers, ...crownLayers, ...frameLayers];
-		console.log(`Total layers: ${allLayers.length}, Total erase masks: ${eraseMasks.length}`);
+	// Second pass: apply erase masks to all layers before them
+	const allLayers = [...ptLayers, ...crownLayers, ...frameLayers];
 
-		allLayers.forEach(layer => {
-			// Only get erase masks that come AFTER this layer (higher index = drawn later = erases this layer)
-			const applicableEraseMasks = eraseMasks.filter(erase => erase.index > layer.index);
-			
-			if (applicableEraseMasks.length === 0) {
-				console.log(`Layer "${layer.name}" (index ${layer.index}): No erase masks to apply`);
-				return; // Skip layers with no applicable erase masks
-			}
-			
-			console.log(`Layer "${layer.name}" (index ${layer.index}): ${applicableEraseMasks.length} applicable erase masks`);
-			
-			// Check if this layer would actually be affected by looking at overlap
+	allLayers.forEach(layer => {
+		// Only get erase masks that come AFTER this layer (higher index = drawn later = erases this layer)
+		const applicableEraseMasks = eraseMasks.filter(erase => erase.index > layer.index);
+		
+		if (applicableEraseMasks.length === 0) {
+			return; // Skip layers with no applicable erase masks
+		}			// Check if this layer would actually be affected by looking at overlap
 			// between layer content and erase masks
 			const layerCtx = layer.canvas.getContext('2d');
 			const layerData = layerCtx.getImageData(0, 0, psdWidth, psdHeight);
@@ -5569,14 +5533,11 @@ async function downloadCardAsPSD() {
 					layerHasContent = true;
 					break;
 				}
-			}
-			
-			if (!layerHasContent) {
-				console.log(`  - Layer has no content, skipping mask`);
-				return; // Skip empty layers
-			}
-			
-			// Combine all applicable erase masks
+		}
+		
+		if (!layerHasContent) {
+			return; // Skip empty layers
+		}			// Combine all applicable erase masks
 			const combinedMaskCanvas = document.createElement('canvas');
 			combinedMaskCanvas.width = psdWidth;
 			combinedMaskCanvas.height = psdHeight;
@@ -5627,26 +5588,14 @@ async function downloadCardAsPSD() {
 					maskWouldAffectLayer = true;
 					break;
 				}
-			}
-			
-			if (!maskWouldAffectLayer) {
-				if (debugging) console.log(`  - Mask doesn't affect "${layer.name}", skipping`);
-				return;
-			}
-			
-			if (debugging) {
-				const sampleIdx = Math.floor(finalMaskPixels.length / 8) * 4;
-				console.log(`  Layer "${layer.name}": mask sample = ${finalMaskPixels[sampleIdx]}`);
-			}
-			
-			// Use full layer bounds for mask (optimization disabled for compatibility)
-			const maskBounds = { top: 0, left: 0, bottom: psdHeight, right: psdWidth };
-			
-			if (debugging) {
-				console.log(`  Applying mask to "${layer.name}": bounds (${maskBounds.top},${maskBounds.left})`);
-			}
-			
-			layer.mask = {
+		}
+		
+		if (!maskWouldAffectLayer) {
+			return;
+		}
+		
+		// Use full layer bounds for mask (optimization disabled for compatibility)
+		const maskBounds = { top: 0, left: 0, bottom: psdHeight, right: psdWidth };			layer.mask = {
 				top: maskBounds.top,
 				left: maskBounds.left,
 				bottom: maskBounds.bottom,
@@ -5685,17 +5634,42 @@ async function downloadCardAsPSD() {
 		// Add the frame group to the PSD
 		psd.children.push(frameGroup);
 
-		// Add watermark layer (after frames, before set symbol)
-		psd.children.push({
-			name: 'Watermark',
-			canvas: watermarkCanvas,
-			left: 0,
-			top: 0,
-			right: psdWidth,
-			bottom: psdHeight,
-			blendMode: 'normal',
-			opacity: card.watermarkOpacity || 0.4
-		});
+		// Add watermark layer (after frames, before set symbol if one is present)
+		if (!card.watermarkSource.includes('/img/blank.png') && card.watermarkZoom > 0) {
+			// Store current opacity
+			const originalOpacity = card.watermarkOpacity;
+			
+			// Temporarily set to full opacity
+			card.watermarkOpacity = 1;
+			document.querySelector('#watermark-opacity').value = 100;
+			
+			// Redraw watermark at full opacity
+			watermarkEdited();
+			
+			// Create a canvas with the full opacity watermark
+			const fullOpacityWatermarkCanvas = document.createElement('canvas');
+			fullOpacityWatermarkCanvas.width = psdWidth;
+			fullOpacityWatermarkCanvas.height = psdHeight;
+			const fullOpacityWatermarkCtx = fullOpacityWatermarkCanvas.getContext('2d');
+			fullOpacityWatermarkCtx.drawImage(watermarkCanvas, 0, 0);
+			
+			// Restore original opacity in UI and card object
+			card.watermarkOpacity = originalOpacity;
+			document.querySelector('#watermark-opacity').value = originalOpacity * 100;
+			watermarkEdited();
+			
+			// Add to PSD with correct layer opacity
+			psd.children.push({
+				name: 'Watermark',
+				canvas: fullOpacityWatermarkCanvas,
+				left: 0,
+				top: 0,
+				right: psdWidth,
+				bottom: psdHeight,
+				blendMode: 'normal',
+				opacity: originalOpacity
+			});
+		}
 
 		// Create text group with individual text fields AND editable text layers
 		const textGroup = {
@@ -5705,7 +5679,6 @@ async function downloadCardAsPSD() {
 
 		// Track flavor divider position during text rendering
 		let actualFlavorDividerY = null;
-		let actualFlavorDividerX = null;
 
 		// Render each text field separately with BOTH raster and editable text
 		for (const [key, textObject] of Object.entries(card.text)) {
@@ -5729,7 +5702,6 @@ async function downloadCardAsPSD() {
 			// If this field had a flavor bar, scan the canvas to find where it was actually drawn
 			if (hasFlavorBar && card.showsFlavorBar) {
 				const imageData = textFieldCtx.getImageData(0, 0, psdWidth, psdHeight);
-				const barSymbol = getManaSymbol('bar');
 				
 				// Scan for the flavor bar (look for non-transparent pixels in likely Y range)
 				const textBoxY = scaleY(textObject.y || 0);
@@ -5756,7 +5728,6 @@ async function downloadCardAsPSD() {
 							// If we found a long horizontal line, this is likely our bar
 							if (consecutivePixels > scaleWidth(0.5)) {
 								actualFlavorDividerY = y;
-								actualFlavorDividerX = firstX;
 								break;
 							}
 						} else {
@@ -5780,7 +5751,7 @@ async function downloadCardAsPSD() {
 				.replace(/\{lns\}/g, '\n')
 				.replace(/\{[^}]+\}/g, '')
 				.trim();
-			
+
 			if (cleanText) {
 				const textBoxX = scaleX(textObject.x || 0);
 				const textBoxY = scaleY(textObject.y || 0);
@@ -5788,6 +5759,7 @@ async function downloadCardAsPSD() {
 				const textBoxHeight = scaleHeight(textObject.height || 1);
 				const fontSize = scaleHeight(textObject.size || 0.038);
 				const fillColor = parseColorToRGB(textObject.color || 'black');
+				const textRotation = textObject.rotation || 0;
 
 				// Get alignment
 				let alignment = 'left';
@@ -5807,7 +5779,6 @@ async function downloadCardAsPSD() {
 					'gothambold': 'GothamBold',
 					'goudymedieval': 'GoudyMediaeval',
 				};
-				// Get the actual font being used, not just the mapped version
 				const actualFont = textObject.font || 'mplantin';
 				const fontName = fontMap[actualFont.toLowerCase()] || fontMap['mplantin'];
 
@@ -5818,59 +5789,76 @@ async function downloadCardAsPSD() {
 				// Get the X offset for this specific text field
 				const xOffset = textXOffsets[key] || textXOffsets['default'];
 
-				// Check if this is the rules text field
-			const isRulesText = key === 'rules' || (textObject.name && textObject.name.toLowerCase().includes('rules'));
+				// Calculate rotation transform
+				const rotationRad = (textRotation * Math.PI) / 180;
+				const cos = Math.cos(rotationRad);
+				const sin = Math.sin(rotationRad);
 
-			if (isRulesText) {
-				// Create PARAGRAPH text layer for rules text
-				// Use the same positioning as the guideline blue rectangles
-				const boxLeft = scaleX(textObject.x || 0);
-				const boxTop = scaleY(textObject.y || 0);
-				const boxWidth = scaleWidth(textObject.width || 1);
-				const boxHeight = scaleHeight(textObject.height || 1);
-				
-				textGroup.children.push({
-					name: (textObject.name || key) + ' (Editable)',
-					text: {
-						text: cleanText,
-						// Transform positions the text box
-						transform: [1, 0, 0, 1, boxLeft + xOffset, boxTop],
-						shapeType: 'box',  // This makes it a paragraph/area text
-						// Bounding box for the text area - [top, left, bottom, right]
-						// These are RELATIVE to the transform position
-						boxBounds: [
-							0,
-							0,
-							boxWidth,
-							boxHeight
-						],
-						style: {
-							font: { name: fontName },
-							fontSize: fontSize,
-							fillColor: fillColor,
-							leading: fontSize * 1.2, // Line spacing
+				// Calculate rotated bounding box for proper layer bounds
+				// We need to find the corners of the text box after rotation
+				const corners = [
+					{ x: 0, y: 0 },
+					{ x: textBoxWidth, y: 0 },
+					{ x: textBoxWidth, y: textBoxHeight },
+					{ x: 0, y: textBoxHeight }
+				];
+
+				// Rotate each corner around the origin (top-left of text box)
+				const rotatedCorners = corners.map(corner => ({
+					x: corner.x * cos - corner.y * sin + textBoxX + xOffset,
+					y: corner.x * sin + corner.y * cos + textBoxY
+				}));
+
+				// Find the bounding box of the rotated corners
+				const minX = Math.min(...rotatedCorners.map(c => c.x));
+				const maxX = Math.max(...rotatedCorners.map(c => c.x));
+				const minY = Math.min(...rotatedCorners.map(c => c.y));
+				const maxY = Math.max(...rotatedCorners.map(c => c.y));
+
+				// Check if this is the rules text field
+				const isRulesText = key === 'rules' || (textObject.name && textObject.name.toLowerCase().includes('rules'));
+
+				if (isRulesText) {
+					// Create PARAGRAPH text layer for rules text
+					const boxLeft = scaleX(textObject.x || 0);
+					const boxTop = scaleY(textObject.y || 0);
+					const boxWidth = scaleWidth(textObject.width || 1);
+					const boxHeight = scaleHeight(textObject.height || 1);
+					
+					textGroup.children.push({
+						name: (textObject.name || key) + ' (Editable)',
+						text: {
+							text: cleanText,
+							transform: [cos, sin, -sin, cos, boxLeft + xOffset, boxTop],
+							shapeType: 'box',
+							boxBounds: [0, 0, boxWidth, boxHeight],
+							style: {
+								font: { name: fontName },
+								fontSize: fontSize,
+								fillColor: fillColor,
+								leading: fontSize * 1.2,
+							},
+							paragraphStyle: {
+								alignment: alignment,
+								firstLineIndent: 0,
+								startIndent: 0,
+								endIndent: 0,
+								spaceBefore: 0,
+								spaceAfter: 0,
+							}
 						},
-						paragraphStyle: {
-							alignment: alignment,
-							firstLineIndent: 0,
-							startIndent: 0,
-							endIndent: 0,
-							spaceBefore: 0,
-							spaceAfter: 0,
-						}
-					},
-					top: boxTop,
-					left: boxLeft + xOffset,
-					bottom: boxTop + boxHeight,
-					right: boxLeft + boxWidth + xOffset
-				});
+						top: minY,
+						left: minX,
+						bottom: maxY,
+						right: maxX
+					});
 				} else {
 					// Create POINT text layer for other text (title, type, pt, etc.)
 					textGroup.children.push({
 						name: (textObject.name || key) + ' (Editable)',
 						text: {
 							text: cleanText,
-							transform: [1, 0, 0, 1, textBoxX + xOffset, textBoxY + baselineOffset],
+							transform: [cos, sin, -sin, cos, textBoxX + xOffset, textBoxY + baselineOffset],
 							style: {
 								font: { name: fontName },
 								fontSize: fontSize,
@@ -5880,13 +5868,14 @@ async function downloadCardAsPSD() {
 								alignment: alignment
 							}
 						},
-						top: textBoxY,
-						left: textBoxX + xOffset,
-						bottom: textBoxY + textBoxHeight,
-						right: textBoxX + textBoxWidth + xOffset
+						top: minY,
+						left: minX,
+						bottom: maxY,
+						right: maxX
 					});
 				}
 			}
+
 		}
 	
 		// Add flavor divider if we found its actual position
@@ -5935,8 +5924,14 @@ async function downloadCardAsPSD() {
 
 		const textLayersChildren = [];
 
-		// Add static text layers FIRST (will appear at bottom in PSD)
-		textLayersChildren.push(...staticTextLayers);
+		// Add static text layers group FIRST (will appear at bottom in PSD)
+		if (staticTextLayers.length > 0) {
+			textLayersChildren.push({
+				name: 'Static Text Layers',
+				children: staticTextLayers,
+				opened: true  // Expanded by default
+			});
+		}
 
 		// Add editable text layers group LAST if there are any (will appear at top in PSD)
 		if (editableTextLayers.length > 0) {
@@ -5977,28 +5972,26 @@ async function downloadCardAsPSD() {
 			});
 		}
 		
-		// Add bottom info layer
-		psd.children.push({
-			name: 'Bottom Info',
-			canvas: bottomInfoCanvas,
-			left: 0,
-			top: 0,
-			right: psdWidth,
-			bottom: psdHeight,
-			blendMode: 'normal',
-			opacity: 1
-		});
+		// Add bottom info layer only if collector info is enabled
+		if (document.querySelector('#enableCollectorInfo').checked) {
+			psd.children.push({
+				name: 'Bottom Info',
+				canvas: bottomInfoCanvas,
+				left: 0,
+				top: 0,
+				right: psdWidth,
+				bottom: psdHeight,
+				blendMode: 'normal',
+				opacity: 1
+			});
+		}
 
-		// Write PSD file
-		console.log(`Writing PSD: ${psdWidth}x${psdHeight}, ${psd.children.length} layers`);
-		
-		const buffer = agPsd.writePsd(psd, { 
-			generateThumbnail: true,
-			trimImageData: false,
-			logMissingFeatures: debugging // Use debug mode if enabled
-		});
-		
-		if (!buffer || buffer.byteLength === 0) {
+	// Write PSD file
+	const buffer = agPsd.writePsd(psd, { 
+		generateThumbnail: true,
+		trimImageData: false,
+		logMissingFeatures: false // Use debug mode if enabled
+	});		if (!buffer || buffer.byteLength === 0) {
 			throw new Error('Failed to generate PSD buffer - buffer is empty');
 		}
 		
@@ -6018,26 +6011,17 @@ async function downloadCardAsPSD() {
 		downloadElement.remove();
 		URL.revokeObjectURL(url);
 		
-		notify(`PSD exported successfully (${fileSizeMB}MB)`, 3);
-	} catch (error) {
-		console.error('PSD export failed:', error);
-		console.error('Error details:', {
-			message: error.message,
-			stack: error.stack,
-			name: error.name
-		});
-		
-		// Provide more helpful error messages
-		let errorMessage = 'PSD export failed';
-		if (error.message.includes('buffer')) {
-			errorMessage += ': Failed to generate file buffer';
-		} else if (error.message.includes('memory')) {
-			errorMessage += ': Out of memory. Try closing other tabs.';
-		} else if (error.message) {
-			errorMessage += `: ${error.message}`;
-		}
-		
-		notify(errorMessage, 5);
+	notify(`PSD exported successfully (${fileSizeMB}MB)`, 3);
+} catch (error) {
+	// Provide more helpful error messages
+	let errorMessage = 'PSD export failed';
+	if (error.message.includes('buffer')) {
+		errorMessage += ': Failed to generate file buffer';
+	} else if (error.message.includes('memory')) {
+		errorMessage += ': Out of memory. Try closing other tabs.';
+	} else if (error.message) {
+		errorMessage += `: ${error.message}`;
+	}		notify(errorMessage, 5);
 	}
 		}
 
