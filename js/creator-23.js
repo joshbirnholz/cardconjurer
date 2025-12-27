@@ -5733,8 +5733,10 @@ async function downloadCardAsPSD() {
 			});
 		}
 
-		// Add the frame group to the PSD
-		psd.children.push(frameGroup);
+		// Add the frame group to the PSD only if it has children
+		if (frameGroup.children.length > 0) {
+			psd.children.push(frameGroup);
+		}
 
 		// Add watermark layer (after frames, before set symbol if one is present)
 		if (!card.watermarkSource.includes('/img/blank.png') && card.watermarkZoom > 0) {
@@ -6048,7 +6050,10 @@ async function downloadCardAsPSD() {
 			opened: false
 		};
 
-		psd.children.push(finalTextGroup);
+		// Add the text group to the PSD only if it has children
+		if (finalTextGroup.children.length > 0) {
+			psd.children.push(finalTextGroup);
+		}
 
 		// Add set symbol layer
 		if (card.setSymbolBounds && !setSymbol.src.includes('/img/blank.png')) {
