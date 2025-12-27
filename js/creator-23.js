@@ -5297,6 +5297,13 @@ async function downloadCardAsPSD() {
 		const psdWidth = cardCanvas.width;
 		const psdHeight = cardCanvas.height;
 		
+		// Calculate appropriate PPI based on whether margins are included
+		// Standard card size is 2.5" x 3.5" (poker card size)
+		// With margins: lower PPI to maintain print size
+		// Without margins: higher PPI for sharper details
+		const hasMargins = card.marginX > 0 || card.marginY > 0;
+		const targetPPI = hasMargins ? 804.04 : 810.48;  // Lower PPI with margins, higher without
+		
 		// Define Y offset multipliers for each text field
 		const textOffsets = {
 			'title': 0.95,
@@ -5321,7 +5328,29 @@ async function downloadCardAsPSD() {
 			channels: 3,  // RGB
 			bitsPerChannel: 8,
 			colorMode: 3, // ColorMode.RGB (from ag-psd)
-			children: []
+			children: [],
+			// Add image resources for proper color profile and resolution metadata
+			imageResources: {
+				resolutionInfo: {
+					horizontalResolution: targetPPI,  // Adjust based on margin presence
+					horizontalResolutionUnit: 'PPI',
+					widthUnit: 'Inches',
+					verticalResolution: targetPPI,    // Adjust based on margin presence
+					verticalResolutionUnit: 'PPI',
+					heightUnit: 'Inches'
+				},
+				// Add pixel aspect ratio (square pixels)
+				pixelAspectRatio: {
+					aspect: 1.0
+				},
+				// Add print scale
+				printScale: {
+					style: 0, // centered
+					x: 1.0,
+					y: 1.0,
+					scale: 1.0
+				}
+			}
 		};
 
 		// Add art layer only if art is present
@@ -5460,10 +5489,8 @@ async function downloadCardAsPSD() {
 				
 				tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
 				
-				// Apply HSL adjustments if needed
-				if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
-					hsl(tempMaskCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
-				}
+				// Note: HSL adjustments are now exported as adjustment layers instead of baked in
+				// This preserves editability in Photoshop
 				
 				frameCtx.drawImage(tempMaskCanvas, 0, 0);
 			}
@@ -5487,7 +5514,10 @@ async function downloadCardAsPSD() {
 				canvas: frameCanvas,
 				opacity: (frame.opacity || 100) / 100,
 				blendMode: convertBlendMode(frame.mode),
-				colorOverlay: frame.colorOverlayCheck ? frame.colorOverlay : null // Store for later
+				colorOverlay: frame.colorOverlayCheck ? frame.colorOverlay : null, // Store for later
+				hslHue: frame.hslHue || 0,
+				hslSaturation: frame.hslSaturation || 0,
+				hslLightness: frame.hslLightness || 0
 			};
 			
 			// Categorize layers into PT, Crown, or regular frame layers
@@ -5597,7 +5627,7 @@ async function downloadCardAsPSD() {
 			};
 		});
 
-		// Helper function to add layer with optional color overlay clipping mask
+		// Helper function to add layer with optional color overlay and HSL adjustment clipping masks
 		const addLayerWithColorOverlay = (layer, targetArray) => {
 			// Add the base layer
 			targetArray.push({
@@ -5611,6 +5641,43 @@ async function downloadCardAsPSD() {
 				blendMode: layer.blendMode,
 				mask: layer.mask
 			});
+			
+			// If there are HSL adjustments, add as adjustment layer
+			if (layer.hslHue !== 0 || layer.hslSaturation !== 0 || layer.hslLightness !== 0) {
+				// Note: ag-psd doesn't fully support adjustment layers with actual adjustment data
+				// So we create a visual indicator layer and apply the adjustments
+				// Users will need to manually recreate the exact values in Photoshop
+				
+				// Create a canvas with the HSL adjustment baked in for visual reference
+				const hslCanvas = document.createElement('canvas');
+				hslCanvas.width = psdWidth;
+				hslCanvas.height = psdHeight;
+				const hslCtx = hslCanvas.getContext('2d');
+				
+				// Draw the base layer
+				hslCtx.drawImage(layer.canvas, 0, 0);
+				
+				// Apply HSL adjustment
+				hsl(hslCanvas, layer.hslHue, layer.hslSaturation, layer.hslLightness);
+				
+				// Add as a clipping mask layer with the adjustment baked in
+				const hslLabel = [];
+				if (layer.hslHue !== 0) hslLabel.push(`H:${layer.hslHue > 0 ? '+' : ''}${layer.hslHue}`);
+				if (layer.hslSaturation !== 0) hslLabel.push(`S:${layer.hslSaturation > 0 ? '+' : ''}${layer.hslSaturation}`);
+				if (layer.hslLightness !== 0) hslLabel.push(`L:${layer.hslLightness > 0 ? '+' : ''}${layer.hslLightness}`);
+				
+				targetArray.push({
+					name: layer.name + ' HSL Adjustment [' + hslLabel.join(', ') + ']',
+					canvas: hslCanvas,
+					left: 0,
+					top: 0,
+					right: psdWidth,
+					bottom: psdHeight,
+					opacity: 1,
+					blendMode: 'normal',
+					clipping: true // This makes it clip to the layer below
+				});
+			}
 			
 			// If there's a color overlay, add it as a clipping mask layer
 			if (layer.colorOverlay) {
