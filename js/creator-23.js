@@ -5297,10 +5297,7 @@ async function downloadCardAsPSD() {
 		const psdWidth = cardCanvas.width;
 		const psdHeight = cardCanvas.height;
 		
-		// Calculate appropriate PPI based on whether margins are included
-		// Standard card size is 2.5" x 3.5" (poker card size)
-		// With margins: lower PPI to maintain print size
-		// Without margins: higher PPI for sharper details
+		// Set appropriate PPI based on whether margins are included
 		const hasMargins = card.marginX > 0 || card.marginY > 0;
 		const targetPPI = hasMargins ? 804.04 : 810.48;  // Lower PPI with margins, higher without
 		
@@ -5646,7 +5643,7 @@ async function downloadCardAsPSD() {
 			if (layer.hslHue !== 0 || layer.hslSaturation !== 0 || layer.hslLightness !== 0) {
 				// Note: ag-psd doesn't fully support adjustment layers with actual adjustment data
 				// So we create a visual indicator layer and apply the adjustments
-				// Users will need to manually recreate the exact values in Photoshop
+				// Users will need to manually recreate the exact values in Photoshop if desired
 				
 				// Create a canvas with the HSL adjustment baked in for visual reference
 				const hslCanvas = document.createElement('canvas');
