@@ -113,6 +113,11 @@ async function resetCardIrregularities({canvas = [getStandardWidth(), getStandar
 	card.bottomInfoZoom = 1;
 	card.bottomInfoColor = 'white';
 	replacementMasks = {};
+	// Clear gradient unless maintaining it
+	if (!card.gradientOptions || resetOthers) {
+		clearGradient();
+		delete card.gradientOptions;
+	}
 	//rotation
 	if (card.landscape) {
 		// previewContext.scale(card.width/card.height, card.height/card.width);
@@ -186,6 +191,7 @@ sizeCanvas('card');
 sizeCanvas('frame');
 sizeCanvas('frameMasking');
 sizeCanvas('frameCompositing');
+sizeCanvas('gradient');
 sizeCanvas('text');
 sizeCanvas('paragraph');
 sizeCanvas('line');
@@ -383,6 +389,176 @@ function findManaSymbolIndex(string) {
 }
 function getManaSymbol(key) {
 	return mana.get(key);
+}
+function drawHorizontalGradient(options = {}) {
+    const {
+        startFromBottom = true,
+        maxOpacity = 1,
+        height = 0.3,
+        solidHeight = 0,
+        yPosition = null,
+        colors = ['#000000'],
+        fadeDirection = 'up'
+    } = options;
+
+    gradientContext.clearRect(0, 0, gradientCanvas.width, gradientCanvas.height);
+    
+    const canvasWidth = gradientCanvas.width;
+    const canvasHeight = gradientCanvas.height;
+    
+    // Consolidate color logic - determine final colors to use
+    function getFinalColors() {
+        if (colors.length === 0) return ['#808080']; // Grey for 0 colors
+        if (colors.length > 3) return ['#e3d193']; // Gold for 4+ colors
+        return colors;
+    }
+    
+    // Create gradient stops for any number of colors
+    function createGradientStops(gradient, colorsToUse, alpha) {
+        const colorCount = colorsToUse.length;
+        
+        if (colorCount === 1) {
+            const rgb = hexToRgb(colorsToUse[0]);
+            const color = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+            gradient.addColorStop(0, color);
+            gradient.addColorStop(1, color);
+        } else if (colorCount === 2) {
+            const [color1, color2] = colorsToUse;
+            const rgb1 = hexToRgb(color1);
+            const rgb2 = hexToRgb(color2);
+            const blended = blendColors(color1, color2);
+            const blendedRgb = hexToRgb(blended);
+            
+            gradient.addColorStop(0, `rgba(${rgb1.r}, ${rgb1.g}, ${rgb1.b}, ${alpha})`);
+            gradient.addColorStop(0.45, `rgba(${rgb1.r}, ${rgb1.g}, ${rgb1.b}, ${alpha})`);
+            gradient.addColorStop(0.5, `rgba(${blendedRgb.r}, ${blendedRgb.g}, ${blendedRgb.b}, ${alpha})`);
+            gradient.addColorStop(0.55, `rgba(${rgb2.r}, ${rgb2.g}, ${rgb2.b}, ${alpha})`);
+            gradient.addColorStop(1, `rgba(${rgb2.r}, ${rgb2.g}, ${rgb2.b}, ${alpha})`);
+        } else if (colorCount === 3) {
+            const [color1, color2, color3] = colorsToUse;
+            const positions = [0, 0.31, 0.333, 0.356, 0.644, 0.667, 0.69, 1];
+            const colorValues = [
+                hexToRgb(color1),
+                hexToRgb(color1),
+                hexToRgb(blendColors(color1, color2)),
+                hexToRgb(color2),
+                hexToRgb(color2),
+                hexToRgb(blendColors(color2, color3)),
+                hexToRgb(color3),
+                hexToRgb(color3)
+            ];
+            
+            positions.forEach((pos, i) => {
+                const rgb = colorValues[i];
+                gradient.addColorStop(pos, `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`);
+            });
+        }
+        
+        return gradient;
+    }
+    
+    // Helper function to create multi-color horizontal gradient with proper opacity
+    function createHorizontalGradient(alpha = maxOpacity) {
+        const gradient = gradientContext.createLinearGradient(0, 0, canvasWidth, 0);
+        const colorsToUse = getFinalColors();
+        return createGradientStops(gradient, colorsToUse, alpha);
+    }
+    
+    // Calculate positioning (consolidated logic)
+    const { startY, fadeHeight, solidAreaHeight } = calculatePositioning();
+    
+    function calculatePositioning() {
+        let startY, fadeHeight, solidAreaHeight;
+        
+        if (yPosition !== null) {
+            startY = Math.round(yPosition * canvasHeight);
+            fadeHeight = Math.round(height * canvasHeight);
+            solidAreaHeight = Math.round(solidHeight * canvasHeight);
+        } else {
+            fadeHeight = Math.round(height * canvasHeight);
+            solidAreaHeight = Math.round(solidHeight * canvasHeight);
+            const totalHeight = fadeHeight + solidAreaHeight;
+            startY = startFromBottom ? canvasHeight - totalHeight : 0;
+        }
+        
+        return { startY, fadeHeight, solidAreaHeight };
+    }
+    
+    // Draw solid area with proper opacity
+    if (solidAreaHeight > 0) {
+        const solidY = fadeDirection === 'down' ? startY + fadeHeight : startY + fadeHeight;
+        gradientContext.fillStyle = createHorizontalGradient(maxOpacity);
+        gradientContext.fillRect(0, solidY, canvasWidth, solidAreaHeight);
+    }
+    
+    // Draw fade area (consolidated fade logic)
+    const colorsToUse = getFinalColors();
+    
+    if (colorsToUse.length === 1) {
+        drawSingleColorFade(colorsToUse[0], startY, fadeHeight);
+    } else {
+        drawMultiColorFade(startY, fadeHeight);
+    }
+    
+    function drawSingleColorFade(color, startY, fadeHeight) {
+        const fadeStartY = fadeDirection === 'down' ? startY : startY + fadeHeight;
+        const fadeEndY = fadeDirection === 'down' ? startY + fadeHeight : startY;
+        const fadeGradient = gradientContext.createLinearGradient(0, fadeStartY, 0, fadeEndY);
+        
+        const rgb = hexToRgb(color);
+        const transparentColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0)`;
+        const solidColor = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${maxOpacity})`;
+        
+        if (fadeDirection === 'down') {
+            fadeGradient.addColorStop(0, transparentColor);
+            fadeGradient.addColorStop(1, solidColor);
+        } else {
+            fadeGradient.addColorStop(0, solidColor);
+            fadeGradient.addColorStop(1, transparentColor);
+        }
+        
+        gradientContext.fillStyle = fadeGradient;
+        gradientContext.fillRect(0, startY, canvasWidth, fadeHeight);
+    }
+    
+    function drawMultiColorFade(startY, fadeHeight) {
+        const fadeStart = fadeDirection === 'down' ? startY : startY + fadeHeight;
+        const increment = fadeDirection === 'down' ? 1 : -1;
+        
+        for (let y = 0; y < fadeHeight; y++) {
+            const currentY = fadeStart + (y * increment);
+            const fadeProgress = y / fadeHeight;
+            const alpha = fadeDirection === 'down' ? fadeProgress * maxOpacity : (1 - fadeProgress) * maxOpacity;
+            
+            gradientContext.fillStyle = createHorizontalGradient(alpha);
+            gradientContext.fillRect(0, currentY, canvasWidth, 1);
+        }
+    }
+}
+
+// Helper function to blend two hex colors (if not already defined)
+function blendColors(hex1, hex2, ratio = 0.5) {
+    const rgb1 = hexToRgb(hex1);
+    const rgb2 = hexToRgb(hex2);
+    
+    const r = Math.round(rgb1.r * (1 - ratio) + rgb2.r * ratio);
+    const g = Math.round(rgb1.g * (1 - ratio) + rgb2.g * ratio);
+    const b = Math.round(rgb1.b * (1 - ratio) + rgb2.b * ratio);
+    
+    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
+// Helper function to convert hex to RGB (if not already defined)
+function hexToRgb(hex) {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : {r: 0, g: 0, b: 0};
+}
+function clearGradient() {
+	gradientContext.clearRect(0, 0, gradientCanvas.width, gradientCanvas.height);
 }
 //FRAME TAB
 function drawFrames() {
@@ -3503,10 +3679,39 @@ async function drawText() {
 	textContext.clearRect(0, 0, textCanvas.width, textCanvas.height);
 	prePTContext.clearRect(0, 0, prePTCanvas.width, prePTCanvas.height);
 	drawTextBetweenFrames = false;
-	for (var textObject of Object.entries(card.text)) {
-		await writeText(textObject[1], textContext);
-		continue;
+	
+	// Check if any textbox has an outline
+	const hasAnyOutlines = Object.values(card.text).some(textObj => 
+		(textObj.outlineWidth || 0) > 0
+	);
+	
+	if (!hasAnyOutlines) {
+		// Simple single-pass rendering
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+	} else {
+		// Two-pass rendering for outlined text
+		textContext.isOutlinePass = true;
+		textContext.isFillPass = false;
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+		
+		textContext.isOutlinePass = false;
+		textContext.isFillPass = true;
+		for (var textObject of Object.entries(card.text)) {
+			await writeText(textObject[1], textContext);
+			continue;
+		}
+		
+		// Clean up flags (only needed when we set them)
+		delete textContext.isOutlinePass;
+		delete textContext.isFillPass;
 	}
+	
 	if (drawTextBetweenFrames || redrawFrames) {
 		drawFrames();
 		if (!drawTextBetweenFrames) {
@@ -3532,6 +3737,9 @@ function writeText(textObject, targetContext) {
 	var textManaCost = textObject.manaCost || false;
 	var textAllCaps = textObject.allCaps || false;
 	var textManaSpacing = scaleWidth(textObject.manaSpacing) || 0;
+    // Check for drawing mode flags on the context
+    var isOutlinePass = targetContext.isOutlinePass || false;
+    var isFillPass = targetContext.isFillPass || false;
 	//Buffers the canvases accordingly
 	var canvasMargin = 300;
 	paragraphCanvas.width = textWidth + 2 * canvasMargin;
@@ -4118,7 +4326,8 @@ function writeText(textObject, targetContext) {
 						shadowColor: textShadowColor,
 						shadowOffsetX: textShadowOffsetX,
 						shadowOffsetY: textShadowOffsetY,
-						shadowBlur: textShadowBlur
+						shadowBlur: textShadowBlur,
+						outlineColor: lineContext.strokeStyle
 					});
 					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
 
@@ -4211,7 +4420,8 @@ function writeText(textObject, targetContext) {
 				// First pass: Draw outlines only
 				manaSymbolsToRender.forEach(symbolData => {
 					if (!symbolData.hasOutline) return;
-					outlineContext.fillStyle = 'black';
+					// Use the outline color from the textbox instead of hardcoded 'black'
+					outlineContext.fillStyle = symbolData.outlineColor || 'black';
 					outlineContext.beginPath();
 					var centerX = symbolData.x + symbolData.width/2;
 					var centerY = symbolData.y + symbolData.height/2;
@@ -4336,24 +4546,39 @@ function writeText(textObject, targetContext) {
 					maxSpaceSize: 6,
 					minSpaceSize: 0
 				};
-
+			
 				if (textArcRadius > 0) {
-					lineContext.fillTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX, textOutlineWidth);
+					// For text WITHOUT outline, only draw on fill pass (or if no passes)
+					if (textOutlineWidth <= 0 && isOutlinePass) {
+						// Skip this text during outline pass
+					} else if (textOutlineWidth > 0 && isOutlinePass) {
+						// Draw outline only for arc text
+						lineContext.strokeTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX);
+					} else if (isFillPass || (!isOutlinePass && !isFillPass)) {
+						// Draw fill for arc text (in fill pass OR when not doing multi-pass)
+						lineContext.fillTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX, 0);
+					}
 				} else {
-					if (textOutlineWidth >= 1) {
+					// For text WITHOUT outline, only draw on fill pass (or if no passes)
+					if (textOutlineWidth <= 0 && isOutlinePass) {
+						// Skip this text during outline pass
+					} else if (textOutlineWidth > 0 && isOutlinePass) {
+						// Draw outline only
 						if (fillJustify) {
 							lineContext.strokeJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
 						} else {
 							lineContext.strokeText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
 						}
-					}
-					if (fillJustify) {
-						lineContext.fillJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
-					} else {
-						lineContext.fillText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
+					} else if (isFillPass || (!isOutlinePass && !isFillPass)) {
+						// Draw fill (in fill pass OR when not doing multi-pass)
+						if (fillJustify) {
+							lineContext.fillJustifyText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, justifyWidth, justifySettings);
+						} else {
+							lineContext.fillText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
+						}
 					}
 				}
-
+			
 				if (fillJustify) {
 					currentX += lineContext.measureJustifiedText(wordToWrite, justifyWidth, justifySettings);
 				} else {
@@ -4412,10 +4637,26 @@ CanvasRenderingContext2D.prototype.fillTextArc = function(text, x, y, radius, st
 	this.rotate(startRotation + widthToAngle(distance, radius));
 	for (var i = 0; i < text.length; i++) {
 		var letter = text[i];
+		// Only draw outline if outlineWidth is specified and > 0
 		if (outlineWidth >= 1) {
 			this.strokeText(letter, 0, -radius);
+		} else {
+			// Only draw fill when outlineWidth is 0
+			this.fillText(letter, 0, -radius);
 		}
-		this.fillText(letter, 0, -radius);
+		this.rotate(widthToAngle(this.measureText(letter).width, radius));
+	}
+	this.restore();
+}
+
+// Add a stroke-only version for arc text
+CanvasRenderingContext2D.prototype.strokeTextArc = function(text, x, y, radius, startRotation, distance = 0) {
+	this.save();
+	this.translate(x - distance + scaleWidth(0.5), y + radius);
+	this.rotate(startRotation + widthToAngle(distance, radius));
+	for (var i = 0; i < text.length; i++) {
+		var letter = text[i];
+		this.strokeText(letter, 0, -radius);
 		this.rotate(widthToAngle(this.measureText(letter).width, radius));
 	}
 	this.restore();
@@ -4595,7 +4836,7 @@ function artEdited() {
 	drawCard();
 }
 function autoFitArt() {
-	document.querySelector('#art-rotate').value = 0;
+        document.querySelector('#art-rotate').value = card.artBounds.rotation || 0;
 	if (art.width / art.height > scaleWidth(card.artBounds.width) / scaleHeight(card.artBounds.height)) {
 		document.querySelector('#art-y').value = Math.round(scaleY(card.artBounds.y) - scaleHeight(card.marginY));
 		document.querySelector('#art-zoom').value = (scaleHeight(card.artBounds.height) / art.height * 100).toFixed(1);
@@ -4765,6 +5006,7 @@ function setSymbolEdited() {
 	card.setSymbolX = document.querySelector('#setSymbol-x').value / card.width;
 	card.setSymbolY = document.querySelector('#setSymbol-y').value / card.height;
 	card.setSymbolZoom = document.querySelector('#setSymbol-zoom').value / 100;
+	card.setSymbolRotate = document.querySelector('#setSymbol-rotate').value || 0;
 	drawCard();
 }
 function resetSetSymbol() {
@@ -4773,6 +5015,7 @@ function resetSetSymbol() {
 	}
 	document.querySelector('#setSymbol-x').value = Math.round(scaleX(card.setSymbolBounds.x));
 	document.querySelector('#setSymbol-y').value = Math.round(scaleY(card.setSymbolBounds.y));
+	document.querySelector('#setSymbol-rotate').value = card.setSymbolBounds.rotation || 0;
 	var setSymbolZoom;
 	if (setSymbol.width / setSymbol.height > scaleWidth(card.setSymbolBounds.width) / scaleHeight(card.setSymbolBounds.height)) {
 		setSymbolZoom = (scaleWidth(card.setSymbolBounds.width) / setSymbol.width * 100).toFixed(1);
@@ -5048,6 +5291,19 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
     const symbolHeight = setSymbol.height * card.setSymbolZoom; 
     const x = scaleX(card.setSymbolX);
     const y = scaleY(card.setSymbolY);
+    const rotation = card.setSymbolRotate || 0;
+
+    // Save context for rotation
+    cardContext.save();
+    
+    // Apply rotation if needed
+    if (rotation !== 0) {
+        const centerX = x + symbolWidth / 2;
+        const centerY = y + symbolHeight / 2;
+        cardContext.translate(centerX, centerY);
+        cardContext.rotate(Math.PI / 180 * rotation);
+        cardContext.translate(-centerX, -centerY);
+    }
 
     if (bounds.outlineWidth && bounds.outlineWidth > 0) {
         // Create temp canvas for outlined symbol
@@ -5101,6 +5357,7 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
         // Draw main symbol without outline (simple path)
         cardContext.drawImage(setSymbol, x, y, symbolWidth, symbolHeight);
     }
+    cardContext.restore();
 }
 //DRAWING THE CARD (putting it all together)
 function drawCard() {
@@ -5116,6 +5373,12 @@ function drawCard() {
 	}
 	cardContext.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
 	cardContext.restore();
+	// Add gradient here - after art but before frames
+	cardContext.drawImage(gradientCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	// Add divider gradient if it exists (for minimalist version)
+	if (card.dividerCanvas && card.version === 'Minimalist') {
+		cardContext.drawImage(card.dividerCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
+	}
 	// frame elements
 	if (card.version.includes('planeswalker') && typeof planeswalkerPreFrameCanvas !== "undefined") {
 		cardContext.drawImage(planeswalkerPreFrameCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
@@ -5207,7 +5470,7 @@ function drawCard() {
 	// cutout the corners
 	cardContext.globalCompositeOperation = 'destination-out';
 	if (!card.noCorners && (card.marginX == 0 && card.marginY == 0)) {
-		var w = card.version == 'battle' ? 2100 : getStandardWidth();
+		var w = getStandardWidth();
 
 		cardContext.drawImage(corner, 0, 0, scaleWidth(59/w), scaleWidth(59/w));
 		cardContext.rotate(Math.PI / 2);
@@ -5682,7 +5945,7 @@ function parseRollAbilities(text) {
 }
 
 function parseStationCard(oracleText) {
-    if (!oracleText || !oracleText.includes('STATION')) {
+    if (!oracleText || !oracleText.includes('Station')) {
         return null;
     }
 
@@ -5695,8 +5958,8 @@ function parseStationCard(oracleText) {
     // Format station reminder text with italics
     preStationText = preStationText.replace(/Station (\([^)]+\))/g, 'Station {i}$1{/i}');
     
-    // Find all STATION abilities with their numbers - more flexible regex
-    const stationRegex = /STATION (\d+\+)\s*\n([^]*?)(?=\nSTATION \d+\+|$)/g;
+    // Updated regex to match new scryfall format: "10+ | ability text"
+    const stationRegex = /(\d+\+)\s*\|\s*([^\n]+)/g;
     const stationAbilities = [];
     
     let match;
@@ -5960,7 +6223,7 @@ function changeCardIndex() {
         textEdited();
     }
 
-else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION') && card.version.includes('station')) {
+else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station') && card.version.includes('station')) {
 
     // Clear existing station fields
     if (card.text) {
@@ -6248,6 +6511,10 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 			card.text.pt.text = cardToImport.power + '/' + cardToImport.toughness || '';
 		}
 	}
+	else if (card.version == 'Minimalist' && card.text.power && card.text.toughness) {
+		card.text.power.text = cardToImport.power || '';
+		card.text.toughness.text = cardToImport.toughness || '';
+	}
 	if (card.text.pt && card.text.pt.text == undefined + '/' + undefined) {card.text.pt.text = '';}
 	if (card.text.pt && card.text.pt.text == undefined + '\n' + undefined) {card.text.pt.text = '';}
 	if (card.text.pt && card.text.pt.text == '{}') {card.text.pt.text = '';}
@@ -6375,12 +6642,22 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 		}
 	}
 	//art
-	document.querySelector('#art-name').value = cardToImport.name;
-	fetchScryfallData(cardToImport.name, artFromScryfall, 'art');
-	if (document.querySelector('#importAllPrints').checked) {
-		document.querySelector('#art-index').value = document.querySelector('#import-index').value;
-		changeArtIndex();
-	}
+	var artSearchName = cardToImport.original_name || cardToImport.name;
+	document.querySelector('#art-name').value = artSearchName;
+	// If importing all prints, modify the callback to select the correct art after data loads
+	const callback = document.querySelector('#importAllPrints').checked 
+		? (scryfallResponse) => {
+			artFromScryfall(scryfallResponse);
+			// Find and select the matching art
+			const illustrationID = cardToImport.illustration_id;
+			const index = scryfallArt.findIndex(card => card.illustration_id === illustrationID);
+			if (index >= 0) {
+				document.querySelector('#art-index').value = index;
+				changeArtIndex();
+			}
+		}
+		: artFromScryfall;
+	fetchScryfallData(artSearchName, callback, 'art');
 	//set symbol
 	if (!document.querySelector('#lockSetSymbolCode').checked) {
 		document.querySelector('#set-symbol-code').value = cardToImport.set;
@@ -6478,6 +6755,7 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
 		document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
 		document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
+		document.querySelector('#setSymbol-rotate').value = card.setSymbolRotate || 0;
 		uploadSetSymbol(card.setSymbolSource);
 		document.querySelector('#watermark-x').value = scaleX(card.watermarkX) - scaleWidth(card.marginX);
 		document.querySelector('#watermark-y').value = scaleY(card.watermarkY) - scaleHeight(card.marginY);
@@ -6667,13 +6945,17 @@ async function imageLocal(event, destination, otherParams) {
 	await reader.readAsDataURL(event.target.files[0]);
 }
 function loadScript(scriptPath) {
+	return new Promise((resolve, reject) => {
 	var script = document.createElement('script');
 	script.setAttribute('type', 'text/javascript');
-	script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');}
-	script.setAttribute('src', scriptPath);
-	if (typeof script != 'undefined') {
-		document.querySelectorAll('head')[0].appendChild(script);
+	script.onload = resolve;
+	script.onerror = function(){
+		notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');
+		reject();
 	}
+	script.setAttribute('src', scriptPath);
+	document.querySelectorAll('head')[0].appendChild(script);
+	});
 }
 // Stretchable SVGs
 function stretchSVG(frameObject) {
@@ -6727,10 +7009,17 @@ function processScryfallCard(card, responseCards) {
 			face.rarity = card.rarity;
 			face.collector_number = card.collector_number;
 			face.lang = card.lang;
-      face.layout = card.layout; // Add layout from parent card
-			if (card.lang != 'en' || face.printed_name) {
+			face.layout = card.layout; // Add layout from parent card
+			face.illustration_id = card.illustration_id;
+			// Store original name before any modifications
+			face.original_name = face.name;
+			// Apply printed name if it exists
+			if (face.printed_name) {
+				face.name = face.printed_name;
+			}
+			// Apply other printed text for non-English cards
+			if (card.lang != 'en') {
 				face.oracle_text = face.printed_text || face.oracle_text;
-				face.name = face.printed_name || face.name;
 				face.type_line = face.printed_type_line || face.type_line;
 			}
 			responseCards.push(face);
@@ -6739,9 +7028,15 @@ function processScryfallCard(card, responseCards) {
 			}
 		});
 	} else {
-		if (card.lang != 'en' || card.printed_name) {
+		// Store original name before any modifications
+		card.original_name = card.name;
+		// Apply printed name if it exists
+		if (card.printed_name) {
+			card.name = card.printed_name;
+		}
+		// Apply other printed text for non-English cards
+		if (card.lang != 'en') {
 			card.oracle_text = card.printed_text || card.oracle_text;
-			card.name = card.printed_name || card.name;
 			card.type_line = card.printed_type_line || card.type_line;
 		}
 		// Ensure layout is set even for single-faced cards
