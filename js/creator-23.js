@@ -5384,6 +5384,68 @@ async function downloadCardAsPSD() {
 			opened: false
 		};
 
+		// Helper function to create a PSD mask object from ImageData
+		const createPSDMask = (imageData) => ({
+			top: 0,
+			left: 0,
+			bottom: psdHeight,
+			right: psdWidth,
+			defaultColor: 255,
+			imageData,
+			disabled: false,
+			positionRelativeToLayer: false,
+			fromVectorData: false
+		});
+
+		// Helper function to combine multiple masks by multiplying them together
+		const multiplyMasks = (mask1Data, mask2Data) => {
+			const canvas = document.createElement('canvas');
+			canvas.width = psdWidth;
+			canvas.height = psdHeight;
+			const ctx = canvas.getContext('2d');
+			ctx.putImageData(mask1Data, 0, 0);
+			
+			const tempCanvas = document.createElement('canvas');
+			tempCanvas.width = psdWidth;
+			tempCanvas.height = psdHeight;
+			tempCanvas.getContext('2d').putImageData(mask2Data, 0, 0);
+			
+			ctx.globalCompositeOperation = 'multiply';
+			ctx.drawImage(tempCanvas, 0, 0);
+			return ctx.getImageData(0, 0, psdWidth, psdHeight);
+		};
+
+		// Helper to calculate mask transform coordinates
+		const getMaskTransform = (bounds, ogBounds) => ({
+			x: scaleX((bounds.x || 0) - (ogBounds.x || 0) - ((ogBounds.x || 0) * ((bounds.width || 1) / (ogBounds.width || 1) - 1))),
+			y: scaleY((bounds.y || 0) - (ogBounds.y || 0) - ((ogBounds.y || 0) * ((bounds.height || 1) / (ogBounds.height || 1) - 1))),
+			w: scaleWidth((bounds.width || 1) / (ogBounds.width || 1)),
+			h: scaleHeight((bounds.height || 1) / (ogBounds.height || 1))
+		});
+
+		// Helper to apply masks to a canvas context
+		const applyMasksToFrame = (ctx, frame, frameX, frameY, frameWidth, frameHeight) => {
+			const bounds = frame.bounds || {};
+			const ogBounds = frame.ogBounds || bounds;
+			const transform = getMaskTransform(bounds, ogBounds);
+			
+			ctx.globalCompositeOperation = 'source-over';
+			ctx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
+			ctx.globalCompositeOperation = 'destination-in';
+			frame.masks.forEach(mask => ctx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h));
+		};
+
+		// Helper to convert alpha to inverted grayscale mask
+		const alphaToInvertedMask = (imageData) => {
+			const pixels = imageData.data;
+			for (let i = 0; i < pixels.length; i += 4) {
+				const maskValue = 255 - pixels[i + 3]; // Invert alpha
+				pixels[i] = pixels[i + 1] = pixels[i + 2] = maskValue;
+				pixels[i + 3] = 255;
+			}
+			return imageData;
+		};
+
 		// Process frames from bottom to top and collect all layers first
 		const reversedFrames = card.frames.slice().reverse();
 		const frameLayers = [];
@@ -5395,61 +5457,32 @@ async function downloadCardAsPSD() {
 		for (let index = 0; index < reversedFrames.length; index++) {
 			const frame = reversedFrames[index];
 			
-			if (frame.erase) {
-				// Store erase layer for mask creation
-				if (frame.image) {
-					const eraseCanvas = document.createElement('canvas');
-					eraseCanvas.width = psdWidth;
-					eraseCanvas.height = psdHeight;
-					const eraseCtx = eraseCanvas.getContext('2d');
-					
-					const bounds = frame.bounds || {};
-					const ogBounds = frame.ogBounds || bounds;
-					const frameX = Math.round(scaleX(bounds.x || 0));
-					const frameY = Math.round(scaleY(bounds.y || 0));
-					const frameWidth = Math.round(scaleWidth(bounds.width || 1));
-					const frameHeight = Math.round(scaleHeight(bounds.height || 1));
-					
-					// Draw the frame image first
-					eraseCtx.globalCompositeOperation = 'source-over';
-					eraseCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
-					
-					// Apply masks
-					eraseCtx.globalCompositeOperation = 'destination-in';
-					frame.masks.forEach(mask => {
-						eraseCtx.drawImage(mask.image, 
-							scaleX((bounds.x || 0) - (ogBounds.x || 0) - ((ogBounds.x || 0) * ((bounds.width || 1) / (ogBounds.width || 1) - 1))), 
-							scaleY((bounds.y || 0) - (ogBounds.y || 0) - ((ogBounds.y || 0) * ((bounds.height || 1) / (ogBounds.height || 1) - 1))), 
-							scaleWidth((bounds.width || 1) / (ogBounds.width || 1)), 
-							scaleHeight((bounds.height || 1) / (ogBounds.height || 1))
-						);
-					});
-					
-					// Apply HSL adjustments if needed
-					if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
-						hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
-					}
-					
-					// Convert alpha to inverted grayscale mask (destination-out behavior)
-					// Invert opacity: opaque areas (alpha=255) become black (hide), transparent becomes white (show)
-					const maskImageData = eraseCtx.getImageData(0, 0, psdWidth, psdHeight);
-					const maskPixels = maskImageData.data;
-					
-					for (let i = 0; i < maskPixels.length; i += 4) {
-						const maskValue = 255 - maskPixels[i + 3]; // Invert alpha
-						maskPixels[i] = maskPixels[i + 1] = maskPixels[i + 2] = maskValue;
-						maskPixels[i + 3] = 255;
-					}
-					
-					eraseCtx.putImageData(maskImageData, 0, 0);
-					
-					eraseMasks.push({
-						index: index,
-						canvas: eraseCanvas
-					});
+			if (frame.erase && frame.image) {
+				// Create erase mask
+				const eraseCanvas = document.createElement('canvas');
+				eraseCanvas.width = psdWidth;
+				eraseCanvas.height = psdHeight;
+				const eraseCtx = eraseCanvas.getContext('2d');
+				
+				const bounds = frame.bounds || {};
+				const ogBounds = frame.ogBounds || bounds;
+				const frameX = Math.round(scaleX(bounds.x || 0));
+				const frameY = Math.round(scaleY(bounds.y || 0));
+				const frameWidth = Math.round(scaleWidth(bounds.width || 1));
+				const frameHeight = Math.round(scaleHeight(bounds.height || 1));
+				
+				applyMasksToFrame(eraseCtx, frame, frameX, frameY, frameWidth, frameHeight);
+				
+				// Apply HSL adjustments if needed
+				if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
+					hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
 				}
-				// IMPORTANT: Skip creating a regular frame layer for erase frames
-				continue;
+				
+				// Convert alpha to inverted grayscale mask
+				eraseCtx.putImageData(alphaToInvertedMask(eraseCtx.getImageData(0, 0, psdWidth, psdHeight)), 0, 0);
+				
+				eraseMasks.push({ index, canvas: eraseCanvas });
+				continue; // Skip creating a regular frame layer for erase frames
 			}
 			
 			// Create regular frame layer
@@ -5474,197 +5507,203 @@ async function downloadCardAsPSD() {
 				tempMaskCtx.globalCompositeOperation = 'source-over';
 				tempMaskCtx.drawImage(black, 0, 0, psdWidth, psdHeight);
 				
+				const transform = getMaskTransform(bounds, ogBounds);
 				tempMaskCtx.globalCompositeOperation = 'source-in';
-				frame.masks.forEach(mask => {
-					tempMaskCtx.drawImage(mask.image, 
-						scaleX((bounds.x || 0) - (ogBounds.x || 0) - ((ogBounds.x || 0) * ((bounds.width || 1) / (ogBounds.width || 1) - 1))), 
-						scaleY((bounds.y || 0) - (ogBounds.y || 0) - ((ogBounds.y || 0) * ((bounds.height || 1) / (ogBounds.height || 1) - 1))), 
-						scaleWidth((bounds.width || 1) / (ogBounds.width || 1)), 
-						scaleHeight((bounds.height || 1) / (ogBounds.height || 1))
-					);
-				});
-				
+				frame.masks.forEach(mask => tempMaskCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h));
 				tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
-				
-				// Note: HSL adjustments are now exported as adjustment layers instead of baked in
-				// This preserves editability in Photoshop
 				
 				frameCtx.drawImage(tempMaskCanvas, 0, 0);
 			}
 			
 			// Build layer name with mask names if they exist
-			let layerName = frame.name || `Frame ${index + 1}`;
-			if (frame.masks && frame.masks.length > 0) {
-				const maskNames = frame.masks
-					.map(mask => mask.name)
-					.filter(name => name && !name.toLowerCase().includes('mask')) // Skip generic "Mask" names
-					.join(', ');
-				
-				if (maskNames) {
-					layerName += ', ' + maskNames;
-				}
-			}
+			const maskNames = frame.masks?.map(m => m.name).filter(n => n && !n.toLowerCase().includes('mask')).join(', ');
+			const layerName = (frame.name || `Frame ${index + 1}`) + (maskNames ? `, ${maskNames}` : '');
 
 			const layerData = {
-				index: index,
+				index,
 				name: layerName,
 				canvas: frameCanvas,
 				opacity: (frame.opacity || 100) / 100,
 				blendMode: convertBlendMode(frame.mode),
-				colorOverlay: frame.colorOverlayCheck ? frame.colorOverlay : null, // Store for later
+				colorOverlay: frame.colorOverlayCheck ? frame.colorOverlay : null,
 				hslHue: frame.hslHue || 0,
 				hslSaturation: frame.hslSaturation || 0,
-				hslLightness: frame.hslLightness || 0
+				hslLightness: frame.hslLightness || 0,
+				frameData: {
+					image: frame.image,
+					bounds: frame.bounds || {},
+					ogBounds: frame.ogBounds || frame.bounds || {},
+					masks: frame.masks || []
+				}
 			};
 			
 			// Categorize layers into PT, Crown, or regular frame layers
-			if (frame.name && frame.name.toLowerCase().includes('power/toughness')) {
-				ptLayers.push(layerData);
-			} else if (frame.name && frame.name.toLowerCase().includes('crown')) {
-				crownLayers.push(layerData);
-			} else {
-				frameLayers.push(layerData);
-			}
+			const name = frame.name?.toLowerCase() || '';
+			if (name.includes('power/toughness')) ptLayers.push(layerData);
+			else if (name.includes('crown')) crownLayers.push(layerData);
+			else frameLayers.push(layerData);
 		}
 
 	// Second pass: apply erase masks to all layers before them
 	const allLayers = [...ptLayers, ...crownLayers, ...frameLayers];
 
 	allLayers.forEach(layer => {
-		// Only get erase masks that come AFTER this layer (higher index = drawn later = erases this layer)
 		const applicableEraseMasks = eraseMasks.filter(erase => erase.index > layer.index);
+		if (applicableEraseMasks.length === 0) return;
 		
-		if (applicableEraseMasks.length === 0) {
-			return; // Skip layers with no applicable erase masks
-		}			// Check if this layer would actually be affected by looking at overlap
-			// between layer content and erase masks
-			const layerCtx = layer.canvas.getContext('2d');
-			const layerData = layerCtx.getImageData(0, 0, psdWidth, psdHeight);
-			const layerPixels = layerData.data;
+		// Quick check: does this layer have any content?
+		const layerCtx = layer.canvas.getContext('2d');
+		const layerData = layerCtx.getImageData(0, 0, psdWidth, psdHeight);
+		const layerPixels = layerData.data;
+		
+		const layerHasContent = layerPixels.some((_, i) => i % 4 === 3 && layerPixels[i] > 0);
+		if (!layerHasContent) return;
+		
+		// Combine all applicable erase masks
+		const combinedMaskCanvas = document.createElement('canvas');
+		combinedMaskCanvas.width = psdWidth;
+		combinedMaskCanvas.height = psdHeight;
+		const combinedMaskCtx = combinedMaskCanvas.getContext('2d');
+		
+		// Start with white (fully visible)
+		combinedMaskCtx.fillStyle = 'white';
+		combinedMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
+		
+		// Apply each erase layer by multiplying
+		applicableEraseMasks.forEach(erase => {
+			const eraseMaskData = erase.canvas.getContext('2d').getImageData(0, 0, psdWidth, psdHeight);
+			const erasePixels = eraseMaskData.data;
+			const combinedData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
+			const combinedPixels = combinedData.data;
 			
-			// Quick check: does this layer have any non-transparent pixels?
-			let layerHasContent = false;
-			for (let i = 3; i < layerPixels.length; i += 4) {
-				if (layerPixels[i] > 0) {
-					layerHasContent = true;
-					break;
-				}
-		}
+			for (let i = 0; i < combinedPixels.length; i += 4) {
+				const finalValue = (combinedPixels[i] / 255) * (erasePixels[i] / 255) * 255;
+				combinedPixels[i] = combinedPixels[i + 1] = combinedPixels[i + 2] = finalValue;
+			}
+			
+			combinedMaskCtx.putImageData(combinedData, 0, 0);
+		});
 		
-		if (!layerHasContent) {
-			return; // Skip empty layers
-		}			// Combine all applicable erase masks
-			const combinedMaskCanvas = document.createElement('canvas');
-			combinedMaskCanvas.width = psdWidth;
-			combinedMaskCanvas.height = psdHeight;
-			const combinedMaskCtx = combinedMaskCanvas.getContext('2d');
+		// Check if mask actually affects this layer
+		const finalMaskData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
+		const finalMaskPixels = finalMaskData.data;
+		
+		const maskAffectsLayer = finalMaskPixels.some((_, i) => 
+			i % 4 === 0 && layerPixels[i + 3] > 0 && finalMaskPixels[i] < 255
+		);
+		
+		if (maskAffectsLayer) {
+			layer.mask = createPSDMask(finalMaskData);
+		}
+	});
+
+		// Helper function to create a combined mask from all frame masks (including half masks)
+		const createCombinedFrameMask = (frame, psdWidth, psdHeight) => {
+			if (!frame.masks?.length) return null;
+			
+			const maskCanvas = document.createElement('canvas');
+			maskCanvas.width = psdWidth;
+			maskCanvas.height = psdHeight;
+			const maskCtx = maskCanvas.getContext('2d');
 			
 			// Start with white (fully visible)
-			combinedMaskCtx.fillStyle = 'white';
-			combinedMaskCtx.fillRect(0, 0, psdWidth, psdHeight);
+			maskCtx.fillStyle = 'white';
+			maskCtx.fillRect(0, 0, psdWidth, psdHeight);
+			maskCtx.globalCompositeOperation = 'multiply';
 			
-			// Apply each erase layer
-			applicableEraseMasks.forEach(erase => {
-				// Get the erase mask data (already inverted during creation)
-				const eraseMaskData = erase.canvas.getContext('2d').getImageData(0, 0, psdWidth, psdHeight);
-				const erasePixels = eraseMaskData.data;
+			const bounds = frame.bounds || {};
+			const ogBounds = frame.ogBounds || bounds;
+			const transform = getMaskTransform(bounds, ogBounds);
+			
+			// Apply each mask
+			frame.masks.forEach(mask => {
+				const tempCanvas = document.createElement('canvas');
+				tempCanvas.width = psdWidth;
+				tempCanvas.height = psdHeight;
+				const tempCtx = tempCanvas.getContext('2d');
 				
-				// Get current combined mask data
-				const combinedData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
-				const combinedPixels = combinedData.data;
+				// Draw mask and convert alpha to grayscale
+				tempCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h);
+				const tempData = tempCtx.getImageData(0, 0, psdWidth, psdHeight);
+				const pixels = tempData.data;
 				
-				// Multiply the masks together
-				// The erase mask is already inverted, so:
-				// White (255) in erase mask = area should stay visible (no erase)
-				// Black (0) in erase mask = area should be hidden (erased)
-				for (let i = 0; i < combinedPixels.length; i += 4) {
-					const eraseValue = erasePixels[i];
-					const currentValue = combinedPixels[i];
-					
-					// Multiply the values (both normalized to 0-1 range)
-					const finalValue = (currentValue / 255) * (eraseValue / 255) * 255;
-					
-					combinedPixels[i] = finalValue;
-					combinedPixels[i + 1] = finalValue;
-					combinedPixels[i + 2] = finalValue;
-					// Keep alpha at 255
+				for (let i = 0; i < pixels.length; i += 4) {
+					pixels[i] = pixels[i + 1] = pixels[i + 2] = pixels[i + 3];
+					pixels[i + 3] = 255;
 				}
 				
-				combinedMaskCtx.putImageData(combinedData, 0, 0);
+				tempCtx.putImageData(tempData, 0, 0);
+				maskCtx.drawImage(tempCanvas, 0, 0);
 			});
 			
-			// Convert combined mask to ImageData for PSD
-			const finalMaskData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
-			const finalMaskPixels = finalMaskData.data;
-			
-			// Check if mask actually affects this layer (any visible pixel with mask < 255)
-			let maskWouldAffectLayer = false;
-			for (let i = 0; i < finalMaskPixels.length; i += 4) {
-				if (layerPixels[i + 3] > 0 && finalMaskPixels[i] < 255) {
-					maskWouldAffectLayer = true;
-					break;
-				}
-		}
-		
-		if (!maskWouldAffectLayer) {
-			return;
-		}
-		
-		// Use full layer bounds for mask (optimization disabled for compatibility)
-		const maskBounds = { top: 0, left: 0, bottom: psdHeight, right: psdWidth };			layer.mask = {
-				top: maskBounds.top,
-				left: maskBounds.left,
-				bottom: maskBounds.bottom,
-				right: maskBounds.right,
-				defaultColor: 255,
-				imageData: finalMaskData,
-				disabled: false,
-				positionRelativeToLayer: false,
-				fromVectorData: false
-			};
-		});
+			return maskCtx.getImageData(0, 0, psdWidth, psdHeight);
+		};
 
 		// Helper function to add layer with optional color overlay and HSL adjustment clipping masks
 		const addLayerWithColorOverlay = (layer, targetArray) => {
-			// Add the base layer
-			targetArray.push({
+			// Determine if we need to recreate the full frame
+			const hasFrameMasks = layer.frameData?.masks?.length > 0;
+			let fullFrameCanvas = layer.canvas;
+			let combinedMaskData = null;
+			
+			// If we have frame masks, draw the full frame and create combined mask
+			if (hasFrameMasks) {
+				fullFrameCanvas = document.createElement('canvas');
+				fullFrameCanvas.width = psdWidth;
+				fullFrameCanvas.height = psdHeight;
+				const ctx = fullFrameCanvas.getContext('2d');
+				
+				const { bounds = {}, ogBounds = bounds, image } = layer.frameData;
+				if (image) {
+					ctx.drawImage(image, 
+						Math.round(scaleX(bounds.x || 0)), 
+						Math.round(scaleY(bounds.y || 0)), 
+						Math.round(scaleWidth(bounds.width || 1)), 
+						Math.round(scaleHeight(bounds.height || 1))
+					);
+				}
+				
+				combinedMaskData = createCombinedFrameMask(layer.frameData, psdWidth, psdHeight);
+			}
+			
+			// Combine frame mask with erase mask if both exist
+			if (combinedMaskData && layer.mask) {
+				combinedMaskData = multiplyMasks(combinedMaskData, layer.mask.imageData);
+			} else if (layer.mask) {
+				combinedMaskData = layer.mask.imageData;
+			}
+			
+			// Create and add base layer
+			const baseLayer = {
 				name: layer.name,
-				canvas: layer.canvas,
+				canvas: fullFrameCanvas,
 				left: 0,
 				top: 0,
 				right: psdWidth,
 				bottom: psdHeight,
 				opacity: layer.opacity,
-				blendMode: layer.blendMode,
-				mask: layer.mask
-			});
+				blendMode: layer.blendMode
+			};
+			if (combinedMaskData) baseLayer.mask = createPSDMask(combinedMaskData);
+			targetArray.push(baseLayer);
 			
-			// If there are HSL adjustments, add as adjustment layer
-			if (layer.hslHue !== 0 || layer.hslSaturation !== 0 || layer.hslLightness !== 0) {
-				// Note: ag-psd doesn't fully support adjustment layers with actual adjustment data
-				// So we create a visual indicator layer and apply the adjustments
-				// Users will need to manually recreate the exact values in Photoshop if desired
-				
-				// Create a canvas with the HSL adjustment baked in for visual reference
+			// Add HSL adjustment layer if needed
+			if (layer.hslHue || layer.hslSaturation || layer.hslLightness) {
 				const hslCanvas = document.createElement('canvas');
 				hslCanvas.width = psdWidth;
 				hslCanvas.height = psdHeight;
 				const hslCtx = hslCanvas.getContext('2d');
+				hslCtx.drawImage(fullFrameCanvas, 0, 0);
+				hsl(hslCanvas, layer.hslHue || 0, layer.hslSaturation || 0, layer.hslLightness || 0);
 				
-				// Draw the base layer
-				hslCtx.drawImage(layer.canvas, 0, 0);
+				const hslLabel = [
+					layer.hslHue && `H:${layer.hslHue > 0 ? '+' : ''}${layer.hslHue}`,
+					layer.hslSaturation && `S:${layer.hslSaturation > 0 ? '+' : ''}${layer.hslSaturation}`,
+					layer.hslLightness && `L:${layer.hslLightness > 0 ? '+' : ''}${layer.hslLightness}`
+				].filter(Boolean).join(', ');
 				
-				// Apply HSL adjustment
-				hsl(hslCanvas, layer.hslHue, layer.hslSaturation, layer.hslLightness);
-				
-				// Add as a clipping mask layer with the adjustment baked in
-				const hslLabel = [];
-				if (layer.hslHue !== 0) hslLabel.push(`H:${layer.hslHue > 0 ? '+' : ''}${layer.hslHue}`);
-				if (layer.hslSaturation !== 0) hslLabel.push(`S:${layer.hslSaturation > 0 ? '+' : ''}${layer.hslSaturation}`);
-				if (layer.hslLightness !== 0) hslLabel.push(`L:${layer.hslLightness > 0 ? '+' : ''}${layer.hslLightness}`);
-				
-				targetArray.push({
-					name: layer.name + ' HSL Adjustment [' + hslLabel.join(', ') + ']',
+				const hslLayer = {
+					name: `${layer.name} HSL Adjustment [${hslLabel}]`,
 					canvas: hslCanvas,
 					left: 0,
 					top: 0,
@@ -5672,21 +5711,22 @@ async function downloadCardAsPSD() {
 					bottom: psdHeight,
 					opacity: 1,
 					blendMode: 'normal',
-					clipping: true // This makes it clip to the layer below
-				});
+					clipping: true
+				};
+				if (combinedMaskData) hslLayer.mask = createPSDMask(combinedMaskData);
+				targetArray.push(hslLayer);
 			}
 			
-			// If there's a color overlay, add it as a clipping mask layer
+			// Add color overlay layer if needed
 			if (layer.colorOverlay) {
 				const colorCanvas = document.createElement('canvas');
 				colorCanvas.width = psdWidth;
 				colorCanvas.height = psdHeight;
-				const colorCtx = colorCanvas.getContext('2d');
-				colorCtx.fillStyle = layer.colorOverlay;
-				colorCtx.fillRect(0, 0, psdWidth, psdHeight);
+				colorCanvas.getContext('2d').fillStyle = layer.colorOverlay;
+				colorCanvas.getContext('2d').fillRect(0, 0, psdWidth, psdHeight);
 				
-				targetArray.push({
-					name: layer.name + ' Color Overlay',
+				const colorLayer = {
+					name: `${layer.name} Color Overlay`,
 					canvas: colorCanvas,
 					left: 0,
 					top: 0,
@@ -5694,8 +5734,10 @@ async function downloadCardAsPSD() {
 					bottom: psdHeight,
 					opacity: 1,
 					blendMode: 'normal',
-					clipping: true // This makes it clip to the layer below
-				});
+					clipping: true
+				};
+				if (combinedMaskData) colorLayer.mask = createPSDMask(combinedMaskData);
+				targetArray.push(colorLayer);
 			}
 		};
 
