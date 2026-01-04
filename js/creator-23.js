@@ -5277,6 +5277,7 @@ function parseColorToRGB(color) {
 	return colorMap[color] || { r: 0, g: 0, b: 0 };
 }
 
+// Exports the current card as a layered PSD file with masks, frames, text, and art
 async function downloadCardAsPSD() {
 	const startTime = performance.now();
 	
@@ -5308,14 +5309,13 @@ async function downloadCardAsPSD() {
 			'rules': 0.999,
 			'pt': 0.80,
 			'mana': 0.8,
-			// Add more field names and their offsets as needed
 			'default': 0.95  // fallback for unlisted fields
 		};
 
 		// Define X offset for each text field (in pixels)
 		const textXOffsets = {
-			'pt': +10,  // Move PT left by 10 pixels
-			'default': 0  // no offset for other fields
+			'pt': +10,
+			'default': 0
 		};
 		
 		// Create PSD structure with metadata
@@ -5329,10 +5329,10 @@ async function downloadCardAsPSD() {
 			// Add image resources for proper color profile and resolution metadata
 			imageResources: {
 				resolutionInfo: {
-					horizontalResolution: targetPPI,  // Adjust based on margin presence
+					horizontalResolution: targetPPI,
 					horizontalResolutionUnit: 'PPI',
 					widthUnit: 'Inches',
-					verticalResolution: targetPPI,    // Adjust based on margin presence
+					verticalResolution: targetPPI,
 					verticalResolutionUnit: 'PPI',
 					heightUnit: 'Inches'
 				},
@@ -5342,7 +5342,7 @@ async function downloadCardAsPSD() {
 				},
 				// Add print scale
 				printScale: {
-					style: 0, // centered
+					style: 0,
 					x: 1.0,
 					y: 1.0,
 					scale: 1.0
@@ -5481,7 +5481,14 @@ async function downloadCardAsPSD() {
 				// Convert alpha to inverted grayscale mask
 				eraseCtx.putImageData(alphaToInvertedMask(eraseCtx.getImageData(0, 0, psdWidth, psdHeight)), 0, 0);
 				
-				eraseMasks.push({ index, canvas: eraseCanvas });
+				// Store the erase mask along with the frame's mask info for later combination
+				eraseMasks.push({ 
+					index, 
+					canvas: eraseCanvas,
+					frameMasks: frame.masks || [],
+					bounds,
+					ogBounds
+				});
 				continue; // Skip creating a regular frame layer for erase frames
 			}
 			
@@ -5544,6 +5551,48 @@ async function downloadCardAsPSD() {
 			else frameLayers.push(layerData);
 		}
 
+	// Helper function to create a combined mask from all frame masks (including half masks)
+	const createCombinedFrameMask = (frame, psdWidth, psdHeight, invert = false) => {
+		if (!frame.masks?.length) return null;
+		
+		const maskCanvas = document.createElement('canvas');
+		maskCanvas.width = psdWidth;
+		maskCanvas.height = psdHeight;
+		const maskCtx = maskCanvas.getContext('2d');
+		
+		// Start with white (fully visible)
+		maskCtx.fillStyle = 'white';
+		maskCtx.fillRect(0, 0, psdWidth, psdHeight);
+		maskCtx.globalCompositeOperation = 'multiply';
+		
+		const bounds = frame.bounds || {};
+		const ogBounds = frame.ogBounds || bounds;
+		const transform = getMaskTransform(bounds, ogBounds);
+		
+		// Apply each mask
+		frame.masks.forEach(mask => {
+			const tempCanvas = document.createElement('canvas');
+			tempCanvas.width = psdWidth;
+			tempCanvas.height = psdHeight;
+			const tempCtx = tempCanvas.getContext('2d');
+			
+			// Draw mask and convert alpha to grayscale (optionally inverted)
+			tempCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h);
+			const tempData = tempCtx.getImageData(0, 0, psdWidth, psdHeight);
+			const pixels = tempData.data;
+			
+			for (let i = 0; i < pixels.length; i += 4) {
+				pixels[i] = pixels[i + 1] = pixels[i + 2] = invert ? 255 - pixels[i + 3] : pixels[i + 3];
+				pixels[i + 3] = 255;
+			}
+			
+			tempCtx.putImageData(tempData, 0, 0);
+			maskCtx.drawImage(tempCanvas, 0, 0);
+		});
+		
+		return maskCtx.getImageData(0, 0, psdWidth, psdHeight);
+	};
+
 	// Second pass: apply erase masks to all layers before them
 	const allLayers = [...ptLayers, ...crownLayers, ...frameLayers];
 
@@ -5571,7 +5620,11 @@ async function downloadCardAsPSD() {
 		
 		// Apply each erase layer by multiplying
 		applicableEraseMasks.forEach(erase => {
-			const eraseMaskData = erase.canvas.getContext('2d').getImageData(0, 0, psdWidth, psdHeight);
+			// Use frame masks if present (inverted for erase), otherwise use erase canvas
+			const eraseMaskData = erase.frameMasks?.length > 0
+				? createCombinedFrameMask({ masks: erase.frameMasks, bounds: erase.bounds, ogBounds: erase.ogBounds }, psdWidth, psdHeight, true)
+				: erase.canvas.getContext('2d').getImageData(0, 0, psdWidth, psdHeight);
+			
 			const erasePixels = eraseMaskData.data;
 			const combinedData = combinedMaskCtx.getImageData(0, 0, psdWidth, psdHeight);
 			const combinedPixels = combinedData.data;
@@ -5597,50 +5650,8 @@ async function downloadCardAsPSD() {
 		}
 	});
 
-		// Helper function to create a combined mask from all frame masks (including half masks)
-		const createCombinedFrameMask = (frame, psdWidth, psdHeight) => {
-			if (!frame.masks?.length) return null;
-			
-			const maskCanvas = document.createElement('canvas');
-			maskCanvas.width = psdWidth;
-			maskCanvas.height = psdHeight;
-			const maskCtx = maskCanvas.getContext('2d');
-			
-			// Start with white (fully visible)
-			maskCtx.fillStyle = 'white';
-			maskCtx.fillRect(0, 0, psdWidth, psdHeight);
-			maskCtx.globalCompositeOperation = 'multiply';
-			
-			const bounds = frame.bounds || {};
-			const ogBounds = frame.ogBounds || bounds;
-			const transform = getMaskTransform(bounds, ogBounds);
-			
-			// Apply each mask
-			frame.masks.forEach(mask => {
-				const tempCanvas = document.createElement('canvas');
-				tempCanvas.width = psdWidth;
-				tempCanvas.height = psdHeight;
-				const tempCtx = tempCanvas.getContext('2d');
-				
-				// Draw mask and convert alpha to grayscale
-				tempCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h);
-				const tempData = tempCtx.getImageData(0, 0, psdWidth, psdHeight);
-				const pixels = tempData.data;
-				
-				for (let i = 0; i < pixels.length; i += 4) {
-					pixels[i] = pixels[i + 1] = pixels[i + 2] = pixels[i + 3];
-					pixels[i + 3] = 255;
-				}
-				
-				tempCtx.putImageData(tempData, 0, 0);
-				maskCtx.drawImage(tempCanvas, 0, 0);
-			});
-			
-			return maskCtx.getImageData(0, 0, psdWidth, psdHeight);
-		};
-
-		// Helper function to add layer with optional color overlay and HSL adjustment clipping masks
-		const addLayerWithColorOverlay = (layer, targetArray) => {
+	// Helper function to add layer with optional color overlay and HSL adjustment clipping masks
+	const addLayerWithColorOverlay = (layer, targetArray) => {
 			// Determine if we need to recreate the full frame
 			const hasFrameMasks = layer.frameData?.masks?.length > 0;
 			let fullFrameCanvas = layer.canvas;
@@ -6069,7 +6080,7 @@ async function downloadCardAsPSD() {
 			textLayersChildren.push({
 				name: 'Static Text Layers',
 				children: staticTextLayers,
-				opened: true  // Expanded by default
+				opened: true
 			});
 		}
 
@@ -6078,8 +6089,8 @@ async function downloadCardAsPSD() {
 			textLayersChildren.push({
 				name: 'Editable Text',
 				children: editableTextLayers,
-				opened: false, // Collapsed by default
-				hidden: true // Hidden by default to avoid clutter
+				opened: false,
+				hidden: true
 			});
 		}
 
