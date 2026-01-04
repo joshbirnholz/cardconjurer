@@ -5350,12 +5350,52 @@ async function downloadCardAsPSD() {
 			}
 		};
 
+		// Helper to create common layer properties
+		const createLayerBase = (name, canvas, opacity = 1, blendMode = 'normal') => ({
+			name,
+			canvas,
+			left: 0,
+			top: 0,
+			right: psdWidth,
+			bottom: psdHeight,
+			opacity,
+			blendMode
+		});
+
+		// Helper to create a canvas sized to PSD dimensions
+		const createCanvas = () => {
+			const canvas = document.createElement('canvas');
+			canvas.width = psdWidth;
+			canvas.height = psdHeight;
+			return { canvas, ctx: canvas.getContext('2d') };
+		};
+
+		// Helper to check if text field is rules text
+		const checkIsRulesText = (key, textObject) => 
+			key === 'rules' || (textObject?.name?.toLowerCase().includes('rules')) || (textObject?.name?.toLowerCase() === 'case');
+
+		// Helper to check if layer is editable
+		const isEditableLayer = (layer) => layer.name?.includes('(Editable)');
+
+		// Helper to get scaled bounds from a bounds object
+		const getScaledBounds = (bounds) => ({
+			x: Math.round(scaleX(bounds?.x || 0)),
+			y: Math.round(scaleY(bounds?.y || 0)),
+			width: Math.round(scaleWidth(bounds?.width || 1)),
+			height: Math.round(scaleHeight(bounds?.height || 1))
+		});
+
+		// Helper to get scaled text box coordinates
+		const getScaledTextBounds = (textObject) => ({
+			x: scaleX(textObject?.x || 0),
+			y: scaleY(textObject?.y || 0),
+			width: scaleWidth(textObject?.width || 1),
+			height: scaleHeight(textObject?.height || 1)
+		});
+
 		// Add art layer only if art is present
 		if (!card.artSource.includes('/img/blank.png') && card.artZoom > 0) {
-			const artCanvas = document.createElement('canvas');
-			artCanvas.width = psdWidth;
-			artCanvas.height = psdHeight;
-			const artCtx = artCanvas.getContext('2d');
+			const { canvas: artCanvas, ctx: artCtx } = createCanvas();
 			artCtx.save();
 			artCtx.translate(scaleX(card.artX), scaleY(card.artY));
 			artCtx.rotate(Math.PI / 180 * (card.artRotate || 0));
@@ -5365,16 +5405,7 @@ async function downloadCardAsPSD() {
 			artCtx.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
 			artCtx.restore();
 			
-			psd.children.push({
-				name: 'Art',
-				canvas: artCanvas,
-				left: 0,
-				top: 0,
-				right: psdWidth,
-				bottom: psdHeight,
-				blendMode: 'normal',
-				opacity: 1
-			});
+			psd.children.push(createLayerBase('Art', artCanvas));
 		}
 
 		// Create frame group with all frame layers inside
@@ -5399,15 +5430,10 @@ async function downloadCardAsPSD() {
 
 		// Helper function to combine multiple masks by multiplying them together
 		const multiplyMasks = (mask1Data, mask2Data) => {
-			const canvas = document.createElement('canvas');
-			canvas.width = psdWidth;
-			canvas.height = psdHeight;
-			const ctx = canvas.getContext('2d');
+			const { canvas, ctx } = createCanvas();
 			ctx.putImageData(mask1Data, 0, 0);
 			
-			const tempCanvas = document.createElement('canvas');
-			tempCanvas.width = psdWidth;
-			tempCanvas.height = psdHeight;
+			const { canvas: tempCanvas } = createCanvas();
 			tempCanvas.getContext('2d').putImageData(mask2Data, 0, 0);
 			
 			ctx.globalCompositeOperation = 'multiply';
@@ -5423,19 +5449,18 @@ async function downloadCardAsPSD() {
 			h: scaleHeight((bounds.height || 1) / (ogBounds.height || 1))
 		});
 
-		// Helper to apply masks to a canvas context
-		const applyMasksToFrame = (ctx, frame, frameX, frameY, frameWidth, frameHeight) => {
-			const bounds = frame.bounds || {};
-			const ogBounds = frame.ogBounds || bounds;
-			const transform = getMaskTransform(bounds, ogBounds);
-			
-			ctx.globalCompositeOperation = 'source-over';
-			ctx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
-			ctx.globalCompositeOperation = 'destination-in';
-			frame.masks.forEach(mask => ctx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h));
-		};
-
-		// Helper to convert alpha to inverted grayscale mask
+	// Helper to apply masks to a canvas context
+	const applyMasksToFrame = (ctx, frame) => {
+		const bounds = frame.bounds || {};
+		const ogBounds = frame.ogBounds || bounds;
+		const { x, y, width, height } = getScaledBounds(bounds);
+		const transform = getMaskTransform(bounds, ogBounds);
+		
+		ctx.globalCompositeOperation = 'source-over';
+		ctx.drawImage(frame.image, x, y, width, height);
+		ctx.globalCompositeOperation = 'destination-in';
+		frame.masks.forEach(mask => ctx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h));
+	};		// Helper to convert alpha to inverted grayscale mask
 		const alphaToInvertedMask = (imageData) => {
 			const pixels = imageData.data;
 			for (let i = 0; i < pixels.length; i += 4) {
@@ -5457,28 +5482,20 @@ async function downloadCardAsPSD() {
 		for (let index = 0; index < reversedFrames.length; index++) {
 			const frame = reversedFrames[index];
 			
-			if (frame.erase && frame.image) {
-				// Create erase mask
-				const eraseCanvas = document.createElement('canvas');
-				eraseCanvas.width = psdWidth;
-				eraseCanvas.height = psdHeight;
-				const eraseCtx = eraseCanvas.getContext('2d');
-				
-				const bounds = frame.bounds || {};
-				const ogBounds = frame.ogBounds || bounds;
-				const frameX = Math.round(scaleX(bounds.x || 0));
-				const frameY = Math.round(scaleY(bounds.y || 0));
-				const frameWidth = Math.round(scaleWidth(bounds.width || 1));
-				const frameHeight = Math.round(scaleHeight(bounds.height || 1));
-				
-				applyMasksToFrame(eraseCtx, frame, frameX, frameY, frameWidth, frameHeight);
-				
-				// Apply HSL adjustments if needed
-				if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
-					hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
-				}
-				
-				// Convert alpha to inverted grayscale mask
+		if (frame.erase && frame.image) {
+			// Create erase mask
+			const { canvas: eraseCanvas, ctx: eraseCtx } = createCanvas();
+			
+		
+		const bounds = frame.bounds || {};
+		const ogBounds = frame.ogBounds || bounds;
+		
+		applyMasksToFrame(eraseCtx, frame);
+			
+			// Apply HSL adjustments if needed
+			if (frame.hslHue || frame.hslSaturation || frame.hslLightness) {
+				hsl(eraseCanvas, frame.hslHue || 0, frame.hslSaturation || 0, frame.hslLightness || 0);
+			}				// Convert alpha to inverted grayscale mask
 				eraseCtx.putImageData(alphaToInvertedMask(eraseCtx.getImageData(0, 0, psdWidth, psdHeight)), 0, 0);
 				
 				// Store the erase mask along with the frame's mask info for later combination
@@ -5493,31 +5510,20 @@ async function downloadCardAsPSD() {
 			}
 			
 			// Create regular frame layer
-			const frameCanvas = document.createElement('canvas');
-			frameCanvas.width = psdWidth;
-			frameCanvas.height = psdHeight;
-			const frameCtx = frameCanvas.getContext('2d');
+			const { canvas: frameCanvas, ctx: frameCtx } = createCanvas();
 			
-			if (frame.image) {
-				const bounds = frame.bounds || {};
-				const ogBounds = frame.ogBounds || bounds;
-				const frameX = Math.round(scaleX(bounds.x || 0));
-				const frameY = Math.round(scaleY(bounds.y || 0));
-				const frameWidth = Math.round(scaleWidth(bounds.width || 1));
-				const frameHeight = Math.round(scaleHeight(bounds.height || 1));
-				
-				const tempMaskCanvas = document.createElement('canvas');
-				tempMaskCanvas.width = psdWidth;
-				tempMaskCanvas.height = psdHeight;
-				const tempMaskCtx = tempMaskCanvas.getContext('2d');
-				
-				tempMaskCtx.globalCompositeOperation = 'source-over';
+		if (frame.image) {
+			const bounds = frame.bounds || {};
+			const ogBounds = frame.ogBounds || bounds;
+			const { x, y, width, height } = getScaledBounds(bounds);
+			
+			const { canvas: tempMaskCanvas, ctx: tempMaskCtx } = createCanvas();				tempMaskCtx.globalCompositeOperation = 'source-over';
 				tempMaskCtx.drawImage(black, 0, 0, psdWidth, psdHeight);
 				
 				const transform = getMaskTransform(bounds, ogBounds);
 				tempMaskCtx.globalCompositeOperation = 'source-in';
 				frame.masks.forEach(mask => tempMaskCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h));
-				tempMaskCtx.drawImage(frame.image, frameX, frameY, frameWidth, frameHeight);
+				tempMaskCtx.drawImage(frame.image, x, y, width, height);
 				
 				frameCtx.drawImage(tempMaskCanvas, 0, 0);
 			}
@@ -5555,10 +5561,7 @@ async function downloadCardAsPSD() {
 	const createCombinedFrameMask = (frame, psdWidth, psdHeight, invert = false) => {
 		if (!frame.masks?.length) return null;
 		
-		const maskCanvas = document.createElement('canvas');
-		maskCanvas.width = psdWidth;
-		maskCanvas.height = psdHeight;
-		const maskCtx = maskCanvas.getContext('2d');
+		const { canvas: maskCanvas, ctx: maskCtx } = createCanvas();
 		
 		// Start with white (fully visible)
 		maskCtx.fillStyle = 'white';
@@ -5569,14 +5572,13 @@ async function downloadCardAsPSD() {
 		const ogBounds = frame.ogBounds || bounds;
 		const transform = getMaskTransform(bounds, ogBounds);
 		
+		// Create reusable temp canvas outside the loop
+		const { canvas: tempCanvas, ctx: tempCtx } = createCanvas();
+		
 		// Apply each mask
 		frame.masks.forEach(mask => {
-			const tempCanvas = document.createElement('canvas');
-			tempCanvas.width = psdWidth;
-			tempCanvas.height = psdHeight;
-			const tempCtx = tempCanvas.getContext('2d');
-			
-			// Draw mask and convert alpha to grayscale (optionally inverted)
+			// Clear and draw mask, convert alpha to grayscale (optionally inverted)
+			tempCtx.clearRect(0, 0, psdWidth, psdHeight);
 			tempCtx.drawImage(mask.image, transform.x, transform.y, transform.w, transform.h);
 			const tempData = tempCtx.getImageData(0, 0, psdWidth, psdHeight);
 			const pixels = tempData.data;
@@ -5609,10 +5611,7 @@ async function downloadCardAsPSD() {
 		if (!layerHasContent) return;
 		
 		// Combine all applicable erase masks
-		const combinedMaskCanvas = document.createElement('canvas');
-		combinedMaskCanvas.width = psdWidth;
-		combinedMaskCanvas.height = psdHeight;
-		const combinedMaskCtx = combinedMaskCanvas.getContext('2d');
+		const { canvas: combinedMaskCanvas, ctx: combinedMaskCtx } = createCanvas();
 		
 		// Start with white (fully visible)
 		combinedMaskCtx.fillStyle = 'white';
@@ -5657,27 +5656,19 @@ async function downloadCardAsPSD() {
 			let fullFrameCanvas = layer.canvas;
 			let combinedMaskData = null;
 			
-			// If we have frame masks, draw the full frame and create combined mask
-			if (hasFrameMasks) {
-				fullFrameCanvas = document.createElement('canvas');
-				fullFrameCanvas.width = psdWidth;
-				fullFrameCanvas.height = psdHeight;
-				const ctx = fullFrameCanvas.getContext('2d');
-				
-				const { bounds = {}, ogBounds = bounds, image } = layer.frameData;
-				if (image) {
-					ctx.drawImage(image, 
-						Math.round(scaleX(bounds.x || 0)), 
-						Math.round(scaleY(bounds.y || 0)), 
-						Math.round(scaleWidth(bounds.width || 1)), 
-						Math.round(scaleHeight(bounds.height || 1))
-					);
-				}
-				
-				combinedMaskData = createCombinedFrameMask(layer.frameData, psdWidth, psdHeight);
+		// If we have frame masks, draw the full frame and create combined mask
+		if (hasFrameMasks) {
+			const { canvas, ctx } = createCanvas();
+			fullFrameCanvas = canvas;
+			
+			const { bounds = {}, ogBounds = bounds, image } = layer.frameData;
+			if (image) {
+				const { x, y, width, height } = getScaledBounds(bounds);
+				ctx.drawImage(image, x, y, width, height);
 			}
 			
-			// Combine frame mask with erase mask if both exist
+			combinedMaskData = createCombinedFrameMask(layer.frameData, psdWidth, psdHeight);
+		}			// Combine frame mask with erase mask if both exist
 			if (combinedMaskData && layer.mask) {
 				combinedMaskData = multiplyMasks(combinedMaskData, layer.mask.imageData);
 			} else if (layer.mask) {
@@ -5685,25 +5676,13 @@ async function downloadCardAsPSD() {
 			}
 			
 			// Create and add base layer
-			const baseLayer = {
-				name: layer.name,
-				canvas: fullFrameCanvas,
-				left: 0,
-				top: 0,
-				right: psdWidth,
-				bottom: psdHeight,
-				opacity: layer.opacity,
-				blendMode: layer.blendMode
-			};
+			const baseLayer = createLayerBase(layer.name, fullFrameCanvas, layer.opacity, layer.blendMode);
 			if (combinedMaskData) baseLayer.mask = createPSDMask(combinedMaskData);
 			targetArray.push(baseLayer);
 			
 			// Add HSL adjustment layer if needed
 			if (layer.hslHue || layer.hslSaturation || layer.hslLightness) {
-				const hslCanvas = document.createElement('canvas');
-				hslCanvas.width = psdWidth;
-				hslCanvas.height = psdHeight;
-				const hslCtx = hslCanvas.getContext('2d');
+				const { canvas: hslCanvas, ctx: hslCtx } = createCanvas();
 				hslCtx.drawImage(fullFrameCanvas, 0, 0);
 				hsl(hslCanvas, layer.hslHue || 0, layer.hslSaturation || 0, layer.hslLightness || 0);
 				
@@ -5713,42 +5692,22 @@ async function downloadCardAsPSD() {
 					layer.hslLightness && `L:${layer.hslLightness > 0 ? '+' : ''}${layer.hslLightness}`
 				].filter(Boolean).join(', ');
 				
-				const hslLayer = {
-					name: `${layer.name} HSL Adjustment [${hslLabel}]`,
-					canvas: hslCanvas,
-					left: 0,
-					top: 0,
-					right: psdWidth,
-					bottom: psdHeight,
-					opacity: 1,
-					blendMode: 'normal',
+				targetArray.push({
+					...createLayerBase(`${layer.name} HSL Adjustment [${hslLabel}]`, hslCanvas),
 					clipping: true
-				};
-				if (combinedMaskData) hslLayer.mask = createPSDMask(combinedMaskData);
-				targetArray.push(hslLayer);
+				});
 			}
 			
 			// Add color overlay layer if needed
 			if (layer.colorOverlay) {
-				const colorCanvas = document.createElement('canvas');
-				colorCanvas.width = psdWidth;
-				colorCanvas.height = psdHeight;
-				colorCanvas.getContext('2d').fillStyle = layer.colorOverlay;
-				colorCanvas.getContext('2d').fillRect(0, 0, psdWidth, psdHeight);
+				const { canvas: colorCanvas, ctx: colorCtx } = createCanvas();
+				colorCtx.fillStyle = layer.colorOverlay;
+				colorCtx.fillRect(0, 0, psdWidth, psdHeight);
 				
-				const colorLayer = {
-					name: `${layer.name} Color Overlay`,
-					canvas: colorCanvas,
-					left: 0,
-					top: 0,
-					right: psdWidth,
-					bottom: psdHeight,
-					opacity: 1,
-					blendMode: 'normal',
+				targetArray.push({
+					...createLayerBase(`${layer.name} Color Overlay`, colorCanvas),
 					clipping: true
-				};
-				if (combinedMaskData) colorLayer.mask = createPSDMask(combinedMaskData);
-				targetArray.push(colorLayer);
+				});
 			}
 		};
 
@@ -5801,10 +5760,7 @@ async function downloadCardAsPSD() {
 			watermarkEdited();
 			
 			// Create a canvas with the full opacity watermark
-			const fullOpacityWatermarkCanvas = document.createElement('canvas');
-			fullOpacityWatermarkCanvas.width = psdWidth;
-			fullOpacityWatermarkCanvas.height = psdHeight;
-			const fullOpacityWatermarkCtx = fullOpacityWatermarkCanvas.getContext('2d');
+			const { canvas: fullOpacityWatermarkCanvas, ctx: fullOpacityWatermarkCtx } = createCanvas();
 			fullOpacityWatermarkCtx.drawImage(watermarkCanvas, 0, 0);
 			
 			// Restore original opacity in UI and card object
@@ -5813,16 +5769,7 @@ async function downloadCardAsPSD() {
 			watermarkEdited();
 			
 			// Add to PSD with correct layer opacity
-			psd.children.push({
-				name: 'Watermark',
-				canvas: fullOpacityWatermarkCanvas,
-				left: 0,
-				top: 0,
-				right: psdWidth,
-				bottom: psdHeight,
-				blendMode: 'normal',
-				opacity: originalOpacity
-			});
+			psd.children.push(createLayerBase('Watermark', fullOpacityWatermarkCanvas, originalOpacity));
 		}
 
 		// Create text group with individual text fields AND editable text layers
@@ -5833,6 +5780,20 @@ async function downloadCardAsPSD() {
 
 		// Track flavor divider position during text rendering
 		let actualFlavorDividerY = null;
+
+		// Font name mapping (shared across all text fields)
+		const fontMap = {
+			'mplantin': 'MPlantin',
+			'mplantini': 'MPlantin-It',
+			'belerenb': 'Beleren-Bold',
+			'beleren': 'Beleren',
+			'belerenbsc': 'BelerenSmallCaps-Bold',
+			'matrix': 'MatrixBoldSmallCaps',
+			'matrixb': 'MatrixBoldSmallCaps',
+			'gothammedium': 'GothamMedium',
+			'gothambold': 'GothamBold',
+			'goudymedieval': 'GoudyMediaeval',
+		};
 
 		// Render each text field separately with BOTH raster and editable text
 		for (const [key, textObject] of Object.entries(card.text)) {
@@ -5845,32 +5806,27 @@ async function downloadCardAsPSD() {
 			const hasFlavorBar = textObject.text && (textObject.text.includes('{flavor}') || textObject.text.includes('{bar}'));
 
 			// Create raster text canvas (with mana symbols)
-			const textFieldCanvas = document.createElement('canvas');
-			textFieldCanvas.width = psdWidth;
-			textFieldCanvas.height = psdHeight;
-			const textFieldCtx = textFieldCanvas.getContext('2d');
+			const { canvas: textFieldCanvas, ctx: textFieldCtx } = createCanvas();
 			
 			// Render this specific text field
 			await writeText(textObject, textFieldCtx);
 			
 			// If this field had a flavor bar, scan the canvas to find where it was actually drawn
 			if (hasFlavorBar && card.showsFlavorBar) {
-				const imageData = textFieldCtx.getImageData(0, 0, psdWidth, psdHeight);
-				
-				// Scan for the flavor bar (look for non-transparent pixels in likely Y range)
-				const textBoxY = scaleY(textObject.y || 0);
-				const textBoxHeight = scaleHeight(textObject.height || 1);
-				const fontSize = scaleHeight(textObject.size || 0.038);
-				
-				// Search within the text box area
-				const searchStartY = textBoxY;
-				const searchEndY = textBoxY + textBoxHeight;
-				
-				// Look for a horizontal line of pixels (the bar is wide)
-				for (let y = searchStartY; y < searchEndY; y++) {
+			const imageData = textFieldCtx.getImageData(0, 0, psdWidth, psdHeight);
+			
+			// Scan for the flavor bar (look for non-transparent pixels in likely Y range)
+			const { y: textBoxY, height: textBoxHeight } = getScaledTextBounds(textObject);
+			const fontSize = scaleHeight(textObject.size || 0.038);
+			
+			// Search within the text box area, starting from bottom
+			const searchStartY = Math.round(textBoxY + textBoxHeight);
+			const searchEndY = Math.round(textBoxY);				// Look for a horizontal line of pixels (the bar is wide) - scan from bottom up
+				for (let y = searchStartY; y > searchEndY; y--) {
 					let consecutivePixels = 0;
 					
-					for (let x = 0; x < psdWidth; x++) {
+					// Sample every 4 pixels for better performance
+					for (let x = 0; x < psdWidth; x += 4) {
 						const index = (y * psdWidth + x) * 4;
 						const alpha = imageData.data[index + 3];
 						
@@ -5878,7 +5834,7 @@ async function downloadCardAsPSD() {
 							consecutivePixels++;
 							
 							// If we found a long horizontal line, this is likely our bar
-							if (consecutivePixels > scaleWidth(0.5)) {
+							if (consecutivePixels > scaleWidth(0.5) / 4) {
 								actualFlavorDividerY = y;
 								break;
 							}
@@ -5903,33 +5859,16 @@ async function downloadCardAsPSD() {
 				.replace(/\{[^}]+\}/g, '')
 				.trim();
 
-			if (cleanText) {
-				const textBoxX = scaleX(textObject.x || 0);
-				const textBoxY = scaleY(textObject.y || 0);
-				const textBoxWidth = scaleWidth(textObject.width || 1);
-				const textBoxHeight = scaleHeight(textObject.height || 1);
-				const fontSize = scaleHeight(textObject.size || 0.038);
-				const fillColor = parseColorToRGB(textObject.color || 'black');
-				const textRotation = textObject.rotation || 0;
 
+		if (cleanText) {
+			const { x: textBoxX, y: textBoxY, width: textBoxWidth, height: textBoxHeight } = getScaledTextBounds(textObject);
+			const fontSize = scaleHeight(textObject.size || 0.038);
+			const fillColor = parseColorToRGB(textObject.color || 'black');
+			const textRotation = textObject.rotation || 0;
 				// Get alignment
-				let alignment = 'left';
-				if (textObject.align === 'center') alignment = 'center';
-				else if (textObject.align === 'right') alignment = 'right';
+				const alignment = ['left', 'center', 'right'].includes(textObject.align) ? textObject.align : 'left';
 
-				// Map font names
-				const fontMap = {
-					'mplantin': 'MPlantin',
-					'mplantini': 'MPlantin-It',
-					'belerenb': 'Beleren-Bold',
-					'beleren': 'Beleren',
-					'belerenbsc': 'BelerenSmallCaps-Bold',
-					'matrix': 'MatrixBoldSmallCaps',
-					'matrixb': 'MatrixBoldSmallCaps',
-					'gothammedium': 'GothamMedium',
-					'gothambold': 'GothamBold',
-					'goudymedieval': 'GoudyMediaeval',
-				};
+				// Get font name from map
 				const actualFont = textObject.font || 'mplantin';
 				const fontName = fontMap[actualFont.toLowerCase()] || fontMap['mplantin'];
 
@@ -5940,43 +5879,50 @@ async function downloadCardAsPSD() {
 				// Get the X offset for this specific text field
 				const xOffset = textXOffsets[key] || textXOffsets['default'];
 
-				// Calculate rotation transform
-				const rotationRad = (textRotation * Math.PI) / 180;
-				const cos = Math.cos(rotationRad);
-				const sin = Math.sin(rotationRad);
+				// Calculate rotation transform and bounding box
+				let cos, sin, minX, maxX, minY, maxY;
+				
+				if (textRotation === 0) {
+					// Fast path: no rotation - use simple bounds
+					cos = 1;
+					sin = 0;
+					minX = textBoxX + xOffset;
+					maxX = minX + textBoxWidth;
+					minY = textBoxY;
+					maxY = minY + textBoxHeight;
+				} else {
+					// Full rotation calculation
+					const rotationRad = (textRotation * Math.PI) / 180;
+					cos = Math.cos(rotationRad);
+					sin = Math.sin(rotationRad);
 
-				// Calculate rotated bounding box for proper layer bounds
-				// We need to find the corners of the text box after rotation
-				const corners = [
-					{ x: 0, y: 0 },
-					{ x: textBoxWidth, y: 0 },
-					{ x: textBoxWidth, y: textBoxHeight },
-					{ x: 0, y: textBoxHeight }
-				];
+					// Calculate rotated bounding box for proper layer bounds
+					const corners = [
+						{ x: 0, y: 0 },
+						{ x: textBoxWidth, y: 0 },
+						{ x: textBoxWidth, y: textBoxHeight },
+						{ x: 0, y: textBoxHeight }
+					];
 
-				// Rotate each corner around the origin (top-left of text box)
-				const rotatedCorners = corners.map(corner => ({
-					x: corner.x * cos - corner.y * sin + textBoxX + xOffset,
-					y: corner.x * sin + corner.y * cos + textBoxY
-				}));
+					// Rotate each corner around the origin (top-left of text box)
+					const rotatedCorners = corners.map(corner => ({
+						x: corner.x * cos - corner.y * sin + textBoxX + xOffset,
+						y: corner.x * sin + corner.y * cos + textBoxY
+					}));
 
-				// Find the bounding box of the rotated corners
-				const minX = Math.min(...rotatedCorners.map(c => c.x));
-				const maxX = Math.max(...rotatedCorners.map(c => c.x));
-				const minY = Math.min(...rotatedCorners.map(c => c.y));
-				const maxY = Math.max(...rotatedCorners.map(c => c.y));
+					// Find the bounding box of the rotated corners
+					minX = Math.min(...rotatedCorners.map(c => c.x));
+					maxX = Math.max(...rotatedCorners.map(c => c.x));
+					minY = Math.min(...rotatedCorners.map(c => c.y));
+					maxY = Math.max(...rotatedCorners.map(c => c.y));
+				}
 
-				// Check if this is the rules text field
-				const isRulesText = key === 'rules' || (textObject.name && textObject.name.toLowerCase().includes('rules'));
+		// Check if this is the rules text field
+		const isRulesText = checkIsRulesText(key, textObject);
 
-				if (isRulesText) {
-					// Create PARAGRAPH text layer for rules text
-					const boxLeft = scaleX(textObject.x || 0);
-					const boxTop = scaleY(textObject.y || 0);
-					const boxWidth = scaleWidth(textObject.width || 1);
-					const boxHeight = scaleHeight(textObject.height || 1);
-					
-					textGroup.children.push({
+		if (isRulesText) {
+			// Create PARAGRAPH text layer for rules text
+			const { x: boxLeft, y: boxTop, width: boxWidth, height: boxHeight } = getScaledTextBounds(textObject);					textGroup.children.push({
 						name: (textObject.name || key) + ' (Editable)',
 						text: {
 							text: cleanText,
@@ -6029,51 +5975,35 @@ async function downloadCardAsPSD() {
 
 		}
 	
-		// Add flavor divider if we found its actual position
-		if (actualFlavorDividerY !== null && card.showsFlavorBar) {
-			const dividerCanvas = document.createElement('canvas');
-			dividerCanvas.width = psdWidth;
-			dividerCanvas.height = psdHeight;
-			const dividerCtx = dividerCanvas.getContext('2d');
-			
-			// Get the flavor bar mana symbol
-			const barSymbol = getManaSymbol('bar');
-			if (barSymbol && barSymbol.image) {
-				// Find the rules text object to get the correct width
-				const rulesText = Object.values(card.text).find(t => 
-					t.name && (t.name.toLowerCase().includes('rules') || t.name.toLowerCase() === 'case')
-				);
-				
-				// Use the rules text width if available, otherwise fall back to a reasonable default
-				const textBoxWidth = rulesText ? scaleWidth(rulesText.width || 0.8) : psdWidth * 0.8;
-				const barWidth = textBoxWidth * 0.96;  // Match the 96% used in writeText
-				const barHeight = scaleHeight(0.03);
-				const barX = (psdWidth - barWidth) / 2;  // Center it
-				
-				// Use the actual Y position we found during text rendering
-				dividerCtx.drawImage(barSymbol.image, barX, actualFlavorDividerY, barWidth, barHeight);
-			}
-			
-			textGroup.children.push({
-				name: 'Flavor Divider',
-				canvas: dividerCanvas,
-				hidden: true
-			});
+	
+	// Add flavor divider in editable text layer if present
+	let flavorDividerLayer = null;
+	if (actualFlavorDividerY !== null && card.showsFlavorBar) {
+		const barSymbol = getManaSymbol('bar');
+		if (barSymbol?.image) {
+			const { canvas, ctx } = createCanvas();
+			const rulesText = Object.values(card.text).find(t => checkIsRulesText(null, t));
+			const barWidth = (rulesText ? scaleWidth(rulesText.width || 0.8) : psdWidth * 0.8) * 0.96;
+			ctx.drawImage(barSymbol.image, (psdWidth - barWidth) / 2, actualFlavorDividerY, barWidth, scaleHeight(0.03));
+			flavorDividerLayer = { name: 'Flavor Divider', canvas };
 		}
+	}
+	// Organize text layers with editable text in a sub-group
+	const editableTextLayers = [];
+	const staticTextLayers = [];
 
-		// Organize text layers with editable text in a sub-group
-		const editableTextLayers = [];
-		const staticTextLayers = [];
-
-		textGroup.children.forEach(layer => {
-			if (layer.name && layer.name.includes('(Editable)')) {
-				editableTextLayers.push(layer);
-			} else {
-				staticTextLayers.push(layer);
-			}
-		});
-
-		const textLayersChildren = [];
+	textGroup.children.forEach(layer => {
+		if (isEditableLayer(layer)) {
+			editableTextLayers.push(layer);
+		} else {
+			staticTextLayers.push(layer);
+		}
+	});
+	
+	// Add flavor divider to editable text group if it exists
+	if (flavorDividerLayer) {
+		editableTextLayers.push(flavorDividerLayer);
+	}		const textLayersChildren = [];
 
 		// Add static text layers group FIRST (will appear at bottom of text group in PSD)
 		if (staticTextLayers.length > 0) {
@@ -6107,10 +6037,7 @@ async function downloadCardAsPSD() {
 
 		// Add set symbol layer
 		if (card.setSymbolBounds && !setSymbol.src.includes('/img/blank.png')) {
-			const setSymbolCanvas = document.createElement('canvas');
-			setSymbolCanvas.width = psdWidth;
-			setSymbolCanvas.height = psdHeight;
-			const setSymbolCtx = setSymbolCanvas.getContext('2d');
+			const { canvas: setSymbolCanvas, ctx: setSymbolCtx } = createCanvas();
 			
 			drawSetSymbol(setSymbolCtx, setSymbol, card.setSymbolBounds);
 			
@@ -6120,30 +6047,12 @@ async function downloadCardAsPSD() {
 			const setRarity = rarityMap[rarityCode] || rarityCode;
 			const setSymbolName = [setRarity, setCode, 'Set Symbol'].filter(x => x).join(' ');
 			
-			psd.children.push({
-				name: setSymbolName,
-				canvas: setSymbolCanvas,
-				left: 0,
-				top: 0,
-				right: psdWidth,
-				bottom: psdHeight,
-				blendMode: 'normal',
-				opacity: 1
-			});
+			psd.children.push(createLayerBase(setSymbolName, setSymbolCanvas));
 		}
 		
 		// Add bottom info layer only if collector info is enabled
 		if (document.querySelector('#enableCollectorInfo').checked) {
-			psd.children.push({
-				name: 'Collector Info',
-				canvas: bottomInfoCanvas,
-				left: 0,
-				top: 0,
-				right: psdWidth,
-				bottom: psdHeight,
-				blendMode: 'normal',
-				opacity: 1
-			});
+			psd.children.push(createLayerBase('Collector Info', bottomInfoCanvas));
 		}
 
 	// Write PSD file
@@ -6174,16 +6083,12 @@ async function downloadCardAsPSD() {
 	notify(`PSD exported successfully (${fileSizeMB}MB in ${timeTaken}s)`, 3);
 } catch (error) {
 	// Provide more helpful error messages
-	let errorMessage = 'PSD export failed';
-	if (error.message.includes('buffer')) {
-		errorMessage += ': Failed to generate file buffer';
-	} else if (error.message.includes('memory')) {
-		errorMessage += ': Out of memory. Try closing other tabs.';
-	} else if (error.message) {
-		errorMessage += `: ${error.message}`;
-	}		notify(errorMessage, 5);
+	const errorSuffix = error.message.includes('buffer') ? ': Failed to generate file buffer'
+		: error.message.includes('memory') ? ': Out of memory. Try closing other tabs.'
+		: error.message ? `: ${error.message}` : '';
+	notify(`PSD export failed${errorSuffix}`, 5);
 	}
-		}
+}
 
 // Helper function to convert Canvas blend modes to Photoshop blend modes
 function convertBlendMode(mode) {
