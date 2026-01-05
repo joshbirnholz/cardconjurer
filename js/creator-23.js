@@ -6370,12 +6370,22 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 		}
 	}
 	//art
-	document.querySelector('#art-name').value = cardToImport.name;
-	fetchScryfallData(cardToImport.name, artFromScryfall, 'art');
-	if (document.querySelector('#importAllPrints').checked) {
-		// document.querySelector('#art-index').value = document.querySelector('#import-index').value;
-		// changeArtIndex();
-	}
+	var artSearchName = cardToImport.original_name || cardToImport.name;
+	document.querySelector('#art-name').value = artSearchName;
+	// If importing all prints, modify the callback to select the correct art after data loads
+	const callback = document.querySelector('#importAllPrints').checked 
+		? (scryfallResponse) => {
+			artFromScryfall(scryfallResponse);
+			// Find and select the matching art
+			const illustrationID = cardToImport.illustration_id;
+			const index = scryfallArt.findIndex(card => card.illustration_id === illustrationID);
+			if (index >= 0) {
+				document.querySelector('#art-index').value = index;
+				changeArtIndex();
+			}
+		}
+		: artFromScryfall;
+	fetchScryfallData(artSearchName, callback, 'art');
 	//set symbol
 	if (!document.querySelector('#lockSetSymbolCode').checked) {
 		document.querySelector('#set-symbol-code').value = cardToImport.set;
