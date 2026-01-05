@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Misc. Custom Frames', value:'MiscCustom'},
+	{name:'Minimalist', value:'Minimalist'},
 	{name:'Deck Covers', value:'CustomDeckCover'},
 	{name:'Simple Inventions', value:'SimpleInventions'},
 	{name:'Tapped (Horizontal M15)', value:'Tapped'},

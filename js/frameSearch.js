@@ -202,6 +202,8 @@ const frameNames = new Map ([
 	['8th Edition', '8th'],
 	['8th Edition Universes Beyond', '8thUB'],
 	['Eighth Edition', '8th'],
+	['Eighth Edition (Transform Front)', '8thTransformFront'],
+	['Eighth Edition (Transform Back)', '8thTransformBack'],
 	['Eighth Edition Universes Beyond', '8thUB'],
 	['Seventh Edition', 'Seventh'],
 	['Fifth Edition', 'SeventhButFifth'],

@@ -16,11 +16,12 @@ availableFrames = [
 	{name:'Black Land Frame', src:'/img/frames/m15/snow/bl.png', masks:masks},
 	{name:'Red Land Frame', src:'/img/frames/m15/snow/rl.png', masks:masks},
 	{name:'Green Land Frame', src:'/img/frames/m15/snow/gl.png', masks:masks},
-	{name:'Plains Watermark', src:'/img/frames/snow/watermarks/w.png', bounds:bounds},
-	{name:'Island Watermark', src:'/img/frames/snow/watermarks/u.png', bounds:bounds},
-	{name:'Swamp Watermark', src:'/img/frames/snow/watermarks/b.png', bounds:bounds},
-	{name:'Mountain Watermark', src:'/img/frames/snow/watermarks/r.png', bounds:bounds},
-	{name:'Forest Watermark', src:'/img/frames/snow/watermarks/g.png', bounds:bounds},
+	{name:'White Watermark', src:'/img/frames/snow/watermarks/w.png', bounds:bounds},
+	{name:'Blue Watermark', src:'/img/frames/snow/watermarks/u.png', bounds:bounds},
+	{name:'Black Watermark', src:'/img/frames/snow/watermarks/b.png', bounds:bounds},
+	{name:'Red Watermark', src:'/img/frames/snow/watermarks/r.png', bounds:bounds},
+	{name:'Green Watermark', src:'/img/frames/snow/watermarks/g.png', bounds:bounds},
+	{name:'Colorless Watermark', src:'/img/frames/snow/watermarks/c.png', bounds:bounds},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;

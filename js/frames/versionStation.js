@@ -1,7 +1,130 @@
 //=====================================
-// INITIALIZATION AND SETUP
+// SHARED INITIALIZATION FUNCTION
 //=====================================
 
+async function initializeStationFrame(frameType = 'regular', preservedData = null) {
+	
+	// Initialize station canvases
+	sizeCanvas('stationPreFrame');
+	sizeCanvas('stationPostFrame');
+
+	// Preserve existing station data AND current colors if they exist (for reloads)
+	const existingStation = preservedData || card.station || {};
+	// Only preserve colors if NOT in auto mode (let auto mode regenerate from mana)
+	const isAutoMode = existingStation.colorModes?.[1] === 'auto' || !existingStation.colorModes?.[1];
+	
+	// Always preserve disableFirstAbility regardless of color mode
+	const preservedDisableFirstAbility = existingStation.disableFirstAbility;
+	
+	const preservedColors = (existingStation.squares && !isAutoMode) ? {
+		square1Color: existingStation.squares[1]?.color,
+		square2Color: existingStation.squares[2]?.color,
+		square1Opacity: existingStation.squares[1]?.opacity,
+		square2Opacity: existingStation.squares[2]?.opacity,
+		colorModes: existingStation.colorModes || {},
+		badgeValues: existingStation.badgeValues || ['', '', '']
+	} : null;
+	
+	// Wait for script to be loaded
+	if (!window.stationPreFrameContext) {
+		await new Promise(resolve => {
+			const checkLoaded = () => {
+				if (window.stationPreFrameContext && typeof stationEdited === 'function') {
+					resolve();
+				} else {
+					setTimeout(checkLoaded, 50);
+				}
+			};
+			checkLoaded();
+		});
+	}
+
+	// Handle station data restoration and frame-specific settings
+	if (existingStation && Object.keys(existingStation).length > 0) {
+		// Merge the existing data back after version file loads
+		card.station = {
+			...card.station, // Keep the initialized defaults
+			...existingStation // Restore any existing customizations
+		};
+		
+		// Restore preserved colors if they existed
+		if (preservedColors && card.station.squares) {
+			if (preservedColors.square1Color) {
+				card.station.squares[1].color = preservedColors.square1Color;
+				card.station.squares[1].opacity = preservedColors.square1Opacity;
+			}
+			if (preservedColors.square2Color) {
+				card.station.squares[2].color = preservedColors.square2Color;
+				card.station.squares[2].opacity = preservedColors.square2Opacity;
+			}
+			if (preservedColors.colorModes) {
+				card.station.colorModes = preservedColors.colorModes;
+			}
+			if (preservedColors.badgeValues) {
+				card.station.badgeValues = preservedColors.badgeValues;
+			}
+		}
+		
+		// Always restore disableFirstAbility regardless of color mode
+		if (preservedDisableFirstAbility !== undefined) {
+			card.station.disableFirstAbility = preservedDisableFirstAbility;
+		}
+	}
+	
+	// Apply frame-specific settings
+	if (card.station && card.station.squares) {
+		switch (frameType) {
+			case 'borderless':
+				card.station.borderlessXOffset = 1;
+				card.station.squares[1].width = 1712;
+				card.station.squares[1].x = 1;
+				card.station.squares[2].width = 1712;
+				card.station.squares[2].x = 1;
+				break;
+			case 'regular':
+			default:
+				card.station.borderlessXOffset = 0;
+				card.station.squares[1].width = 1714;
+				card.station.squares[1].x = 0;
+				card.station.squares[2].width = 1714;
+				card.station.squares[2].x = 0;
+				break;
+		}
+	}
+	
+	// Update UI to reflect correct values
+	if (typeof fixStationInputs === 'function') {
+		fixStationInputs();
+	}
+	
+	// Only reset if we don't have preserved colors
+	if (!preservedColors && typeof resetStationSettings === 'function') {
+		resetStationSettings();
+	}
+	
+	// Only trigger color updates if we don't have preserved colors
+	if (!preservedColors) {
+		// Trigger color updates based on current mana
+		if (card.text?.mana?.text && typeof updateBadgeImageFromMana === 'function') {
+			updateBadgeImageFromMana();
+			updatePTImageFromMana();
+			updateSquareColorsFromMana();
+		}
+	}
+	
+	// Trigger redraw
+	if (typeof stationEdited === 'function') {
+		setTimeout(() => {
+			stationEdited();
+		}, 50);
+	}
+	
+	return true;
+}
+
+//=====================================
+// INITIALIZATION AND SETUP
+//=====================================
 
 if (!loadedVersions.includes('/js/frames/versionStation.js')) {
 	loadedVersions.push('/js/frames/versionStation.js');
@@ -26,6 +149,31 @@ if (!loadedVersions.includes('/js/frames/versionStation.js')) {
 	
 	// Just refresh the UI inputs
 	fixStationInputs(stationEdited);
+}
+
+// Override textEdited function to handle station-specific updates
+if (typeof window.originalTextEdited === 'undefined' && typeof textEdited === 'function') {
+	window.originalTextEdited = textEdited;
+	window.textEdited = function() {
+		// Call the original function
+		window.originalTextEdited();
+		
+		// Add station-specific handling
+		if (typeof updateBadgeImageFromMana === 'function' && typeof updatePTImageFromMana === 'function') {
+			const textKey = Object.keys(card.text)[selectedTextIndex];
+			if (textKey === 'mana') {
+				// Mana cost changed - update badge, PT image, and square colors
+				updateBadgeImageFromMana();
+				updatePTImageFromMana();
+				updateSquareColorsFromMana();
+				if (typeof stationEdited === 'function') stationEdited();
+			} else if (textKey === 'pt') {
+				// P/T changed - update text positions
+				if (typeof updateStationTextPositions === 'function') updateStationTextPositions();
+				if (typeof stationEdited === 'function') stationEdited();
+			}
+		}
+	};
 }
 
 //=====================================
@@ -308,7 +456,11 @@ function setupManaPropertyWatcher() {
 		return;
 	}
 	
+	// Save current value BEFORE deleting the property
 	let currentManaValue = card.text.mana.text || '';
+	
+	// Delete existing property so we can redefine it with getter/setter
+	delete card.text.mana.text;
 	
 	// Create a property descriptor that watches for changes
 	Object.defineProperty(card.text.mana, 'text', {
@@ -352,7 +504,11 @@ function setupPTPropertyWatcher() {
 		return;
 	}
 	
+	// Save current value BEFORE deleting the property
 	let currentPTValue = card.text.pt.text || '';
+	
+	// Delete existing property so we can redefine it with getter/setter
+	delete card.text.pt.text;
 	
 	// Create a property descriptor that watches for changes
 	Object.defineProperty(card.text.pt, 'text', {
@@ -972,6 +1128,7 @@ function applyPresetColor(index, mode) {
 function resetStationSettings() {
 	const preservedBadgeValues = card.station?.badgeValues ? [...card.station.badgeValues] : ['', '', ''];
 	const preservedBorderlessOffset = card.station?.borderlessXOffset;
+	const preservedDisableFirstAbility = card.station?.disableFirstAbility;
 	
 	// Clear existing watchers before reset
 	clearStationListeners();
@@ -979,6 +1136,11 @@ function resetStationSettings() {
 	delete card.station;
 	initializeStationDefaults();
 	card.station.badgeValues = preservedBadgeValues;
+	
+	// Restore disableFirstAbility
+	if (preservedDisableFirstAbility !== undefined) {
+		card.station.disableFirstAbility = preservedDisableFirstAbility;
+	}
 	
 	// Re-establish watchers after reset
 	setupStationListeners();
