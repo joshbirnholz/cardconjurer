@@ -1,37 +1,37 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/sld/burningrevelations/maskFrame.png', name:'Frame'}, {src:'/img/frames/sld/burningrevelations/maskPinline.png', name:'Pinline'}, {src:'/img/frames/sld/burningrevelations/maskRules.png', name:'Rules'}, {src:'/img/frames/sld/burningrevelations/maskBorder.png', name:'Border'}];
-var crownMasks = [{src:'/img/frames/sld/burningrevelations/maskCrownBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/sld/burningRevelations/maskFrame.png', name:'Frame'}, {src:'/img/frames/sld/burningRevelations/maskPinline.png', name:'Pinline'}, {src:'/img/frames/sld/burningRevelations/maskRules.png', name:'Rules'}, {src:'/img/frames/sld/burningRevelations/maskBorder.png', name:'Border'}];
+var crownMasks = [{src:'/img/frames/sld/burningRevelations/maskCrownBorder.png', name:'Border'}];
 var ptBounds = {x:1582/2010, y:2490/2814, width:337/2010, height:179/2814};
 var crownBounds = {x:101/2010, y:43/2814, width:1829/2010, height:267/2814};
 //defines available frames
 availableFrames = [
-	{name:'White Frame', src:'/img/frames/sld/burningrevelations/w.png', masks:masks},
-	{name:'Blue Frame', src:'/img/frames/sld/burningrevelations/u.png', masks:masks},
-	{name:'Black Frame', src:'/img/frames/sld/burningrevelations/b.png', masks:masks},
-	{name:'Red Frame', src:'/img/frames/sld/burningrevelations/r.png', masks:masks},
-	{name:'Green Frame', src:'/img/frames/sld/burningrevelations/g.png', masks:masks},
-	{name:'Multicolored Frame', src:'/img/frames/sld/burningrevelations/m.png', masks:masks},
-	{name:'Artifact Frame', src:'/img/frames/sld/burningrevelations/a.png', masks:masks},
-	{name:'Land Frame', src:'/img/frames/sld/burningrevelations/l.png', masks:masks},
-	{name:'Colorless Frame', src:'/img/frames/sld/burningrevelations/c.png', masks:masks},
-	{name:'White Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/w.png', bounds:ptBounds},
-	{name:'Blue Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/u.png', bounds:ptBounds},
-	{name:'Black Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/b.png', bounds:ptBounds},
-	{name:'Red Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/r.png', bounds:ptBounds},
-	{name:'Green Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/g.png', bounds:ptBounds},
-	{name:'Multicolored Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/m.png', bounds:ptBounds},
-	{name:'Artifact Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/a.png', bounds:ptBounds},
-	{name:'Land Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/l.png', bounds:ptBounds},
-	{name:'Colorless Power/Toughness', src:'/img/frames/sld/burningrevelations/pt/c.png', bounds:ptBounds},
-	{name:'White Crown', src:'/img/frames/sld/burningrevelations/crowns/w.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Blue Crown', src:'/img/frames/sld/burningrevelations/crowns/u.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Black Crown', src:'/img/frames/sld/burningrevelations/crowns/b.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Red Crown', src:'/img/frames/sld/burningrevelations/crowns/r.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Green Crown', src:'/img/frames/sld/burningrevelations/crowns/g.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Multicolored Crown', src:'/img/frames/sld/burningrevelations/crowns/m.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Artifact Crown', src:'/img/frames/sld/burningrevelations/crowns/a.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Land Crown', src:'/img/frames/sld/burningrevelations/crowns/l.png', bounds:crownBounds, complementary:27, masks:crownMasks},
-	{name:'Colorless Crown', src:'/img/frames/sld/burningrevelations/crowns/c.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'White Frame', src:'/img/frames/sld/burningRevelations/w.png', masks:masks},
+	{name:'Blue Frame', src:'/img/frames/sld/burningRevelations/u.png', masks:masks},
+	{name:'Black Frame', src:'/img/frames/sld/burningRevelations/b.png', masks:masks},
+	{name:'Red Frame', src:'/img/frames/sld/burningRevelations/r.png', masks:masks},
+	{name:'Green Frame', src:'/img/frames/sld/burningRevelations/g.png', masks:masks},
+	{name:'Multicolored Frame', src:'/img/frames/sld/burningRevelations/m.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/sld/burningRevelations/a.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/sld/burningRevelations/l.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/sld/burningRevelations/c.png', masks:masks},
+	{name:'White Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/w.png', bounds:ptBounds},
+	{name:'Blue Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/u.png', bounds:ptBounds},
+	{name:'Black Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/b.png', bounds:ptBounds},
+	{name:'Red Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/r.png', bounds:ptBounds},
+	{name:'Green Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/g.png', bounds:ptBounds},
+	{name:'Multicolored Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/m.png', bounds:ptBounds},
+	{name:'Artifact Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/a.png', bounds:ptBounds},
+	{name:'Land Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/l.png', bounds:ptBounds},
+	{name:'Colorless Power/Toughness', src:'/img/frames/sld/burningRevelations/pt/c.png', bounds:ptBounds},
+	{name:'White Crown', src:'/img/frames/sld/burningRevelations/crowns/w.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Blue Crown', src:'/img/frames/sld/burningRevelations/crowns/u.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Black Crown', src:'/img/frames/sld/burningRevelations/crowns/b.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Red Crown', src:'/img/frames/sld/burningRevelations/crowns/r.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Green Crown', src:'/img/frames/sld/burningRevelations/crowns/g.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Multicolored Crown', src:'/img/frames/sld/burningRevelations/crowns/m.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Artifact Crown', src:'/img/frames/sld/burningRevelations/crowns/a.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Land Crown', src:'/img/frames/sld/burningRevelations/crowns/l.png', bounds:crownBounds, complementary:27, masks:crownMasks},
+	{name:'Colorless Crown', src:'/img/frames/sld/burningRevelations/crowns/c.png', bounds:crownBounds, complementary:27, masks:crownMasks},
 	{name:'Legend Crown Border Cover', src:'/img/black.png', bounds:{x:156/2010, y:34/2814, width:1728/2010, height:119/2814}}
 ];
 //disables/enables the "Load Frame Version" button
@@ -41,7 +41,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'burningrevelations';
+	card.version = 'burningRevelations';
 	//art bounds
 	card.artBounds = {x:149/2010, y:315/2814, width:1719/2010, height:1255/2814};
 	autoFitArt();
