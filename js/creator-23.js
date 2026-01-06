@@ -5257,7 +5257,6 @@ function downloadCard(alt = false, jpeg = false) {
 		}
 	}
 }
-
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
 	console.log('Import card called with:', cardObject); // Log initial import data
