@@ -12,9 +12,10 @@ loadFramePacks([
 	{name:'Other Frames', value:'disabled'},
 	{name:'Full Art', value:'FullArtNew'},
 	{name:'Snow (Kaldheim)', value:'SnowNew'},
-	{name:'Nyx (Theros)', value:'M15NyxNew'},
 
 	{name:'Universes Beyond Frames', value:'disabled'},
 	{name:'Universes Beyond', value:'UBNew'},
+	{name:'Universes Beyond (Extended Art)', value:'UBExtendedArtNew'},
 	{name:'Legend Crowns (Universes Beyond)', value:'UBLegendCrownsNew'},
+	{name:'Floating Legend Crowns (Universes Beyond)', value:'UBLegendCrownsFloatingNew'},
 ])
