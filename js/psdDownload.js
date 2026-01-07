@@ -819,6 +819,19 @@ async function downloadCardAsPSD() {
 					opened: false
 				});
 			}
+		} else if (card.version.toLowerCase().includes('dungeon') && typeof dungeonCanvas !== "undefined") {
+			// Simply use the existing dungeon canvases
+			if (window.dungeonCanvas) {
+				const { canvas: dungeonShapeCanvas, ctx: dungeonShapeCtx } = createCanvas();
+				dungeonShapeCtx.drawImage(window.dungeonCanvas, 0, 0, psdWidth, psdHeight);
+				frameGroup.children.push(createLayerBase('Dungeon', dungeonShapeCanvas));
+			}
+			
+			if (window.dungeonFXCanvas) {
+				const { canvas: dungeonFXCanvasLayer, ctx: dungeonFXCtx } = createCanvas();
+				dungeonFXCtx.drawImage(window.dungeonFXCanvas, 0, 0, psdWidth, psdHeight);
+				frameGroup.children.push(createLayerBase('Dungeon FX', dungeonFXCanvasLayer));
+			}
 		}
 
 		// Add the frame group to the PSD only if it has children
