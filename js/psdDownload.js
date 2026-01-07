@@ -466,43 +466,60 @@ async function downloadCardAsPSD() {
 		// Store station text layers to add to text group later
 		const stationTextLayers = [];
 
+		// Helper: Extract color name from image source path
+		const getColorFromSrc = (imageSrc) => {
+			if (!imageSrc) return '';
+			const match = imageSrc.match(/\/(badges|pt)\/([a-z])\.png/i);
+			if (match) {
+				const colorMap = {
+					'w': 'White', 'u': 'Blue', 'b': 'Black', 'r': 'Red', 'g': 'Green',
+					'm': 'Multicolored', 'a': 'Artifact', 'c': 'Colorless', 'l': 'Land'
+				};
+				return (colorMap[match[2].toLowerCase()] || '') ? colorMap[match[2].toLowerCase()] + ' ' : '';
+			}
+			return '';
+		};
+
+		// Helper: Calculate station element positions
+		const getStationPosition = (type, index, key, settings) => {
+			const square = card.station.squares[index];
+			const basePos = card.station.baseTextPositions?.[key];
+			if (!basePos) return null;
+			
+			const squareX = scaleX(basePos.x) + (square.x - 214);
+			const squareY = scaleY(basePos.y) + square.y;
+			const elementX = type === 'pt' ? squareX + square.width + (settings.x - 266) : squareX + (settings.x || -81);
+			const elementY = squareY + (square.height / 2) + (settings.y || 0);
+			
+			return { elementX, elementY, settings };
+		};
+
 		// Add station squares after frame layers (so they appear on top)
 		if (card.version.toLowerCase().includes('station') && card.station && card.station.squares) {
-			// Draw square 2 (bottom square) first
-			const square2 = card.station.squares[2];
-			if (square2.enabled && card.text?.ability2) {
-				const { canvas: square2Canvas, ctx: square2Ctx } = createCanvas();
-				const basePos = card.station.baseTextPositions?.ability2;
-				if (basePos) {
-					const squareX = scaleX(basePos.x) + (square2.x - 214);
-					const squareY = scaleY(basePos.y) + square2.y;
-					
-					square2Ctx.fillStyle = square2.color;
-					square2Ctx.globalAlpha = 1; // Full opacity in canvas
-					square2Ctx.fillRect(squareX, squareY, square2.width, square2.height);
-					
-					// Add with layer opacity set to the square's opacity
-					frameGroup.children.push(createLayerBase('Station Square 2', square2Canvas, square2.opacity || 1));
+			// Process squares in reverse order (2 then 1) so they appear correctly in PSD
+			[2, 1].forEach(squareIndex => {
+				const square = card.station.squares[squareIndex];
+				const abilityKey = squareIndex === 2 ? 'ability2' : 'ability1';
+				const shouldRender = squareIndex === 2 
+					? square.enabled && card.text?.ability2
+					: square.enabled && card.text?.ability1 && !card.station.disableFirstAbility;
+				
+				if (shouldRender) {
+					const { canvas: squareCanvas, ctx: squareCtx } = createCanvas();
+					const basePos = card.station.baseTextPositions?.[abilityKey];
+					if (basePos) {
+						const squareX = scaleX(basePos.x) + (square.x - 214);
+						const squareY = scaleY(basePos.y) + square.y;
+						
+						squareCtx.fillStyle = square.color;
+						squareCtx.globalAlpha = 1; // Full opacity in canvas
+						squareCtx.fillRect(squareX, squareY, square.width, square.height);
+						
+						// Add with layer opacity set to the square's opacity
+						frameGroup.children.push(createLayerBase(`Station Square ${squareIndex}`, squareCanvas, square.opacity || 1));
+					}
 				}
-			}
-			
-			// Draw square 1 (top square) second
-			const square1 = card.station.squares[1];
-			if (square1.enabled && card.text?.ability1 && !card.station.disableFirstAbility) {
-				const { canvas: square1Canvas, ctx: square1Ctx } = createCanvas();
-				const basePos = card.station.baseTextPositions?.ability1;
-				if (basePos) {
-					const squareX = scaleX(basePos.x) + (square1.x - 214);
-					const squareY = scaleY(basePos.y) + square1.y;
-					
-					square1Ctx.fillStyle = square1.color;
-					square1Ctx.globalAlpha = 1; // Full opacity in canvas
-					square1Ctx.fillRect(squareX, squareY, square1.width, square1.height);
-					
-					// Add with layer opacity set to the square's opacity
-					frameGroup.children.push(createLayerBase('Station Square 1', square1Canvas, square1.opacity || 1));
-				}
-			}
+			});
 		}
 
 		// Add PT layers group second if there are any (or if it's a station card with PT)
@@ -516,35 +533,6 @@ async function downloadCardAsPSD() {
 			
 			// Add station PT box directly to PT children if it exists
 			if (hasStationPT) {
-				const getStationPosition = (type, index, key, settings) => {
-					const square = card.station.squares[index];
-					const basePos = card.station.baseTextPositions?.[key];
-					if (!basePos) return null;
-					
-					const squareX = scaleX(basePos.x) + (square.x - 214);
-					const squareY = scaleY(basePos.y) + square.y;
-					const elementX = type === 'pt' ? squareX + square.width + (settings.x - 266) : squareX + (settings.x || -81);
-					const elementY = squareY + (square.height / 2) + (settings.y || 0);
-					
-					return { elementX, elementY, settings };
-				};
-				
-				// Extract color from PT image
-				const getColorFromSrc = (imageSrc) => {
-					if (!imageSrc) return '';
-					// Match /badges/w.png or /pt/u.png pattern
-					const match = imageSrc.match(/\/(badges|pt)\/([a-z])\.png/i);
-					if (match) {
-						const colorCode = match[2].toLowerCase();
-						const colorMap = {
-							'w': 'White', 'u': 'Blue', 'b': 'Black', 'r': 'Red', 'g': 'Green',
-							'm': 'Multicolored', 'a': 'Artifact', 'c': 'Colorless', 'l': 'Land'
-						};
-						return (colorMap[colorCode] || '') ? colorMap[colorCode] + ' ' : '';
-					}
-					return '';
-				};
-				
 				const ptColor = getColorFromSrc(stationPTImage?.src);
 				
 				const pos = getStationPosition('pt', 2, 'ability2', card.station.ptSettings);
@@ -574,13 +562,63 @@ async function downloadCardAsPSD() {
 		
 		// Store station badges to add after PT but before crowns
 		let stationBadgesGroup = null;
+		// Store planeswalker text layers to add to text group later
+		const planeswalkerTextLayers = [];
+		// Store saga text layers to add to text group later
+		const sagaTextLayers = [];
+		// Store class text layers to add to text group later
+		const classTextLayers = [];
 
 		// Add planeswalker post-frame canvas (if version is planeswalker)
 		if (card.version.toLowerCase().includes('planeswalker')) {
-			if (typeof planeswalkerPostFrameCanvas !== "undefined") {
-				const { canvas: pwPostFrameCanvas, ctx: pwPostFrameCtx } = createCanvas();
-				pwPostFrameCtx.drawImage(planeswalkerPostFrameCanvas, 0, 0, psdWidth, psdHeight);
-				frameGroup.children.push(createLayerBase('Planeswalker Post-Frame', pwPostFrameCanvas));
+			if (typeof planeswalkerPostFrameCanvas !== "undefined" && card.planeswalker) {
+				// Extract badge icons (plus, minus, neutral) and text separately
+				const planeswalkerBadges = [];
+				const planeswalkerTall = (card.version.includes('Tall') || card.version.includes('Compleated')) ? 1 : 0;
+				
+				// Badge type configurations
+				const badgeConfigs = {
+					'+': { image: 'plusIcon', x: 0.0294, y: -0.0258, w: 0.14, h: 0.0724, textY: 0.0172, type: 'Plus' },
+					'-': { image: 'minusIcon', x: 0.028, y: -0.0153, w: 0.1414, h: 0.0705, textY: 0.0181, type: 'Minus' },
+					'0': { image: 'neutralIcon', x: 0.028, y: -0.0153, w: 0.1414, h: 0.061, textY: 0.0191, type: 'Neutral' }
+				};
+				
+				// Create badge layers for each ability (iterate backwards so they appear 1,2,3 in PSD)
+				for (let i = card.planeswalker.count - 1; i >= 0; i--) {
+					const costValue = card.planeswalker.abilities[i];
+					if (!costValue) continue;
+					
+					const placement = scaleY(planeswalkerAbilityLayout[planeswalkerTall][card.planeswalker.count - 1][i] + card.planeswalker.abilityAdjust[i]);
+					
+					// Determine badge type based on cost value
+					const badgeKey = costValue.includes('+') ? '+' : costValue.includes('-') ? '-' : '0';
+					const config = badgeConfigs[badgeKey];
+					const badgeImage = typeof window[config.image] !== 'undefined' ? window[config.image] : null;
+					
+					// Draw badge icon if available
+					if (badgeImage?.complete && badgeImage.naturalWidth > 0) {
+						const { canvas: badgeCanvas, ctx: badgeCtx } = createCanvas();
+						badgeCtx.drawImage(badgeImage, scaleX(config.x), placement + scaleHeight(config.y), scaleWidth(config.w), scaleHeight(config.h));
+						planeswalkerBadges.push(createLayerBase(`${config.type} Badge ${i + 1}`, badgeCanvas));
+					}
+					
+					// Draw text separately for the text group
+					const { canvas: textCanvas, ctx: textCtx } = createCanvas();
+					textCtx.font = scaleHeight(0.0286) + 'px belerenbsc';
+					textCtx.fillStyle = 'white';
+					textCtx.textAlign = 'center';
+					textCtx.fillText(costValue, scaleX(0.1027), placement + scaleHeight(config.textY));
+					planeswalkerTextLayers.push(createLayerBase(`Ability ${i + 1} Cost`, textCanvas));
+				}
+				
+				// Add badge group if we have badges
+				if (planeswalkerBadges.length > 0) {
+					frameGroup.children.push({
+						name: 'Loyalty Badges',
+						children: planeswalkerBadges,
+						opened: false
+					});
+				}
 			} else if (typeof planeswalkerCanvas !== "undefined") {
 				// Fallback for older planeswalker canvas
 				const { canvas: pwCanvas, ctx: pwCtx } = createCanvas();
@@ -589,80 +627,32 @@ async function downloadCardAsPSD() {
 			}
 		} else if (card.version.toLowerCase().includes('station') && card.station && typeof stationBadgeImage !== "undefined" && typeof stationPTImage !== "undefined") {
 			// For station cards, separate badges and PT boxes from their text
-			
-			// Extract color from image sources
-			const getColorFromSrc = (imageSrc) => {
-				if (!imageSrc) return '';
-				// Match /badges/w.png or /pt/u.png pattern
-				const match = imageSrc.match(/\/(badges|pt)\/([a-z])\.png/i);
-				if (match) {
-					const colorCode = match[2].toLowerCase();
-					const colorMap = {
-						'w': 'White', 'u': 'Blue', 'b': 'Black', 'r': 'Red', 'g': 'Green',
-						'm': 'Multicolored', 'a': 'Artifact', 'c': 'Colorless', 'l': 'Land'
-					};
-					return (colorMap[colorCode] || '') ? colorMap[colorCode] + ' ' : '';
-				}
-				return '';
-			};
-			
 			const badgeColor = getColorFromSrc(stationBadgeImage?.src);
-			const ptColor = getColorFromSrc(stationPTImage?.src);
-			
-			const getStationPosition = (type, index, key, settings) => {
-				const square = card.station.squares[index];
-				const basePos = card.station.baseTextPositions?.[key];
-				if (!basePos) return null;
-				
-				const squareX = scaleX(basePos.x) + (square.x - 214);
-				const squareY = scaleY(basePos.y) + square.y;
-				const elementX = type === 'pt' ? squareX + square.width + (settings.x - 266) : squareX + (settings.x || -81);
-				const elementY = squareY + (square.height / 2) + (settings.y || 0);
-				
-				return { elementX, elementY, settings };
-			};
-			
 			const stationBadges = [];
 			
-			// Badge 2 text and box
-			if (card.station.badgeValues?.[2]?.trim() && /\d/.test(card.station.badgeValues[2])) {
-				const pos = getStationPosition('badge', 2, 'ability2', card.station.badgeSettings);
-				if (pos) {
-					const { canvas: textCanvas, ctx: textCtx } = createCanvas();
-					textCtx.font = scaleHeight(pos.settings.fontSize) + 'px belerenbsc';
-					textCtx.fillStyle = 'white';
-					textCtx.textAlign = 'center';
-					textCtx.textBaseline = 'middle';
-					textCtx.fillText(card.station.badgeValues[2], pos.elementX + (pos.settings.width / 2) + 3, pos.elementY + 5);
-					stationTextLayers.push(createLayerBase('Station Badge 2', textCanvas));
-					
-					const { canvas: boxCanvas, ctx: boxCtx } = createCanvas();
-					if (stationBadgeImage?.complete && stationBadgeImage.naturalWidth > 0) {
-						boxCtx.drawImage(stationBadgeImage, pos.elementX, pos.elementY - (pos.settings.height / 2), pos.settings.width, pos.settings.height);
+			// Create badge layers (iterate backwards: 2, then 1)
+			[2, 1].forEach(index => {
+				if (card.station.badgeValues?.[index]?.trim() && /\d/.test(card.station.badgeValues[index])) {
+					const pos = getStationPosition('badge', index, index === 2 ? 'ability2' : 'ability1', card.station.badgeSettings);
+					if (pos) {
+						// Text layer
+						const { canvas: textCanvas, ctx: textCtx } = createCanvas();
+						textCtx.font = scaleHeight(pos.settings.fontSize) + 'px belerenbsc';
+						textCtx.fillStyle = 'white';
+						textCtx.textAlign = 'center';
+						textCtx.textBaseline = 'middle';
+						textCtx.fillText(card.station.badgeValues[index], pos.elementX + (pos.settings.width / 2) + 3, pos.elementY + 5);
+						stationTextLayers.push(createLayerBase(`Station Badge ${index}`, textCanvas));
+						
+						// Badge box layer
+						const { canvas: boxCanvas, ctx: boxCtx } = createCanvas();
+						if (stationBadgeImage?.complete && stationBadgeImage.naturalWidth > 0) {
+							boxCtx.drawImage(stationBadgeImage, pos.elementX, pos.elementY - (pos.settings.height / 2), pos.settings.width, pos.settings.height);
+						}
+						stationBadges.push(createLayerBase(`${badgeColor}Station Badge ${index}`, boxCanvas));
 					}
-					stationBadges.push(createLayerBase(`${badgeColor}Station Badge 2`, boxCanvas));
 				}
-			}
-			
-			// Badge 1 text and box
-			if (card.station.badgeValues?.[1]?.trim() && /\d/.test(card.station.badgeValues[1])) {
-				const pos = getStationPosition('badge', 1, 'ability1', card.station.badgeSettings);
-				if (pos) {
-					const { canvas: textCanvas, ctx: textCtx } = createCanvas();
-					textCtx.font = scaleHeight(pos.settings.fontSize) + 'px belerenbsc';
-					textCtx.fillStyle = 'white';
-					textCtx.textAlign = 'center';
-					textCtx.textBaseline = 'middle';
-					textCtx.fillText(card.station.badgeValues[1], pos.elementX + (pos.settings.width / 2) + 3, pos.elementY + 5);
-					stationTextLayers.push(createLayerBase('Station Badge 1', textCanvas));
-					
-					const { canvas: boxCanvas, ctx: boxCtx } = createCanvas();
-					if (stationBadgeImage?.complete && stationBadgeImage.naturalWidth > 0) {
-						boxCtx.drawImage(stationBadgeImage, pos.elementX, pos.elementY - (pos.settings.height / 2), pos.settings.width, pos.settings.height);
-					}
-					stationBadges.push(createLayerBase(`${badgeColor}Station Badge 1`, boxCanvas));
-				}
-			}
+			});
 			
 			// Store badges subgroup to add after crowns
 			if (stationBadges.length > 0) {
@@ -693,15 +683,142 @@ async function downloadCardAsPSD() {
 		}
 
 		// Add saga canvas (if version is saga)
-		if (card.version.toLowerCase().includes('saga') && typeof sagaCanvas !== "undefined") {
+		if (card.version.toLowerCase().includes('saga') && typeof sagaCanvas !== "undefined" && card.saga) {
+			// Extract chapter icons and text separately
+			const sagaChapterBadges = [];
+			
+			// Roman numeral conversion function
+			const romanNumeral = (num) => {
+				const romanNumerals = [
+					['', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX'],
+					['', 'X', 'XX', 'XXX', 'XL', 'L', 'LX', 'LXX', 'LXXX', 'XC']
+				];
+				return romanNumerals[1][Math.floor(num / 10)] + romanNumerals[0][num % 10];
+			};
+			
+			// Process each ability (iterate backwards so they appear 1,2,3,4 in PSD)
+			for (let i = card.saga.count - 1; i >= 0; i--) {
+				// Calculate chapter number for this ability
+				let currentChapterNum = 1;
+				for (let j = 0; j < i; j++) {
+					currentChapterNum += parseInt(card.saga.abilities[j]);
+				}
+				
+				const ability = card.text['ability' + i];
+				const x = scaleX(card.saga.x);
+				const y = scaleY(ability.y);
+				const width = scaleWidth(card.saga.width);
+				const height = scaleHeight(ability.height);
+				const chapterCount = parseInt(card.saga.abilities[i]);
+				
+				// Chapter icon positioning
+				const numeralX = x - scaleWidth(0.0614);
+				const numeralY = y + (height - scaleHeight(0.0629)) / 2;
+				const offset = scaleHeight(0.0358) * 2;
+				const centerOffset = (chapterCount - 1) / 2;
+				
+				// Draw each chapter icon and numeral for this ability (backwards for proper ordering)
+				if (typeof sagaChapter !== 'undefined' && sagaChapter?.complete) {
+					for (let j = chapterCount - 1; j >= 0; j--) {
+						const posOffset = (j - centerOffset) * offset;
+						const chapterNum = currentChapterNum + j;
+						const romanNum = romanNumeral(chapterNum);
+						
+						// Chapter icon
+						const { canvas: iconCanvas, ctx: iconCtx } = createCanvas();
+						iconCtx.drawImage(sagaChapter, numeralX, numeralY + posOffset, scaleWidth(0.0787), scaleHeight(0.0629));
+						sagaChapterBadges.push(createLayerBase(`Chapter ${romanNum} Icon`, iconCanvas));
+						
+						// Roman numeral text
+						const { canvas: textCanvas, ctx: textCtx } = createCanvas();
+						textCtx.font = 'normal normal 550 ' + scaleHeight(0.0324) + 'px plantinsemibold';
+						textCtx.textAlign = 'center';
+						textCtx.fillStyle = 'black';
+						textCtx.fillText(romanNum, numeralX + scaleWidth(0.0394), numeralY + posOffset + scaleHeight(0.0429));
+						sagaTextLayers.push(createLayerBase(`Chapter ${romanNum} Text`, textCanvas));
+					}
+				}
+				
+				// Divider line
+				if (typeof sagaDivider !== 'undefined' && sagaDivider?.complete) {
+					const { canvas: dividerCanvas, ctx: dividerCtx } = createCanvas();
+					dividerCtx.drawImage(sagaDivider, x, y - scaleHeight(0.00145), width, scaleHeight(0.0029));
+					sagaChapterBadges.push(createLayerBase(`Ability ${i + 1} Divider`, dividerCanvas));
+				}
+			}
+			
+			// Add chapter icons group if we have any
+			if (sagaChapterBadges.length > 0) {
+				frameGroup.children.push({
+					name: 'Saga Chapters',
+					children: sagaChapterBadges,
+					opened: false
+				});
+			}
+		} else if (card.version.toLowerCase().includes('saga') && typeof sagaCanvas !== "undefined") {
+			// Fallback for saga canvas without card.saga data
 			const { canvas: sagaFrameCanvas, ctx: sagaFrameCtx } = createCanvas();
 			sagaFrameCtx.drawImage(sagaCanvas, 0, 0, psdWidth, psdHeight);
 			frameGroup.children.push(createLayerBase('Saga Frame', sagaFrameCanvas));
-		} else if (card.version.includes('class') && !card.version.includes('classic') && typeof classCanvas !== "undefined") {
-			// Add class canvas (alternative to saga)
-			const { canvas: classFrameCanvas, ctx: classFrameCtx } = createCanvas();
-			classFrameCtx.drawImage(classCanvas, 0, 0, psdWidth, psdHeight);
-			frameGroup.children.push(createLayerBase('Class Frame', classFrameCanvas));
+		} else if (card.version.includes('class') && !card.version.includes('classic') && typeof classCanvas !== "undefined" && card.class) {
+			// Extract class headers and text separately
+			const classHeaders = [];
+			
+			// Get class header image
+			const classHeaderPath = card.version === 'classStoneCutterDeluxe' 
+				? '/img/frames/custom/stoneCutter/stoneCutterDeluxe/class/headerGold.png'
+				: '/img/frames/class/header.png';
+			const classHeaderImage = new Image();
+			classHeaderImage.crossOrigin = 'anonymous';
+			classHeaderImage.src = classHeaderPath;
+			
+			// Wait for class header image to load if needed
+			if (!classHeaderImage.complete) {
+				await new Promise(resolve => {
+					classHeaderImage.onload = resolve;
+					classHeaderImage.onerror = resolve;
+				});
+			}
+			
+			// Calculate which levels are visible and have actual height
+			const visibleLevels = [];
+			for (let i = 1; i <= 3; i++) {
+				const levelHeight = card.text['level' + i + 'c']?.height;
+				const levelY = card.text['level' + i + 'c']?.y;
+				
+				// Only include level if it has positive height and valid Y position
+				if (levelHeight > 0 && levelY !== undefined && levelY < 2) {
+					visibleLevels.push(i);
+				}
+			}
+			
+			// Create header layers for each visible level (iterate backwards for proper ordering)
+			for (let i = visibleLevels.length - 1; i >= 0; i--) {
+				const levelIndex = visibleLevels[i];
+				const levelY = card.text['level' + levelIndex + 'c'].y;
+				const levelHeight = card.text['level' + levelIndex + 'c'].height;
+				
+				const x = scaleX(card.class.x);
+				const y = scaleY(levelY);
+				const width = scaleWidth(card.class.width);
+				const headerHeight = scaleHeight(0.0481);
+				
+				// Draw header if image is loaded
+				if (classHeaderImage.complete && classHeaderImage.naturalWidth > 0) {
+					const { canvas: headerCanvas, ctx: headerCtx } = createCanvas();
+					headerCtx.drawImage(classHeaderImage, x, y - headerHeight, width, headerHeight);
+					classHeaders.push(createLayerBase(`Level ${levelIndex} Header`, headerCanvas));
+				}
+			}
+			
+			// Add headers group if we have any
+			if (classHeaders.length > 0) {
+				frameGroup.children.push({
+					name: 'Class Headers',
+					children: classHeaders,
+					opened: false
+				});
+			}
 		}
 
 		// Add the frame group to the PSD only if it has children
@@ -957,7 +1074,17 @@ async function downloadCardAsPSD() {
 	const editableTextLayers = [];
 	const staticTextLayers = [];
 	
-	// Add station text layers to static text group FIRST if they exist
+	// Add saga text layers to static text group FIRST if they exist
+	if (typeof sagaTextLayers !== 'undefined' && sagaTextLayers.length > 0) {
+		staticTextLayers.push(...sagaTextLayers);
+	}
+	
+	// Add planeswalker text layers to static text group SECOND if they exist
+	if (typeof planeswalkerTextLayers !== 'undefined' && planeswalkerTextLayers.length > 0) {
+		staticTextLayers.push(...planeswalkerTextLayers);
+	}
+	
+	// Add station text layers to static text group THIRD if they exist
 	if (typeof stationTextLayers !== 'undefined' && stationTextLayers.length > 0) {
 		staticTextLayers.push(...stationTextLayers);
 	}
