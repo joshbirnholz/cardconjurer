@@ -326,10 +326,10 @@ loadManaSymbols(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '
 loadManaSymbols(true, ['e', 'a', 'p']);
 loadManaSymbols(['wu', 'wb', 'ub', 'ur', 'br', 'bg', 'rg', 'rw', 'gw', 'gu', '2w', '2u', '2b', '2r', '2g', 'wp', 'up', 'bp', 'rp', 'gp', 'h',
 				 'wup', 'wbp', 'ubp', 'urp', 'brp', 'bgp', 'rgp', 'rwp', 'gwp', 'gup', 'purplew', 'purpleu', 'purpleb', 'purpler', 'purpleg',
-				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2]);
+				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2, 0.03]);
 loadManaSymbols(['bar.png', 'whitebar.png']);
 loadManaSymbols(['brush', 'whitebrush'], [2.85, 2.85]);
-loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'], [1.2, 1.2]);
+loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'], [1.2, 1.2, 0.03]);
 loadManaSymbols(true, ['chaos'], [1.2, 1]);
 loadManaSymbols(true, ['tk'], [0.8, 1]);
 loadManaSymbols(true, ['planeswalker'], [0.6, 1.2]);
@@ -367,6 +367,7 @@ function loadManaSymbols(matchColor, manaSymbolPaths, size = [1, 1]) {
 
 		manaSymbol.width = size[0];
 		manaSymbol.height = size[1];
+		manaSymbol.yOffset = size[2] || 0;
 		manaSymbol.image = new Image();
 		manaSymbol.image.crossOrigin = 'anonymous';
 		var manaSymbolPath = '/img/manaSymbols/' + manaSymbol.path;
@@ -4065,7 +4066,7 @@ function writeText(textObject, targetContext) {
 					var manaSymbolWidth = manaSymbol.width * textSize * 0.78;
 					var manaSymbolHeight = manaSymbol.height * textSize * 0.78;
 					var manaSymbolX = currentX + canvasMargin + manaSymbolSpacing;
-					var manaSymbolY = canvasMargin + textSize * 0.34 - manaSymbolHeight / 2;
+					var manaSymbolY = canvasMargin + textSize * 0.34 - manaSymbolHeight / 2 + (manaSymbol.yOffset * textSize);
 					if (textObject.manaPlacement) {
 						manaSymbolX = scaleWidth(textObject.manaPlacement.x[manaPlacementCounter] || 0) + canvasMargin;
 						manaSymbolY = canvasMargin;
