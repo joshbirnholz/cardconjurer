@@ -611,21 +611,104 @@
 								<span class='checkmark'></span>
 							</label>
 						</div>
+<!--Consolidating the Collector info style START --DSKZ ------------------------------------------------------------------------------------------------------------------>
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='input-description margin-bottom'>Collector info style</h5>
-							<label class='checkbox-container input margin-bottom'>Use new (post-ONE) collector info style
-								<input id='enableNewCollectorStyle' type='checkbox' onchange='enableNewCollectorInfoStyle();'>
+							<label class='checkbox-container input margin-bottom'>Show collector info (none by default)
+								<input id='enableCollectorInfo' type='checkbox'>
 								<span class='checkmark'></span>
 							</label>
-						</div>
-						<div class='readable-background padding margin-bottom'>
-							<h5 class='input-description margin-bottom'>Show collector info</h5>
-							<label class='checkbox-container input margin-bottom'>Show collector info (uncheck to hide)
-								<input id='enableCollectorInfo' type='checkbox' onchange='enableCollectorInfo();'>
-								<span class='checkmark'></span>
-							</label>
-						</div>
+								<div id='enableArtistOnly' class='hidden margin-top'>
+									<label class='checkbox-container input'>Show artist info only
+										<input type='checkbox' id='enableArtistOnlyCheck' onchange='setBottomInfoStyle();'>
+										<span class='checkmark'></span>
+									</label>
+								</div>
+								<div id='togglecheckbox' class='hidden margin-top'>
+									<label class='checkbox-container input margin-bottom'>Use new (post-ONE) collector info style
+										<input id='enableNewCollectorStyle' type='checkbox' onchange='enableNewCollectorInfoStyle();'>
+										<span class='checkmark'></span>
+									</label>
+								</div>
+							<script>
+								const enableCheckbox = document.getElementById('enableCollectorInfo');       // main
+								const secondCheckbox = document.getElementById('enableArtistOnly');          // container
+								const secondCheck   = document.getElementById('enableArtistOnlyCheck');      // artist-only checkbox
+								const toggleWrap    = document.getElementById('togglecheckbox');             // container
+								const toggleCheck   = document.getElementById('enableNewCollectorStyle');    // toggle checkbox
 
+								// One authoritative place that decides which function to run based on UI state
+								function setCollectorModeFromUI() {
+									// If main is off → baseline
+									if (!enableCheckbox.checked) {
+									setBottomInfoStyle();
+									return;
+									}
+									// Artist-only takes precedence → baseline
+									if (secondCheck.checked) {
+									setBottomInfoStyle();
+									return;
+									}
+									// Otherwise toggle decides
+									if (toggleCheck.checked) {
+									enableNewCollectorInfoStyle();
+									} else {
+									enableCollectorInfo();
+									}
+								}
+
+								// Main: Show collector info
+								enableCheckbox.addEventListener('change', () => {
+									if (enableCheckbox.checked) {
+									// reveal options
+									secondCheckbox.classList.remove('hidden');
+									toggleWrap.classList.remove('hidden');
+
+									// reset sub-states to defaults
+									secondCheck.checked = false;
+									toggleCheck.checked = false;
+
+									// default collector style when turning main on
+									// (use microtask so any DOM/checkbox changes above settle first)
+									queueMicrotask(setCollectorModeFromUI);
+									} else {
+									// hide + full reset
+									secondCheckbox.classList.add('hidden');
+									toggleWrap.classList.add('hidden');
+									secondCheck.checked = false;
+									toggleCheck.checked = false;
+
+									setBottomInfoStyle();
+									}
+								});
+
+								// Toggle: switch between old/new styles
+								toggleCheck.addEventListener('change', () => {
+									if (!enableCheckbox.checked) {
+									// main is off → snap toggle off and ignore
+									toggleCheck.checked = false;
+									return;
+									}
+									if (toggleCheck.checked) {
+									// Turning toggle ON forces artist-only OFF
+									if (secondCheck.checked) secondCheck.checked = false;
+									}
+									// Always recompute after any flips
+									queueMicrotask(setCollectorModeFromUI);
+								});
+
+								// Artist-only: takes precedence and disables toggle effect
+								secondCheck.addEventListener('change', () => {
+									if (secondCheck.checked) {
+									// artist-only ON → force toggle OFF
+									if (toggleCheck.checked) toggleCheck.checked = false;
+									}
+									// Always recompute after any flips
+									queueMicrotask(setCollectorModeFromUI);
+								});
+							</script>			
+						</div>					
+<!--Consolidating the Collector info style FINISH --DSKZ ------------------------------------------------------------------------------------------------------------------>
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='padding input-description'>Serial Number (leave both blank to hide)</h5>
 							<div class='padding input-grid'>
