@@ -69,7 +69,7 @@
 			</div>
 			<div class='drop-area'>
 	            <h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
-	            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
+	            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
 			</div>
 		</div>
 		<div id='textbox-editor' class='textbox-editor'>
@@ -177,7 +177,7 @@
 							<div class='input-grid'>
 								<div class='padding drop-area'>
 						            <h5 class='margin-bottom padding input-description'>Drag and drop</h5>
-						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadFrameOption);' data-dropFunction='uploadFrameOption' data-otherParams=''>
+						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadFrameOption);' data-dropFunction='uploadFrameOption' data-otherParams=''>
 						        </div>
 						        <div>
 									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadFrameOption);'>
@@ -311,7 +311,7 @@
 							<div class='input-grid margin-bottom'>
 								<div class='padding drop-area'>
 						            <h5 class='margin-bottom padding input-description'>Drag and drop</h5>
-						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");' data-dropFunction='uploadArt' data-otherParams='autoFit'>
+						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");' data-dropFunction='uploadArt' data-otherParams='autoFit'>
 						        </div>
 						        <div>
 									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadArt, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");'>
@@ -369,7 +369,7 @@
 							<div class='input-grid margin-bottom'>
 								<div class='padding drop-area'>
 						            <h5 class='margin-bottom padding input-description'>Drag and drop</h5>
-						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadSetSymbol, "resetSetSymbol");' data-dropFunction='uploadSetSymbol' data-otherParams='resetSetSymbol'>
+						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadSetSymbol, "resetSetSymbol");' data-dropFunction='uploadSetSymbol' data-otherParams='resetSetSymbol'>
 						        </div>
 						        <div>
 									<input type='url' placeholder='Via URL' class='input' onchange='imageURL(this.value, uploadSetSymbol, "resetSetSymbol");'>
@@ -404,7 +404,6 @@
 								<input id='setSymbol-x' type='number' class='input' oninput='setSymbolEdited();' value=0>
 								<input id='setSymbol-y' type='number' class='input' oninput='setSymbolEdited();' value=0>
 								<input id='setSymbol-zoom' type='number' class='input' oninput='setSymbolEdited();' value=100 step=0.1 min=0>
-								<input id='setSymbol-rotate' type='number' class='input' oninput='setSymbolEdited();' value=0 step=1 min=0 max=360>
 							</div>
 							<div class='input-grid'>
 								<button class='input' onclick='resetSetSymbol();'>Reset Set Symbol</button>
@@ -440,7 +439,7 @@
 							<div class='input-grid'>
 								<div class='padding drop-area'>
 						            <h5 class='margin-bottom padding input-description'>Drag and drop</h5>
-						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadWatermark, "resetWatermark");' data-dropFunction='uploadWatermark' data-otherParams='resetWatermark'>
+						            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadWatermark, "resetWatermark");' data-dropFunction='uploadWatermark' data-otherParams='resetWatermark'>
 						        </div>
 						        <div>
 									<input type='url' placeholder='Via URL' class='input margin-bottom' onchange='imageURL(this.value, uploadWatermark, "resetWatermark");'>
@@ -748,7 +747,7 @@
 							<option value="Borderless">Borderless (Alt)</option>
 							<option value="BorderlessUB">Borderless (Alt) (Universes Beyond)</option>
 							<option value="Praetors">Phyrexian</option>
-							<option value="8th">Eighth Edition</option>
+							<option value="8th">8th Edition</option>
 							<option value="Seventh">Seventh Edition</option>
 
 							<option disabled>Redone frames</option>
