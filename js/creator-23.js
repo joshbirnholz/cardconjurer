@@ -5849,7 +5849,7 @@ function changeCardIndex() {
 		}
 
 		if ((card.version.includes('transform') || card.version.includes('Transform')) && card.text?.reminder && flipData.back.pt) {
-		card.text.reminder.text = flipData.back.pt;
+			card.text.reminder.text = flipData.back.pt;
 		}
 	
 		textEdited();
