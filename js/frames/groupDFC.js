@@ -5,6 +5,7 @@ loadFramePacks([
 	{name:'Snow (Front)', value:'M15TransformSnowFront'},
 	{name:'Universes Beyond (Front)', value:'M15TransformUBFront'},
 	{name:'Borderless (Front)', value:'TransformBorderlessFront'},
+	{name:'Borderless Alt (Front)', value:'TransformBorderlessAltFront'},
 	{name:'Extended Art (Front)', value:'TransformExtendedFront'},
 	{name:'Sagas (Front)', value:'SagaDFC'},
 	{name:'Saga Creatures (Front)', value: 'SagaCreatureFront'},
@@ -18,14 +19,16 @@ loadFramePacks([
 	{name:'Snow (Back)', value:'M15TransformSnowBackNew'},
 	{name:'Universes Beyond (Back)', value:'M15TransformUBBackNew'},
 	{name:'Borderless (Back)', value:'TransformBorderlessBack'},
+	{name:'Borderless Alt (Back)', value:'TransformBorderlessAltBack'},
 	{name:'Extended Art (Back)', value:'TransformExtendedBack'},
 	
 	
 	{name:'Common Parts', value:'disabled'},
 	
 	{name:'Color Identity Pips', value:'M15CIPips'},
-	{name:'Transform Icons', value:'M15TransformTypes'},	
-	
+	{name:'Transform Icons', value:'M15TransformTypes'},
+	{name:'Transform Icons (Back/Right)', value:'M15TransformTypesBack'},
+
 	{name:'Other frames', value:'disabled'},
 	{name:'Regular (Back, top-left icon)', value:'M15TransformBack'},
 	{name:'Nyx (Back, top-left icon)', value:'M15TransformNyxBack'},

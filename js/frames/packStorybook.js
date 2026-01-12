@@ -27,7 +27,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'adventure';
+	card.version = 'storyBookAdventure';
 	//art bounds
 	card.artBounds = {x:0.0334, y:0.0258, width:0.9367, height:0.5596};
 	autoFitArt();
