@@ -27,8 +27,8 @@ loadFramePacks([
 	
 	{name:'Color Identity Pips', value:'M15CIPips'},
 	{name:'Transform Icons', value:'M15TransformTypes'},
-	{name:'Transform Icons (Back)', value:'M15TransformTypesBack'},	
-	
+	{name:'Transform Icons (Back/Right)', value:'M15TransformTypesBack'},
+
 	{name:'Other frames', value:'disabled'},
 	{name:'Regular (Back, top-left icon)', value:'M15TransformBack'},
 	{name:'Nyx (Back, top-left icon)', value:'M15TransformNyxBack'},
