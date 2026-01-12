@@ -161,6 +161,8 @@ const frameNames = new Map ([
 	['Sagas (Front)', 'SagaDFC'],
 	['Borderless (Front)', 'TransformBorderlessFront'],
 	['Borderless (Back)', 'TransformBorderlessBack'],
+	['Borderless Alt (Front)', 'TransformBorderlessAltFront'],
+	['Borderless Alt (Back)', 'TransformBorderlessAltBack'],
 	['Extended Art (Front)', 'TransformExtendedFront'],
 	['Extended Art (Back)', 'TransformExtendedBack'],
 	['SDCC15 (Blackout)', 'TransformSDCC15'],
