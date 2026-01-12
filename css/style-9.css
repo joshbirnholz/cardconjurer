@@ -764,6 +764,7 @@ textarea.input {
 }
 /*Selectables*/
 .selectable {
+	position: relative;
 	text-align: center;
 	user-select: none;
 	padding: 1rem;
@@ -774,12 +775,21 @@ textarea.input {
 	transition: 0.5s;
 	cursor: pointer;
 }
-.selectable.selected {
-	padding-top: 0.5rem;
-	border-top: 0.5rem;
-	border-style: solid;
-	border-color: var(--color-selected);
+
+.selectable::after {
+	content: "";
+	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 0;
+
+	background-color: var(--color-selected);
 	transition: 0.5s !important;
+}
+
+.selectable.selected::after {
+	height: .5rem;
 }
 .selectable:hover {
 	box-shadow: 0 0px 16px black;
