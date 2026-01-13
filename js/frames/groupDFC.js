@@ -19,7 +19,7 @@ loadFramePacks([
 	{name:'Snow (Back)', value:'M15TransformSnowBackNew'},
 	{name:'Universes Beyond (Back)', value:'M15TransformUBBackNew'},
 	{name:'Borderless (Back)', value:'TransformBorderlessBack'},
-	{name:'Borderless Alt (Back)', value:'TransformBorderlessAltBack'},
+	{name:'Borderless Alt (Back/Right)', value:'TransformBorderlessAltBack'},
 	{name:'Extended Art (Back)', value:'TransformExtendedBack'},
 	
 	
@@ -39,6 +39,7 @@ loadFramePacks([
 	{name:'Addons', value:'disabled'},
 	{name:'Legend Crowns', value:'TransformLegendCrowns'},
 	{name:'Floating Legend Crowns', value:'TransformLegendCrownsFloating'},
+	{name:'Floating Legend Crowns (Back/Right)', value:'TransformLegendCrownsFloatingBackRight'},
 	{name:'Nickname Legend Crowns', value:'TransformLegendCrownsNickname'},
 	{name:'Legend Crowns (Universes Beyond)', value:'TransformLegendCrownsUB'},
 	{name:'Inner Crowns', value:'M15InnerCrowns'},
