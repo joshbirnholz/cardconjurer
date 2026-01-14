@@ -296,14 +296,19 @@
 								<span class='checkmark'></span>
 							</label>
 						</div>					<div class='readable-background padding margin-bottom'>
-						<h5 class='padding input-description'>Custom Mana Symbols</h5>
-						<h5 class='margin-bottom padding input-description'>Upload a folder of custom mana symbols (folder name appears in dropdown)</h5>
-						<h5 class='margin-bottom padding input-description'>Symbol filenames should end with the symbol name (e.g., 'w.png' for white mana, 'wb.png' for white-black hybrid)</h5>
-						<input type='file' webkitdirectory directory multiple accept='image/*' placeholder='Upload Folder' class='input margin-bottom' oninput='uploadCustomManaFolder(event.target.files);'>
-						<h5 class='margin-bottom padding input-description'>Select mana symbol set to use</h5>
-					<select id='custom-mana-selector' class='input' onchange='selectCustomManaSet(this.value);' aria-label='Select mana symbol set'>
+
+				<div class='input-grid margin-bottom' style='align-items: end;'>
+					<div>
+						<h5 class='margin-bottom padding input-description'>Custom Mana Symbols: Select mana symbol set</h5>
+						<select id='custom-mana-selector' class='input' onchange='selectCustomManaSet(this.value);' aria-label='Custom Mana Symbols: Select mana symbol set'>
 							<option value="">Default (None)</option>
 						</select>
+					</div>
+					<div>
+						<h5 class='margin-bottom padding input-description'>Upload a folder of custom mana symbols (folder name appears in dropdown). Symbol filenames should end with the symbol name (e.g., 'w.png' for white mana, 'wb.png' for white-black hybrid)</h5>
+						<input type='file' webkitdirectory directory multiple accept='image/*' placeholder='Upload Folder' class='input' oninput='uploadCustomManaFolder(event.target.files);'>
+					</div>
+				</div>
 					</div>						<div class='readable-background padding'>
 							<h5 class='padding input-description'>Add a textbox to your card</h5>
 							<div class='padding input-grid'>
