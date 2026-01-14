@@ -6648,6 +6648,8 @@ function saveCard(saveFromFile) {
 			delete frame.image;
 			frame.masks.forEach(mask => delete mask.image);
 		});
+		// Save custom mana selector value
+		cardToSave.customManaSet = document.querySelector('#custom-mana-selector').value || '';
 	}
 	try {
 		localStorage.setItem(cardKey, JSON.stringify(cardToSave));
@@ -6703,6 +6705,11 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#serial-y').value = card.serialY;
 		document.querySelector('#serial-scale').value = card.serialScale;
 		serialInfoEdited();
+		// Restore custom mana selector
+		if (card.customManaSet !== undefined) {
+			document.querySelector('#custom-mana-selector').value = card.customManaSet;
+			selectCustomManaSet(card.customManaSet);
+		}
 
 		card.frames.reverse();
 		await card.frames.forEach(item => addFrame([], item));
