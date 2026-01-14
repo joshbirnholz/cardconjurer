@@ -6711,8 +6711,22 @@ async function loadCard(selectedCardKey) {
 		serialInfoEdited();
 		// Restore custom mana selector
 		if (card.customManaSet !== undefined) {
-			document.querySelector('#custom-mana-selector').value = card.customManaSet;
-			selectCustomManaSet(card.customManaSet);
+			const selector = document.querySelector('#custom-mana-selector');
+			
+			// Check if it's a built-in set or if the custom set still exists
+			const isBuiltIn = card.customManaSet.startsWith('builtin:');
+			const isCustomAndExists = !isBuiltIn && customManaSets.has(card.customManaSet);
+			
+			if (isBuiltIn || isCustomAndExists) {
+				// Set exists, restore it
+				selector.value = card.customManaSet;
+				selectCustomManaSet(card.customManaSet);
+			} else if (card.customManaSet !== '') {
+				// Custom set no longer exists, reset to default and notify user
+				selector.value = '';
+				currentManaPrefix = '';
+				notify(`Custom mana set "${card.customManaSet}" is not available. Using default mana symbols.`, 5);
+			}
 		}
 
 		card.frames.reverse();
