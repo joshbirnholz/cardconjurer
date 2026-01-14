@@ -3430,6 +3430,10 @@ function uploadCustomManaFolder(files) {
 				option.textContent = setName;
 				selector.appendChild(option);
 				
+				// Automatically select the newly uploaded set
+				selector.value = setName;
+				selectCustomManaSet(setName);
+				
 				notify(`Custom mana set "${setName}" loaded with ${manaImages.size} symbols`, 3);
 			}
 		};
