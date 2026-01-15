@@ -4221,7 +4221,13 @@ function writeText(textObject, targetContext) {
 				} else if (possibleCode.includes('kerning')) {
 					lineContext.letterSpacing = possibleCode.replace('kerning', '') + 'px';
 					lineContext.font = lineContext.font; //necessary for the letterspacing update to be recognized
-				} else if (getManaSymbol(possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined) {
+				} else if (
+					// Check if symbol exists with custom prefix or in default set
+					(currentManaPrefix && (getManaSymbol(currentManaPrefix + possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(currentManaPrefix + possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined)) ||
+					(textObject.manaPrefix && (getManaSymbol(textObject.manaPrefix + possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(textObject.manaPrefix + possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined)) ||
+					getManaSymbol(possibleCode.replaceAll('/', '')) != undefined || 
+					getManaSymbol(possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined
+				) {
 					var possibleCode = possibleCode.replaceAll('/', '');
 					var manaSymbol;
 					// Add symbol to render queue without drawing immediately
