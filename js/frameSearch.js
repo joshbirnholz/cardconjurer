@@ -174,6 +174,7 @@ const frameNames = new Map ([
 	['Transform Addon Arrows (Universes Beyond)', 'TransformAddonMDFCUB'],
 	['Transform Addon Arrows (Borderless)', 'TransformAddonMDFCBorderless'],
 	['Transform Addon Arrows (Snow)', 'TransformAddonMDFCSnow'],
+	['Transform Addon Arrows (Extended Art)', 'TransformAddonMDFCExtended'],
 	//modal
 	['Modal DFC', 'ModalRegular'],
 	['Modal DFC Borderless', 'ModalBorderless'],

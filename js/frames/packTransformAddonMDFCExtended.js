@@ -10,14 +10,7 @@ availableFrames = [
 	{name:'Green Transform Arrow', src:'/img/frames/modal/transformAddon/extended/g.png', bounds:bounds},
 	{name:'Multicolored Transform Arrow', src:'/img/frames/modal/transformAddon/extended/m.png', bounds:bounds},
 	{name:'Artifact Transform Arrow', src:'/img/frames/modal/transformAddon/extended/a.png', bounds:bounds},
-
-	{name:'Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/L.png', bounds:bounds},
-	{name:'White Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/w.png', bounds:bounds},
-	{name:'Blue Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/u.png', bounds:bounds},
-	{name:'Black Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/b.png', bounds:bounds},
-	{name:'Red Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/r.png', bounds:bounds},
-	{name:'Green Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/g.png', bounds:bounds},
-	{name:'Multicolored Land Transform Arrow', src:'/img/frames/modal/transformAddon/extended/land/m.png', bounds:bounds}
+    {name:'Land Transform Arrow (Matches Promo Extended Art Frames)', src:'/img/frames/modal/transformAddon/extended/L.png', bounds:bounds},
 	
 ];
 //disables/enables the "Load Frame Version" button
