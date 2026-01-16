@@ -29,7 +29,9 @@ availableFrames = [
 	{name:'Green Holo Stamp', src:'/img/frames/fable/stamp/g.png', bounds:stampBounds},
 	{name:'Multicolored Holo Stamp', src:'/img/frames/fable/stamp/m.png', bounds:stampBounds},
 	{name:'Artifact Holo Stamp', src:'/img/frames/fable/stamp/a.png', bounds:stampBounds},
-//	{name:'Land Holo Stamp', src:'/img/frames/fable/stamp/L.png', bounds:stampBounds}
+//	{name:'Land Holo Stamp', src:'/img/frames/fable/stamp/L.png', bounds:stampBounds},
+	{name:'Plain Holo Stamp', src:'/img/frames/m15/holoStamps/stamp.png', bounds:{x:916/2010, y:2555/2814, width:180/2010, height:90/2814}},
+	{name:'Gray Holo Stamp', src:'/img/frames/m15/holoStamps/gray.png', bounds:{x:916/2010, y:2555/2814, width:180/2010, height:90/2814}}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
