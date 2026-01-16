@@ -16,6 +16,7 @@ loadFramePacks([
 	{name:'Brawl Legend Crowns', value:'ModalLegendCrownsBrawl'},
 	{name:'Inner Crowns', value:'M15InnerCrowns'},
 	{name:'Transform Addon Arrows', value:'TransformAddonMDFC'},
+	{name:'Transform Addon Arrows (UB)', value:'TransformAddonMDFCUB'},
 	{name:'Holo Stamps', value:'M15HoloStamps'},
 	{name:'Dark Power/Toughness', value:'M15DarkPT'},
 	{name:'Colored Borders', value:'M15Borders'},

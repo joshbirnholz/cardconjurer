@@ -11,7 +11,6 @@ availableFrames = [
 	{name:'Multicolored Transform Arrow', src:'/img/frames/modal/transformAddon/m.png', bounds:bounds},
 	{name:'Artifact Transform Arrow', src:'/img/frames/modal/transformAddon/a.png', bounds:bounds},
 	{name:'Vehicle Transform Arrow', src:'/img/frames/modal/transformAddon/v.png', bounds:bounds},
-	{name:'Colorless Transform Arrow', src:'/img/frames/modal/transformAddon/c.png', bounds:bounds},
 
 	{name:'White Nyx Transform Arrow', src:'/img/frames/modal/transformAddon/nyx/w.png', bounds:bounds},
 	{name:'Blue Nyx Transform Arrow', src:'/img/frames/modal/transformAddon/nyx/u.png', bounds:bounds},
@@ -21,13 +20,13 @@ availableFrames = [
 	{name:'Multicolored Nyx Transform Arrow', src:'/img/frames/modal/transformAddon/nyx/m.png', bounds:bounds},
 	{name:'Artifact Nyx Transform Arrow', src:'/img/frames/modal/transformAddon/a.png', bounds:bounds},
 
-	{name:'Land Transform Arrow', src:'/img/frames/modal/transformAddon/L.png', bounds:bounds},
-	{name:'White Land Transform Arrow', src:'/img/frames/modal/transformAddon/WL.png', bounds:bounds},
-	{name:'Blue Land Transform Arrow', src:'/img/frames/modal/transformAddon/uL.png', bounds:bounds},
-	{name:'Black Land Transform Arrow', src:'/img/frames/modal/transformAddon/bL.png', bounds:bounds},
-	{name:'Red Land Transform Arrow', src:'/img/frames/modal/transformAddon/rL.png', bounds:bounds},
-	{name:'Green Land Transform Arrow', src:'/img/frames/modal/transformAddon/gL.png', bounds:bounds},
-	{name:'Multicolored Land Transform Arrow', src:'/img/frames/modal/transformAddon/mL.png', bounds:bounds}
+	{name:'Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/L.png', bounds:bounds},
+	{name:'White Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/w.png', bounds:bounds},
+	{name:'Blue Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/u.png', bounds:bounds},
+	{name:'Black Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/b.png', bounds:bounds},
+	{name:'Red Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/r.png', bounds:bounds},
+	{name:'Green Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/g.png', bounds:bounds},
+	{name:'Multicolored Land Transform Arrow', src:'/img/frames/modal/transformAddon/land/m.png', bounds:bounds}
 	
 ];
 //disables/enables the "Load Frame Version" button
