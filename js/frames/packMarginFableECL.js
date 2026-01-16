@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/fable/margin/masks/maskBorderless.png', name:'Borderless'}];
+var masks = [{src:'/img/frames/fable/margin/masks/maskNoBorder.png', name:'No Border'}];
 var bounds = {x:-88/2010, y:-80/2817, width:2187/2010, height:2978/2817};
 var ogBounds = {x:0, y:0, width:1, height:1};
 var bounds2 = {x:-0.044, y:-1/35, width:1.088, height:37/35};
@@ -12,7 +12,7 @@ availableFrames = [
 	{name:'Green Extension', src:'/img/frames/fable/margin/g.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Multicolored Extension', src:'/img/frames/fable/margin/m.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Artifact Extension', src:'/img/frames/fable/margin/a.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
-	{name:'Borderless Extension', src:'/img/frames/margins/borderlessBorderExtension.png', bounds:bounds2}
+//	{name:'Land Extension', src:'/img/frames/fable/margin/L.png', bounds:bounds, ogBounds:ogBounds, masks:masks}
 
 ];
 //disables/enables the "Load Frame Version" button
