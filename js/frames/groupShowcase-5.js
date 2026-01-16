@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
+	{name:'Fable (ECL)', value:'FableECL'},
 	{name:'Avatar Elemental (TLA)', value:'Elemental'},
 	{name:'Borderless Stellar Sights (EOS)', value:'BorderlessStellarSights'},
 	{name:'Poster Stellar Sights (EOS)', value:'PosterStellarSights'},

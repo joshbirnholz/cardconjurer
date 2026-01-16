@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Generic Margins', value:'Margin-1'},
+	{name: 'Fable (ECL) Margins', value:'MarginFableECL'},
 	{name:'Elemental Margins (TLA)', value:'MarginElemental'},
 	{name:'Edge of Eternities Basics (EOE)', value:'MarginEOEBasics'},
 	{name:'Borderless Stellar Sights', value:'MarginBorderlessStellarSights'},
