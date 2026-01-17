@@ -3230,6 +3230,9 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	frameElement.appendChild(frameElementMask);
 	var frameElementLabel = document.createElement('h4');
 	frameElementLabel.innerHTML = frameToAdd.name;
+	if (frameToAdd.erase) {
+		frameElementLabel.innerHTML += ', Erase Card';
+	}
 	frameToAdd.masks.forEach(item => frameElementLabel.innerHTML += ', ' + item.name);
 	frameElement.appendChild(frameElementLabel);
 	var frameElementClose = document.createElement('h4');
@@ -3267,7 +3270,7 @@ function frameElementClicked(event) {
 		document.querySelector('#frame-editor-opacity').value = selectedFrame.opacity || 100;
 		document.querySelector('#frame-editor-opacity').onchange = (event) => {selectedFrame.opacity = event.target.value; drawFrames();}
 		document.querySelector('#frame-editor-erase').checked = selectedFrame.erase || false;
-		document.querySelector('#frame-editor-erase').onchange = (event) => {selectedFrame.erase = event.target.checked; drawFrames();}
+		document.querySelector('#frame-editor-erase').onchange = (event) => {selectedFrame.erase = event.target.checked; drawFrames(); updateFrameLabel();}
 		document.querySelector('#frame-editor-alpha').checked = selectedFrame.preserveAlpha || false;
 		document.querySelector('#frame-editor-alpha').onchange = (event) => {selectedFrame.preserveAlpha = event.target.checked; drawFrames();}
 		document.querySelector('#frame-editor-color-overlay-check').checked = selectedFrame.colorOverlayCheck || false;
@@ -3345,6 +3348,23 @@ function addMaskToList(list, mask) {
 		list.push({name: mask.name, src: mask.src});
 	}
 }
+function updateFrameLabel() {
+	const frameIndex = card.frames.indexOf(selectedFrame);
+	if (frameIndex === -1) return;
+	
+	const frameElements = document.querySelectorAll('#frame-list .frame-element');
+	const frameElement = frameElements[frameElements.length - 1 - frameIndex];
+	if (!frameElement) return;
+	
+	const label = frameElement.querySelector('h4:not(.frame-element-close)');
+	if (label) {
+		label.innerHTML = selectedFrame.name;
+		if (selectedFrame.erase) {
+			label.innerHTML += ', Erase Card';
+		}
+		selectedFrame.masks.forEach(mask => label.innerHTML += ', ' + mask.name);
+	}
+}
 function createMaskObject(name, src, noThumb = false) {
 	const mask = {name, src, image: new Image()};
 	if (noThumb) mask.noThumb = true;
@@ -3373,6 +3393,7 @@ function frameElementMaskRemoved() {
 	
 	selectedFrame.masks = selectedFrame.masks.filter(mask => mask.name !== selectedOption);
 	drawFrames();
+	updateFrameLabel();
 	refreshMaskDropdowns();
 }
 function frameElementMaskApplied() {
@@ -3383,6 +3404,7 @@ function frameElementMaskApplied() {
 	try {
 		const maskData = JSON.parse(selectedOption);
 		selectedFrame.masks.push(createMaskObject(maskData.name, maskData.src, maskData.noThumb));
+		updateFrameLabel();
 		refreshMaskDropdowns();
 	} catch (e) {
 		console.error('Error applying mask:', e);
@@ -3392,6 +3414,7 @@ function uploadMaskOption(imageSource) {
 	if (!selectedFrame) return;
 	customCount++;
 	selectedFrame.masks.push(createMaskObject(`Uploaded Image (${customCount})`, imageSource, true));
+	updateFrameLabel();
 	refreshMaskDropdowns();
 }
 function uploadFrameOption(imageSource) {
