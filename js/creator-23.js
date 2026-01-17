@@ -3140,6 +3140,12 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	var frameToAdd = JSON.parse(JSON.stringify(availableFrames[selectedFrameIndex]));
 	var maskThumbnail = true;
 	if (!loadingFrame) {
+		// Store the available masks from the frame pack for later use in the editor
+		if (availableFrames[selectedFrameIndex] && availableFrames[selectedFrameIndex].masks) {
+			frameToAdd.availableMasks = JSON.parse(JSON.stringify(availableFrames[selectedFrameIndex].masks));
+		} else {
+			frameToAdd.availableMasks = [];
+		}
 		// The frame is being added manually by the user, so we must process which mask(s) they have selected
 		var noDefaultMask = 0;
 		if (frameToAdd.noDefaultMask) {noDefaultMask = 1;}
@@ -3280,41 +3286,113 @@ function frameElementClicked(event) {
 		document.querySelector('#frame-editor-hsl-lightness-slider').value = selectedFrame.hslLightness || 0;
 		document.querySelector('#frame-editor-hsl-lightness').onchange = (event) => {selectedFrame.hslLightness = event.target.value; drawFrames();}
 		document.querySelector('#frame-editor-hsl-lightness-slider').onchange = (event) => {selectedFrame.hslLightness = event.target.value; drawFrames();}
-		// Removing masks
-		const selectMaskElement = document.querySelector('#frame-editor-masks');
-		selectMaskElement.innerHTML = null;
-		const maskOptionNone = document.createElement('option');
-		maskOptionNone.disabled = true;
-		maskOptionNone.innerHTML = 'None Selected';
-		selectMaskElement.appendChild(maskOptionNone);
-		selectedFrame.masks.forEach(mask => {
-			const maskOption = document.createElement('option');
-			maskOption.innerHTML = mask.name;
-			selectMaskElement.appendChild(maskOption);
-		});
-		selectMaskElement.selectedIndex = 0;
+		// Initialize mask dropdowns
+		refreshMaskDropdowns();
 	}
 }
+function refreshMaskDropdowns() {
+	if (!selectedFrame) return;
+	// Ensure masks array exists
+	if (!selectedFrame.masks) {
+		selectedFrame.masks = [];
+	}
+	
+	// Refresh "Select and remove masks" dropdown
+	const selectMaskElement = document.querySelector('#frame-editor-masks');
+	selectMaskElement.innerHTML = '';
+	const maskOptionNone = document.createElement('option');
+	maskOptionNone.disabled = true;
+	maskOptionNone.innerHTML = 'None Selected';
+	selectMaskElement.appendChild(maskOptionNone);
+	selectedFrame.masks.forEach(mask => {
+		const maskOption = document.createElement('option');
+		maskOption.innerHTML = mask.name;
+		selectMaskElement.appendChild(maskOption);
+	});
+	selectMaskElement.selectedIndex = 0;
+	
+	// Refresh "Select and apply available masks" dropdown
+	const selectAvailableMaskElement = document.querySelector('#frame-editor-available-masks');
+	selectAvailableMaskElement.innerHTML = '';
+	const availableMaskOptionNone = document.createElement('option');
+	availableMaskOptionNone.disabled = true;
+	availableMaskOptionNone.innerHTML = 'Select a mask to apply';
+	availableMaskOptionNone.selected = true;
+	selectAvailableMaskElement.appendChild(availableMaskOptionNone);
+	
+	const appliedMaskNames = selectedFrame.masks.map(m => m.name);
+	const globalMasks = [
+		{src: '/img/frames/maskRightHalf.png', name: 'Right Half'},
+		{src: '/img/frames/maskLeftHalf.png', name: 'Left Half'},
+		{src: '/img/frames/maskMiddleThird.png', name: 'Middle Third'},
+		{src: '/img/frames/maskTopHalf.png', name: 'Top Half'},
+		{src: '/img/frames/maskBottomHalf.png', name: 'Bottom Half'}
+	];
+	
+	// Add available masks (global + frame-specific), excluding already applied ones
+	const allAvailableMasks = [...globalMasks, ...(selectedFrame.availableMasks || availableFrames[selectedFrameIndex]?.masks || [])];
+	allAvailableMasks.forEach(mask => {
+		if (!appliedMaskNames.includes(mask.name)) {
+			const option = document.createElement('option');
+			option.innerHTML = mask.name;
+			option.value = JSON.stringify(mask);
+			selectAvailableMaskElement.appendChild(option);
+		}
+	});
+}
+function addMaskToList(list, mask) {
+	if (!list.find(m => m.name === mask.name && m.src === mask.src)) {
+		list.push({name: mask.name, src: mask.src});
+	}
+}
+function createMaskObject(name, src, noThumb = false) {
+	const mask = {name, src, image: new Image()};
+	if (noThumb) mask.noThumb = true;
+	mask.image.crossOrigin = 'anonymous';
+	mask.image.onload = drawFrames;
+	mask.image.src = fixUri(src);
+	return mask;
+}
 function frameElementMaskRemoved() {
-	const selectElement = document.querySelector('#frame-editor-masks');
-	const selectedOption = selectElement.value;
-	if (selectedOption != 'None Selected') {
-		selectElement.remove(selectElement.selectedIndex);
-		selectElement.selectedIndex = 0;
-		selectedFrame.masks.forEach(mask => {
-			if (mask.name == selectedOption) {
-				selectedFrame.masks = selectedFrame.masks.filter(item => item.name != selectedOption);
-				drawFrames();
-			}
-		});
+	if (!selectedFrame) return;
+	const selectedOption = document.querySelector('#frame-editor-masks').value;
+	if (selectedOption === 'None Selected') return;
+	
+	const removedMask = selectedFrame.masks.find(mask => mask.name === selectedOption);
+	
+	// If it's an uploaded mask, add it back to available lists
+	if (removedMask?.noThumb) {
+		const originalFrame = availableFrames.find(f => f.name === selectedFrame.name && f.src === selectedFrame.src);
+		if (originalFrame) {
+			originalFrame.masks = originalFrame.masks || [];
+			addMaskToList(originalFrame.masks, removedMask);
+		}
+		selectedFrame.availableMasks = selectedFrame.availableMasks || [];
+		addMaskToList(selectedFrame.availableMasks, removedMask);
+	}
+	
+	selectedFrame.masks = selectedFrame.masks.filter(mask => mask.name !== selectedOption);
+	drawFrames();
+	refreshMaskDropdowns();
+}
+function frameElementMaskApplied() {
+	if (!selectedFrame) return;
+	const selectedOption = document.querySelector('#frame-editor-available-masks').value;
+	if (selectedOption === 'Select a mask to apply') return;
+	
+	try {
+		const maskData = JSON.parse(selectedOption);
+		selectedFrame.masks.push(createMaskObject(maskData.name, maskData.src, maskData.noThumb));
+		refreshMaskDropdowns();
+	} catch (e) {
+		console.error('Error applying mask:', e);
 	}
 }
 function uploadMaskOption(imageSource) {
-	const uploadedMask = {name:`Uploaded Image (${customCount})`, src:imageSource, noThumb:true, image: new Image()};
-	customCount ++;
-	selectedFrame.masks.push(uploadedMask);
-	uploadedMask.image.onload = drawFrames;
-	uploadedMask.image.src = imageSource;
+	if (!selectedFrame) return;
+	customCount++;
+	selectedFrame.masks.push(createMaskObject(`Uploaded Image (${customCount})`, imageSource, true));
+	refreshMaskDropdowns();
 }
 function uploadFrameOption(imageSource) {
 	const uploadedFrame = {name:`Uploaded Image (${customCount})`, src:imageSource, noThumb:true};
