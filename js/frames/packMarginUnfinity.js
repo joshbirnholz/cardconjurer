@@ -8,7 +8,8 @@ availableFrames = [
 	{name:'Blue Extension', src:'/img/frames/unfinity/margins/u.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Black Extension', src:'/img/frames/unfinity/margins/b.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 	{name:'Red Extension', src:'/img/frames/unfinity/margins/r.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
-	{name:'Green Extension', src:'/img/frames/unfinity/margins/g.png', bounds:bounds, ogBounds:ogBounds, masks:masks}
+	{name:'Green Extension', src:'/img/frames/unfinity/margins/g.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
+	{name:'Waste Extension', src:'/img/frames/unfinity/margins/L.png', bounds:bounds, ogBounds:ogBounds, masks:masks}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
