@@ -67,9 +67,14 @@
 				<select id='frame-editor-masks' class='input margin-bottom'></select>
 				<button onclick='frameElementMaskRemoved();' class='input'>Remove mask</button>
 			</div>
+			<div>
+				<h5 class='input-description'>Select and apply available masks</h5>
+				<select id='frame-editor-available-masks' class='input margin-bottom'></select>
+				<button onclick='frameElementMaskApplied();' class='input'>Apply mask</button>
+			</div>
 			<div class='drop-area'>
-	            <h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
-	            <input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
+				<h5 class='margin-bottom padding input-description'>Drag and drop masks to add</h5>
+				<input type='file' multiple accept='.png, .svg, .jpg, .jpeg, .bmp, .webp' placeholder='File Upload' class='input' oninput='uploadFiles(event.target.files, uploadMaskOption);' data-dropFunction='uploadMaskOption' data-otherParams=''>
 			</div>
 		</div>
 		<div id='textbox-editor' class='textbox-editor'>
