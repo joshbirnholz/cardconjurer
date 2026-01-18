@@ -1,0 +1,17 @@
+{
+  "name": "image-cdn",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "lint": "eslint src/**/*.js"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240314.0",
+    "eslint": "^8.57.0",
+    "wrangler": "^4.59.2"
+  }
+}
