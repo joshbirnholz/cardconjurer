@@ -4554,6 +4554,9 @@ async function addTextbox(textboxType) {
 }
 //ART TAB
 function uploadArt(imageSource, otherParams) {
+	art.onerror = function() {
+		notify('Failed to load image. Please try a different URL or upload the file directly.');
+	};
 	art.src = imageSource;
 	if (otherParams && otherParams == 'autoFit') {
 		art.onload = function() {
@@ -6657,10 +6660,26 @@ function imageURL(url, destination, otherParams) {
 	// If an image URL does not have HTTP in it, assume it's a local file in the repo local_art directory.
 	if (!url.includes('http')) {
 		imageurl = '/local_art/' + url;
-	} else if (params.get('noproxy') != '') {
-		//CORS PROXY LINKS
-		//Previously: https://cors.bridged.cc/
-		imageurl = 'https://corsproxy.io/?url=' + encodeURIComponent(url);
+	} else {
+		// Convert Google Drive sharing links to direct image URLs
+		if (url.includes('drive.google.com/file/d/')) {
+			const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+			if (match && match[1]) {
+				// Use Google Drive's open endpoint which works for public files
+				imageurl = `https://drive.google.com/uc?export=download&id=${match[1]}`;
+			}
+		}
+		
+		// Skip proxy for services with proper CORS headers
+		const skipProxy = url.includes('i.imgur.com') || 
+						url.includes('i.ibb.co') ||
+						url.includes('postimg.cc') ||
+						url.includes('catbox.moe');
+		
+		if (params.get('noproxy') == null && !skipProxy) {
+			//CORS PROXY LINKS - Using Cloudflare Workers based proxy
+			imageurl = 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(imageurl);
+		}
 	}
 	destination(imageurl, otherParams);
 }
