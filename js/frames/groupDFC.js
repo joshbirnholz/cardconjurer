@@ -12,6 +12,8 @@ loadFramePacks([
 	{name:'Saga Creatures (Back)', value: 'SagaCreatureBack'},
 	{name:'Saga Creatures (Universes Beyond) (Front)', value: 'SagaCreatureUBFront'},
 	{name:'Saga Creatures (Universes Beyond) (Back)', value: 'SagaCreatureUBBack'},
+	{name:'Neon Ink Transform (Front) (TLA)', value:'NeonInkTransformFront'},
+	{name:'Neon Ink Transform (Back) (TLA)', value:'NeonInkTransformBack'},
 
 	{name:'Back', value:'disabled'},
 	{name:'Regular (Back)', value:'M15TransformBackNew'},
@@ -35,6 +37,7 @@ loadFramePacks([
 	{name:'Snow (Back, top-left icon)', value:'M15TransformSnowBack'},
 	{name:'Universes Beyond (Back, top-left icon)', value:'M15TransformUBBack'},
 	{name:'SDCC15 (Blackout)', value:'TransformSDCC15'},
+
 
 	{name:'Addons', value:'disabled'},
 	{name:'Legend Crowns', value:'TransformLegendCrowns'},

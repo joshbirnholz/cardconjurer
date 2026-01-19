@@ -1,5 +1,8 @@
 loadFramePacks([
 	{name:'Basic Lands', value:'disabled'},
+	{name:'Neon Ink (TLA)', value:'NeonInkTextless'},
+	{name:'Neon Ink Transform (Front) (TLA)', value:'NeonInkTransformFrontTextless'},
+	{name:'Neon Ink Transform (Back) (TLA)', value:'NeonInkTransformBackTextless'},
 	{name:'Edge of Eternities Basics (EOE)', value:'EOEBasics'},
 	{name:'Kamigawa Basics (NEO)', value:'NeoBasics'},
 	{name:'Fullart Basics (2022)', value:'TextlessBasics2022'},
