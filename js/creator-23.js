@@ -3797,7 +3797,8 @@ function writeText(textObject, targetContext) {
 		lineContext.shadowOffsetY = textShadowOffsetY;
 		lineContext.shadowBlur = textShadowBlur;
 		lineContext.strokeStyle = textObject.outlineColor || 'black';
-		var textOutlineWidth = scaleHeight(textObject.outlineWidth) || 0;
+		// Calculate outline width proportional to current text size for proper scaling
+		var textOutlineWidth = textObject.outlineWidth ? (textObject.outlineWidth * textSize / textObject.size) : 0;
 		var textLineCap = textObject.lineCap || 'round';
 		var textLineJoin = textObject.lineJoin || 'round';
 		var hideBottomInfoBorder = card.hideBottomInfoBorder || false;
