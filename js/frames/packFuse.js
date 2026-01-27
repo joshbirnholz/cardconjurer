@@ -15,14 +15,12 @@ availableFrames = [
 document.querySelector('#loadFrameVersion').disabled = false;
 //defines process for loading this version, if applicable
 document.querySelector('#loadFrameVersion').onclick = async function() {
-	// Notification
-	notify('At this time, rotated set symbols and second pieces of art is not an option, unless added manually with external software. Apologies for the inconvenience!', 10);
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
 	card.version = 'fuse';
 	//art bounds
-	card.artBounds = {x:0.158, y:0.0534, width:0.3734, height:0.3886};
+	card.artBounds = {x:0.0558, y:0.1034, width:0.5700, height:0.2886, rotation:-90};
 	autoFitArt();
 	//set symbol bounds
 	card.setSymbolBounds = {x:1855/2010, y:2707/2814, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};

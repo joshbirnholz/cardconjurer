@@ -47,7 +47,7 @@ function getStandardHeight() {
 }
 
 //card object
-var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
+var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, setSymbolRotate:0, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
 //core images/masks
 const black = new Image(); black.crossOrigin = 'anonymous'; black.src = fixUri('/img/black.png');
 const blank = new Image(); blank.crossOrigin = 'anonymous'; blank.src = fixUri('/img/blank.png');
@@ -4595,7 +4595,11 @@ function artEdited() {
 	drawCard();
 }
 function autoFitArt() {
-	document.querySelector('#art-rotate').value = 0;
+	// Check if artBounds has rotation and preserve it
+	const preserveRotation = card.artBounds && card.artBounds.rotation !== undefined;
+	const rotationToPreserve = preserveRotation ? card.artBounds.rotation : 0;
+	
+	document.querySelector('#art-rotate').value = rotationToPreserve;
 	if (art.width / art.height > scaleWidth(card.artBounds.width) / scaleHeight(card.artBounds.height)) {
 		document.querySelector('#art-y').value = Math.round(scaleY(card.artBounds.y) - scaleHeight(card.marginY));
 		document.querySelector('#art-zoom').value = (scaleHeight(card.artBounds.height) / art.height * 100).toFixed(1);
@@ -4765,6 +4769,7 @@ function setSymbolEdited() {
 	card.setSymbolX = document.querySelector('#setSymbol-x').value / card.width;
 	card.setSymbolY = document.querySelector('#setSymbol-y').value / card.height;
 	card.setSymbolZoom = document.querySelector('#setSymbol-zoom').value / 100;
+	card.setSymbolRotate = document.querySelector('#setSymbol-rotate').value || 0;
 	drawCard();
 }
 function resetSetSymbol() {
@@ -4773,6 +4778,7 @@ function resetSetSymbol() {
 	}
 	document.querySelector('#setSymbol-x').value = Math.round(scaleX(card.setSymbolBounds.x));
 	document.querySelector('#setSymbol-y').value = Math.round(scaleY(card.setSymbolBounds.y));
+	document.querySelector('#setSymbol-rotate').value = card.setSymbolBounds.rotation || 0;
 	var setSymbolZoom;
 	if (setSymbol.width / setSymbol.height > scaleWidth(card.setSymbolBounds.width) / scaleHeight(card.setSymbolBounds.height)) {
 		setSymbolZoom = (scaleWidth(card.setSymbolBounds.width) / setSymbol.width * 100).toFixed(1);
@@ -5048,6 +5054,19 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
     const symbolHeight = setSymbol.height * card.setSymbolZoom; 
     const x = scaleX(card.setSymbolX);
     const y = scaleY(card.setSymbolY);
+	const rotation = card.setSymbolRotate || 0;
+
+	// Save context for rotation
+	cardContext.save();
+
+	// Apply rotation if needed
+	if (rotation !== 0) {
+		const centerX = x + symbolWidth / 2;
+		const centerY = y + symbolHeight / 2;
+		cardContext.translate(centerX, centerY);
+		cardContext.rotate(Math.PI / 180 * rotation);
+		cardContext.translate(-centerX, -centerY);
+	}
 
     if (bounds.outlineWidth && bounds.outlineWidth > 0) {
         // Create temp canvas for outlined symbol
@@ -5101,6 +5120,7 @@ function drawSetSymbol(cardContext, setSymbol, bounds) {
         // Draw main symbol without outline (simple path)
         cardContext.drawImage(setSymbol, x, y, symbolWidth, symbolHeight);
     }
+	    cardContext.restore();
 }
 //DRAWING THE CARD (putting it all together)
 function drawCard() {
@@ -5109,12 +5129,21 @@ function drawCard() {
 	cardContext.clearRect(0, 0, cardCanvas.width, cardCanvas.height);
 	// art
 	cardContext.save();
-	cardContext.translate(scaleX(card.artX), scaleY(card.artY));
-	cardContext.rotate(Math.PI / 180 * (card.artRotate || 0));
-	if (document.querySelector('#grayscale-art').checked) {
-		cardContext.filter='grayscale(1)';
+	if (card.artRotate || (card.artBounds && card.artBounds.rotation)) {
+		// Use rotation from artRotate or artBounds.rotation
+		const rotation = card.artRotate || card.artBounds.rotation;
+		// Calculate art center
+		const artCenterX = scaleX(card.artX) + (art.width * card.artZoom) / 2;
+		const artCenterY = scaleY(card.artY) + (art.height * card.artZoom) / 2;
+		// Rotate around center
+		cardContext.translate(artCenterX, artCenterY);
+		cardContext.rotate(Math.PI / 180 * rotation);
+		cardContext.translate(-artCenterX, -artCenterY);
 	}
-	cardContext.drawImage(art, 0, 0, art.width * card.artZoom, art.height * card.artZoom);
+	if (document.querySelector('#grayscale-art').checked) {
+		cardContext.filter = 'grayscale(1)';
+	}
+	cardContext.drawImage(art, scaleX(card.artX), scaleY(card.artY), art.width * card.artZoom, art.height * card.artZoom);
 	cardContext.restore();
 	// frame elements
 	if (card.version.includes('planeswalker') && typeof planeswalkerPreFrameCanvas !== "undefined") {
@@ -5207,7 +5236,7 @@ function drawCard() {
 	// cutout the corners
 	cardContext.globalCompositeOperation = 'destination-out';
 	if (!card.noCorners && (card.marginX == 0 && card.marginY == 0)) {
-		var w = card.version == 'battle' ? 2100 : getStandardWidth();
+		var w = getStandardWidth();
 
 		cardContext.drawImage(corner, 0, 0, scaleWidth(59/w), scaleWidth(59/w));
 		cardContext.rotate(Math.PI / 2);
@@ -6481,11 +6510,12 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#art-x').value = scaleX(card.artX) - scaleWidth(card.marginX);
 		document.querySelector('#art-y').value = scaleY(card.artY) - scaleHeight(card.marginY);
 		document.querySelector('#art-zoom').value = card.artZoom * 100;
-		document.querySelector('#art-rotate').value = card.artRotate || 0;
+		document.querySelector('#art-rotate').value = card.artBounds.rotation || 0;
 		uploadArt(card.artSource);
 		document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
 		document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
 		document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
+		document.querySelector('#setSymbol-rotate').value = card.setSymbolRotate || 0;
 		uploadSetSymbol(card.setSymbolSource);
 		document.querySelector('#watermark-x').value = scaleX(card.watermarkX) - scaleWidth(card.marginX);
 		document.querySelector('#watermark-y').value = scaleY(card.watermarkY) - scaleHeight(card.marginY);
