@@ -1,6 +1,6 @@
 //Create objects for common properties across available frames
 var stampBounds = {x:894/2010, y:2559/2814, width:216/2010, height:121/2814};
-var masks = [{src:'/img/frames/m15/room/maskRight.png', name:'Right Side'}];
+var masks = [{src:'/img/frames/m15/room/maskRight.png', name:'Right Side'}, {src:'/img/frames/m15/split/maskTopRight.png', name:'Top Right'}, {src:'/img/frames/m15/split/maskBottomLeft.png', name:'Bottom Left'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/m15/room/ub/w.png', masks:masks},
