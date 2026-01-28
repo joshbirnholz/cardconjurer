@@ -3711,7 +3711,7 @@ function writeText(textObject, targetContext) {
 		        }
 		    }
 		}
-		var textFont = textObject.font || 'mplantin';
+		var textFont = textObject.font ? textObject.font.replaceAll('--', ' ') : 'mplantin';
 		var textAlign = textObject.align || 'left';
 		var textJustify = textObject.justify || 'left';
 		var textShadowColor = textObject.shadow || 'black';
@@ -3758,7 +3758,7 @@ function writeText(textObject, targetContext) {
 		// 	lineCanvas.style.letterSpacing = '3.5px';
 		// }
 		textSize += parseInt(textObject.fontSize || '0');
-		lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+		lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 		lineContext.fillStyle = textColor;
 		lineContext.shadowColor = textShadowColor;
 		lineContext.shadowOffsetX = textShadowOffsetX;
@@ -3815,25 +3815,25 @@ function writeText(textObject, targetContext) {
 						textFontExtension = '';
 						if (!textFontStyle.includes('italic')) {textFontStyle += 'italic ';}
 					}
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 				} else if (possibleCode == '/i') {
 					textFontExtension = '';
 					textFontStyle = textFontStyle.replace('italic ', '');
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 				} else if (possibleCode == 'bold') {
 					if (textFont == 'gillsans') {
 						textFontExtension = 'bold';
 					} else {
 						if (!textFontStyle.includes('bold')) {textFontStyle += 'bold ';}
 					}
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 				} else if (possibleCode == '/bold') {
 					if (textFont == 'gillsans') {
 						textFontExtension = '';
 					} else {
 						textFontStyle = textFontStyle.replace('bold ', '');
 					}
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 				} else if (possibleCode == 'left') {
 					textAlign = 'left';
 				} else if (possibleCode == 'center') {
@@ -3924,16 +3924,16 @@ function writeText(textObject, targetContext) {
 					} else {
 						textSize += parseInt(possibleCode.replace('fontsize', '')) || 0;
 					}
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 				} else if (possibleCode.includes('font') || savedFont) {
-					textFont = word.replace('{font', '').replace('}', '');
+					textFont = word.replace('{font', '').replace('}', '').replaceAll('--', ' ');
 					if (savedFont) {
 						textFont = savedFont;
 						wordToWrite = word;
 					}
 					textFontExtension = '';
 					textFontStyle = '';
-					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					lineContext.font = `${textFontStyle}${textSize}px '${textFont}${textFontExtension}'`;
 					savedFont = null;
 				} else if (possibleCode.includes('outlinecolor')) {
 					lineContext.strokeStyle = possibleCode.replace('outlinecolor', '');
