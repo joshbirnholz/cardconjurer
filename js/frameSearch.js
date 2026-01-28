@@ -109,6 +109,7 @@ const frameNames = new Map ([
 	['Eldraine Storybooks (MOM)', 'StorybookMUL'],
 	['Borderless', 'GenericShowcase'],
 	['Borderless (Alt)', 'Borderless'],
+	['Borderless (Alt) Inner Glow', 'BorderlessGlow'],
 	['Fullart', 'M15ClearTextboxes'],
 	['Nickname ("Godzilla")', 'M15Nickname'],
 	['Extended Art (Regular)', 'M15BoxTopper'],
