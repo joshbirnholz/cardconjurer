@@ -25,6 +25,7 @@ loadFramePacks([
 	{name:'Dark Power/Toughness', value:'M15DarkPT'},
 	{name:'Colored Borders', value:'M15Borders'},
 	{name:'Color Identity Pips', value:'M15CIPips'},
+	{name:'Modal DFC Transform Addon Arrows (Universes Beyond)', value:'TransformAddonMDFCUB'},
 	{name:'"The List" Stamp', value:'TheList'},
 
 	{name:'Custom Addons', value:'disabled'},
