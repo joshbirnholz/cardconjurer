@@ -985,3 +985,12 @@ textarea.input {
 #addToBottomHalf {
   grid-row: 2;
 }
+
+.flex {
+	display: flex;
+	gap: .5rem;
+}
+
+.width-auto {
+	width: auto;
+}
