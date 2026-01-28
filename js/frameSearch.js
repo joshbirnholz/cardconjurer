@@ -45,6 +45,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
+	['Fable (ECL)', 'FableECL'],
 	['Avatar Elemental (TLA)', 'Elemental'],
 	['Borderless Stellar Sights (EOS)', 'BorderlessStellarSights'],
 	['Poster Stellar Sights (EOS)', 'PosterStellarSights'],
@@ -161,11 +162,14 @@ const frameNames = new Map ([
 	['Sagas (Front)', 'SagaDFC'],
 	['Borderless (Front)', 'TransformBorderlessFront'],
 	['Borderless (Back)', 'TransformBorderlessBack'],
+	['Borderless Alt (Front)', 'TransformBorderlessAltFront'],
+	['Borderless Alt (Back/Right)', 'TransformBorderlessAltBack'],
 	['Extended Art (Front)', 'TransformExtendedFront'],
 	['Extended Art (Back)', 'TransformExtendedBack'],
 	['SDCC15 (Blackout)', 'TransformSDCC15'],
 	['DFC Legend Crowns', 'TransformLegendCrowns'],
 	['DFC Floating Legend Crowns', 'TransformLegendCrownsFloating'],
+	['DFC Floating Legend Crowns (Back/Right)', 'TransformLegendCrownsFloatingBackRight'],
 	['DFC Nickname Legend Crowns', 'TransformLegendCrownsNickname'],
 	//modal
 	['Modal DFC', 'ModalRegular'],
