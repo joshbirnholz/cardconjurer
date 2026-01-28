@@ -45,6 +45,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
+	['Mystical Archive (SOA)', 'MysticalArchiveSOA'],
 	['Fable (ECL)', 'FableECL'],
 	['Avatar Elemental (TLA)', 'Elemental'],
 	['Borderless Stellar Sights (EOS)', 'BorderlessStellarSights'],
