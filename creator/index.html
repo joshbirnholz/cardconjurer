@@ -295,8 +295,21 @@
 								<input id='italicize-reminder-text' type='checkbox' onchange='textEdited();'>
 								<span class='checkmark'></span>
 							</label>
-						</div>
-						<div class='readable-background padding'>
+						</div>					<div class='readable-background padding margin-bottom'>
+
+				<div class='input-grid margin-bottom' style='align-items: end;'>
+					<div>
+						<h5 class='margin-bottom padding input-description'>Custom Mana Symbols: Select mana symbol set</h5>
+						<select id='custom-mana-selector' class='input' onchange='selectCustomManaSet(this.value);' aria-label='Custom Mana Symbols: Select mana symbol set'>
+							<option value="">Default (None)</option>
+						</select>
+					</div>
+					<div>
+						<h5 class='margin-bottom padding input-description'>Upload folder of custom mana symbols. Symbol filenames should end with symbol name (e.g., 'w.png' for white)</h5>
+						<input type='file' webkitdirectory directory multiple accept='image/*' placeholder='Upload Folder' class='input' oninput='uploadCustomManaFolder(event.target.files);'>
+					</div>
+				</div>
+					</div>						<div class='readable-background padding'>
 							<h5 class='padding input-description'>Add a textbox to your card</h5>
 							<div class='padding input-grid'>
 								<button class='input' onclick='addTextbox("Nickname");'>Nickname</button>
