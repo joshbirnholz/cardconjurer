@@ -3467,7 +3467,7 @@ function loadTextOptions(textObject, replace=true) {
 function textOptionClicked(event) {
 	selectedTextIndex = getElementIndex(event.target);
 	document.querySelector('#text-editor').value = Object.entries(card.text)[selectedTextIndex][1].text;
-	document.querySelector('#text-editor-font-size').value = Object.entries(card.text)[selectedTextIndex][1].fontSize;
+	document.querySelector('#text-editor-font-size').value = Object.entries(card.text)[selectedTextIndex][1].fontSize || 0;
 	selectSelectable(event);
 }
 function textboxEditor() {
@@ -4554,6 +4554,16 @@ async function addTextbox(textboxType) {
 }
 //ART TAB
 function uploadArt(imageSource, otherParams) {
+	art.onerror = function() {
+		notify('Failed to load image. Please try a different URL or upload the file directly.');
+	};
+	// Store original URL if it's a Google Drive link (before conversion to object URL)
+	if (typeof imageSource === 'string' && imageSource.includes('drive.google.com/file/d/')) {
+		art.originalSrc = imageSource;
+	} else if (!imageSource.startsWith('blob:')) {
+		// Clear originalSrc for non-Google Drive, non-blob URLs
+		delete art.originalSrc;
+	}
 	art.src = imageSource;
 	if (otherParams && otherParams == 'autoFit') {
 		art.onload = function() {
@@ -4587,7 +4597,8 @@ async function pasteArt() {
   }
 }
 function artEdited() {
-	card.artSource = art.src;
+	// Use original Google Drive URL if available, otherwise use current src
+	card.artSource = art.originalSrc || art.src;
 	card.artX = document.querySelector('#art-x').value / card.width;
 	card.artY = document.querySelector('#art-y').value / card.height;
 	card.artZoom = document.querySelector('#art-zoom').value / 100;
@@ -6482,7 +6493,7 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#art-y').value = scaleY(card.artY) - scaleHeight(card.marginY);
 		document.querySelector('#art-zoom').value = card.artZoom * 100;
 		document.querySelector('#art-rotate').value = card.artRotate || 0;
-		uploadArt(card.artSource);
+		imageURL(card.artSource, uploadArt);
 		document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
 		document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
 		document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
@@ -6495,11 +6506,11 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#watermark-opacity').value = card.watermarkOpacity * 100;
 		document.getElementById("rounded-corners").checked = !card.noCorners;
 		uploadWatermark(card.watermarkSource);
-		document.querySelector('#serial-number').value = card.serialNumber;
-		document.querySelector('#serial-total').value = card.serialTotal;
-		document.querySelector('#serial-x').value = card.serialX;
-		document.querySelector('#serial-y').value = card.serialY;
-		document.querySelector('#serial-scale').value = card.serialScale;
+		document.querySelector('#serial-number').value = card.serialNumber || '';
+		document.querySelector('#serial-total').value = card.serialTotal || '';
+		document.querySelector('#serial-x').value = card.serialX || 0;
+		document.querySelector('#serial-y').value = card.serialY || 0;
+		document.querySelector('#serial-scale').value = card.serialScale || 1;
 		serialInfoEdited();
 
 		card.frames.reverse();
@@ -6652,16 +6663,68 @@ function setRoundedCorners(value) {
 	drawCard();
 }
 //Various loaders
-function imageURL(url, destination, otherParams) {
+async function imageURL(url, destination, otherParams) {
 	var imageurl = url;
 	// If an image URL does not have HTTP in it, assume it's a local file in the repo local_art directory.
 	if (!url.includes('http')) {
 		imageurl = '/local_art/' + url;
-	} else if (params.get('noproxy') != '') {
-		//CORS PROXY LINKS
-		//Previously: https://cors.bridged.cc/
-		imageurl = 'https://corsproxy.io/?url=' + encodeURIComponent(url);
+		destination(imageurl, otherParams);
+		return;
 	}
+	
+	// Handle Google Drive sharing links with Google Apps Script
+	if (url.includes('drive.google.com/file/d/')) {
+		const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+		if (match && match[1]) {
+			const scriptUrl = `https://script.google.com/macros/s/AKfycbw8laScKBfxda2Wb0g63gkYDBdy8NWNxINoC4xDOwnCQ3JMFdruam1MdmNmN4wI5k4/exec?id=${match[1]}`;
+			
+			try {
+				const response = await fetch(scriptUrl);
+				const base64Text = await response.text();
+				
+				// Detect MIME type from Base64 signature
+				let mimeType = 'image/png';
+				if (base64Text.startsWith('/9j/')) {
+					mimeType = 'image/jpeg';
+				} else if (base64Text.startsWith('UklGRiI')) {
+					mimeType = 'image/webp';
+				}
+				
+				// Convert Base64 to Blob
+				const byteCharacters = atob(base64Text);
+				const byteNumbers = new Array(byteCharacters.length);
+				for (let i = 0; i < byteCharacters.length; i++) {
+					byteNumbers[i] = byteCharacters.charCodeAt(i);
+				}
+				const byteArray = new Uint8Array(byteNumbers);
+				const blob = new Blob([byteArray], { type: mimeType });
+				
+				// Create object URL and pass it to destination
+				const objectURL = URL.createObjectURL(blob);
+				// Store the original Google Drive URL for saving
+				destination(url, otherParams);
+				// Then set the object URL to display the image
+				art.src = objectURL;
+			} catch (error) {
+				console.error('Failed to load Google Drive image:', error);
+				notify('Failed to load Google Drive image. Please try a different URL.');
+				destination('/img/blank.png', otherParams);
+			}
+			return;
+		}
+	}
+	
+	// Skip proxy for services with proper CORS headers
+	const skipProxy = url.includes('i.imgur.com') || 
+					url.includes('i.ibb.co') ||
+					url.includes('postimg.cc') ||
+					url.includes('catbox.moe');
+	
+	if (params.get('noproxy') == null && !skipProxy) {
+		//CORS PROXY LINKS - Using Cloudflare Workers based proxy
+		imageurl = 'https://corsproxy.io/?url=' + encodeURIComponent(imageurl);
+	}
+	
 	destination(imageurl, otherParams);
 }
 async function imageLocal(event, destination, otherParams) {
