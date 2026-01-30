@@ -1,7 +1,10 @@
 //Create objects for common properties across available frames
 var bounds = {x:0.0594, y:0.0505, width:0.0734, height:0.0524};
+var bounds2 = {x:0.0649, y:162/2814, width:0.0349, height:0.0185};
 //defines available frames
 availableFrames = [
+	{name:'Retro Arrow Up', src:'/img/frames/custom/stoneCutter/stoneCutterDeluxe/mdfc/retroUp.png', bounds:bounds2},
+	{name:'Retro Arrow Down', src:'/img/frames/custom/stoneCutter/stoneCutterDeluxe/mdfc/retroDown.png', bounds:bounds2},
 	{name:'Up Arrow', src:'/img/frames/m15/transform/icons/default.png', bounds:bounds},
 	{name:'Down Arrow', src:'/img/frames/m15/transform/icons/downArrow.png', bounds:bounds},
 	{name:'Sun', src:'/img/frames/m15/transform/icons/sun.svg', bounds:bounds},
