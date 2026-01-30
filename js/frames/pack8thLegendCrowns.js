@@ -30,7 +30,17 @@ availableFrames = [
 	{name:'Red Inner Crown (Companion)', src:'/img/frames/8th/crowns/inner/nycompanionx/r.png', bounds:innerBounds},
 	{name:'Green Inner Crown (Companion)', src:'/img/frames/8th/crowns/inner/companion/g.png', bounds:innerBounds},
 	{name:'Multicolored Inner Crown (Companion)', src:'/img/frames/8th/crowns/inner/companion/m.png', bounds:innerBounds},
-	{name:'Artifact Inner Crown (Companion)', src:'/img/frames/8th/crowns/inner/companion/a.png', bounds:innerBounds}
+	{name:'Artifact Inner Crown (Companion)', src:'/img/frames/8th/crowns/inner/companion/a.png', bounds:innerBounds},
+
+	{name:'White Transform Legend Crown', src:'/img/frames/8th/crowns/transform/w.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Blue Transform Legend Crown', src:'/img/frames/8th/crowns/transform/u.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Black Transform Legend Crown', src:'/img/frames/8th/crowns/transform/b.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Red Transform Legend Crown', src:'/img/frames/8th/crowns/transform/r.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Green Transform Legend Crown', src:'/img/frames/8th/crowns/transform/g.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Multicolored Transform Legend Crown', src:'/img/frames/8th/crowns/transform/m.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Artifact Transform Legend Crown', src:'/img/frames/8th/crowns/transform/a.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Land Transform Legend Crown', src:'/img/frames/8th/crowns/transform/l.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'},
+	{name:'Colorless Transform Legend Crown', src:'/img/frames/8th/crowns/transform/c.png', masks:masks, bounds:bounds, complementary:'Legend Crown Border Cover'}
 
 ];
 //disables/enables the "Load Frame Version" button
