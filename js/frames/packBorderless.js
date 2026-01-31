@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/m15/genericShowcase/m15GenericShowcaseMaskPinline.png', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/m15/regular/m15MaskType.png', name:'Type'}, {src:'/img/frames/m15/regular/m15MaskRules.png', name:'Rules'}, {src:'/img/frames/m15/borderless/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/m15/genericShowcase/m15GenericShowcaseMaskPinline.png', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/m15/regular/m15MaskType.png', name:'Type'}, {src:'/img/frames/m15/regular/m15MaskTitleAndType.png', name:'Title and Type'}, {src:'/img/frames/m15/regular/m15MaskRules.png', name:'Rules'}, {src:'/img/frames/m15/borderless/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
 var bounds = {x:1146/1500, y:1861/2100, width:274/1500, height:140/2100};
 //defines available frames
 availableFrames = [
@@ -10,8 +10,11 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameG.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameM.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameA.png', masks:masks},
+	{name:'Artifact 2 Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameA2.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameL.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameC.png', masks:masks},
+	{name:'Black (Alt) Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameBAlt.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/m15/borderless/pt/w.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/borderless/pt/u.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/borderless/pt/b.png', bounds:bounds},
@@ -19,8 +22,22 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/borderless/pt/g.png', bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/borderless/pt/m.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/borderless/pt/a.png', bounds:bounds},
+	{name:'Artifact 2 Power/Toughness', src:'/img/frames/m15/borderless/pt/a2.png', bounds:bounds},
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/borderless/pt/l.png', bounds:bounds},
-	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds}
+	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds},
+	{name:'Black (Alt) Power/Toughness', src:'/img/frames/m15/borderless/pt/bAlt.png', bounds:bounds},
+
+	{name:'White Land Frame', src:'/img/frames/m15/borderless/innerGlow/w.png', masks:masks},
+	{name:'Blue Land Frame', src:'/img/frames/m15/borderless/innerGlow/u.png', masks:masks},
+	{name:'Black Land Frame', src:'/img/frames/m15/borderless/innerGlow/b.png', masks:masks},
+	{name:'Red Land Frame', src:'/img/frames/m15/borderless/innerGlow/r.png', masks:masks},
+	{name:'Green Land Frame', src:'/img/frames/m15/borderless/innerGlow/g.png', masks:masks},
+	{name:'Multicolored Land Frame', src:'/img/frames/m15/borderless/innerGlow/m.png', masks:masks},
+	{name:'Artifact Land Frame', src:'/img/frames/m15/borderless/innerGlow/a.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks},
+	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks},
+	{name:'Land (Color Type) Frame Inner Glow', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks},
+	{name:'Black (Alt) Land Frame Inner Glow', src:'/img/frames/m15/borderless/innerGlow/bAlt.png', masks:masks}	
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
@@ -47,6 +64,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		rules: {name:'Rules Text', text:'', x:0.086, y:0.6303, width:0.828, height:0.2875, size:0.0362, color:'white'},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
+	notify('If you want to make multi color Glowing Rules lands make sure to use Preserve Alpha feature in the Frame Editor to make the frames blend correctly.', 5);
 }
 //loads available frames
 loadFramePack();

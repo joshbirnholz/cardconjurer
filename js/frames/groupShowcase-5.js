@@ -64,7 +64,6 @@ loadFramePacks([
 	{name:'Generic Showcase Frames', value:'disabled'},
 	{name:'Borderless', value:'GenericShowcase'},
 	{name:'Borderless (Alt)', value:'Borderless'},
-	{name:'Borderless (Alt) Inner Glow', value:'BorderlessGlow'},
 	{name:'Fullart', value:'M15ClearTextboxes'},
 	{name:'Nickname ("Godzilla")', value:'M15Nickname'},
 	{name:'Extended Art (Regular)', value:'M15BoxTopper'},
