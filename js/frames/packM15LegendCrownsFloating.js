@@ -5,7 +5,6 @@ availableFrames = [
 	{name:'White Legend Crown', src:'/img/frames/m15/crowns/m15CrownWFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
 	{name:'Blue Legend Crown', src:'/img/frames/m15/crowns/m15CrownUFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
 	{name:'Black Legend Crown', src:'/img/frames/m15/crowns/m15CrownBFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
-	{name:'Black Legend Crown (Alt)', src:'/img/frames/m15/crowns/m15CrownBAltFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
 	{name:'Red Legend Crown', src:'/img/frames/m15/crowns/m15CrownRFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
 	{name:'Green Legend Crown', src:'/img/frames/m15/crowns/m15CrownGFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
 	{name:'Multicolored Legend Crown', src:'/img/frames/m15/crowns/m15CrownMFloating.png', bounds:bounds, complementary:'Legend Crown Border Cover'},
