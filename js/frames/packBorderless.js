@@ -33,7 +33,7 @@ availableFrames = [
 	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks},
 	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks},
 	{name:'Land (Color Type) Frame', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks},
-	{name:'Black (Alt) Land Frame', src:'/img/frames/m15/borderless/innerGlow/bAlt.png', bounds:bounds},
+	{name:'Black (Alt) Land Frame', src:'/img/frames/m15/borderless/innerGlow/bAlt.png', masks:masks},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
