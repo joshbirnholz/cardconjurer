@@ -5223,7 +5223,79 @@ function drawCard() {
 	previewContext.drawImage(cardCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
 }
 //DOWNLOADING
-function downloadCard(alt = false, jpeg = false) {
+// Serialize card data for embedding in image trailer
+async function serializeCardData() {
+	const cardToSerialize = JSON.parse(JSON.stringify(card));
+	// Remove large image objects that are already in the image file
+	cardToSerialize.frames.forEach(frame => {
+		delete frame.image;
+		frame.masks.forEach(mask => delete mask.image);
+	});
+	
+	// Don't embed base64 images - just use a marker for user-uploaded art
+	if (cardToSerialize.artSource) {
+		if (cardToSerialize.artSource.startsWith('data:image/') || 
+		    cardToSerialize.artSource.startsWith('blob:')) {
+			cardToSerialize.artSource = 'user-uploaded';
+		} else if (cardToSerialize.artSource.includes('/img/blank.png')) {
+			delete cardToSerialize.artSource;
+		}
+	}
+	
+	return JSON.stringify(cardToSerialize);
+}
+
+// Embed card data as a trailer in the image blob
+async function embedTrailerInBlob(dataURL, cardData) {
+	return new Promise((resolve) => {
+		// Convert data URL to blob
+		fetch(dataURL).then(res => res.blob()).then(imgBlob => {
+			// Create trailer with version header
+			const trailerMarker = 'CARDCONJURER_DATA_v1:';
+			const trailerBytes = new TextEncoder().encode(trailerMarker + cardData);
+			
+			// Create new blob with image + trailer
+			const finalBlob = new Blob([imgBlob, trailerBytes], { type: imgBlob.type });
+			
+			// Convert back to data URL for download
+			const reader = new FileReader();
+			reader.onload = function(e) {
+				resolve(e.target.result);
+			};
+			reader.readAsDataURL(finalBlob);
+		});
+	});
+}
+
+// Extract trailer data from blob/file
+async function extractTrailerData(blob) {
+	return new Promise((resolve) => {
+		const reader = new FileReader();
+		reader.onload = function(e) {
+			const arrayBuffer = e.target.result;
+			const view = new Uint8Array(arrayBuffer);
+			
+			// Convert to string and search for trailer marker
+			const fullString = new TextDecoder().decode(view);
+			const markerIndex = fullString.lastIndexOf('CARDCONJURER_DATA_v1:');
+			
+			if (markerIndex !== -1) {
+				const trailerString = fullString.substring(markerIndex + 21); // 21 = length of marker
+				try {
+					const cardData = JSON.parse(trailerString);
+					resolve(cardData);
+				} catch (e) {
+					resolve(null);
+				}
+			} else {
+				resolve(null);
+			}
+		};
+		reader.readAsArrayBuffer(blob);
+	});
+}
+
+async function downloadCard(alt = false, jpeg = false) {
 	if (card.infoArtist.replace(/ /g, '') == '' && !card.artSource.includes('/img/blank.png') && !card.artZoom == 0) {
 		notify('You must credit an artist before downloading!', 5);
 	} else {
@@ -5237,7 +5309,11 @@ function downloadCard(alt = false, jpeg = false) {
 			imageDataURL = cardCanvas.toDataURL('image/png');
 			imageName = imageName + '.png';
 		}
-		// Download image
+		
+		// Embed card data as trailer
+		imageDataURL = await embedTrailerInBlob(imageDataURL, await serializeCardData());
+		
+		// Download image with embedded trailer
 		if (alt) {
 			const newWindow = window.open('about:blank');
 			setTimeout(function(){
@@ -6482,7 +6558,14 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#art-y').value = scaleY(card.artY) - scaleHeight(card.marginY);
 		document.querySelector('#art-zoom').value = card.artZoom * 100;
 		document.querySelector('#art-rotate').value = card.artRotate || 0;
-		uploadArt(card.artSource);
+		// Load art if it's a valid URL, otherwise use blank
+		if (card.artSource && card.artSource !== 'user-uploaded') {
+			uploadArt(card.artSource);
+		} else {
+			// User-uploaded art is not available, or no art specified - use blank
+			uploadArt(fixUri('/img/blank.png'));
+			card.artSource = fixUri('/img/blank.png');
+		}
 		document.querySelector('#setSymbol-x').value = scaleX(card.setSymbolX) - scaleWidth(card.marginX);
 		document.querySelector('#setSymbol-y').value = scaleY(card.setSymbolY) - scaleHeight(card.marginY);
 		document.querySelector('#setSymbol-zoom').value = card.setSymbolZoom * 100;
@@ -6561,12 +6644,72 @@ async function downloadSavedCards() {
 		download.remove();
 	}
 }
-function uploadSavedCards(event) {
+async function uploadSavedCards(event) {
+	const file = event.target.files[0];
+	if (!file) return;
+	
 	var reader = new FileReader();
-	reader.onload = function () {
-		JSON.parse(reader.result).forEach(item => saveCard(item));
+	
+	// Check if file is an image with embedded trailer data
+	if (file.type.startsWith('image/')) {
+		const cardData = await extractTrailerData(file);
+		if (cardData && cardData.frames) {
+			// Extract card name from the imported data
+			let cardName = 'unnamed';
+			if (cardData.text && cardData.text.title) {
+				cardName = cardData.text.title.text || 'unnamed';
+				if (cardData.text.nickname) {
+					cardName += ' (' + cardData.text.nickname.text + ')';
+				}
+				cardName = cardName.replace(/\{[^}]+\}/g, ''); // Remove formatting codes
+			}
+			
+			// Handle duplicate names automatically
+			var cardKeys = JSON.parse(localStorage.getItem('cardKeys')) || [];
+			var finalCardName = cardName;
+			if (cardKeys.includes(finalCardName)) {
+				var originalCardName = cardName;
+				var cardNameNumber = 1;
+				while (cardKeys.includes(finalCardName)) {
+					finalCardName = originalCardName + ' (' + cardNameNumber + ')';
+					cardNameNumber++;
+				}
+			}
+			
+			// Single card object
+			saveCard({key: finalCardName, data: cardData});
+			// Load the card to display it in the editor
+			await loadCard(finalCardName);
+			document.querySelector('#load-card-options').value = finalCardName;
+			notify('Card imported and loaded!', 3);
+		} else if (cardData) {
+			// Has data but wrong format
+			notify('This image contains Card Conjurer save data, but it does not appear to be in the expected format.', 5);
+		} else {
+			// No card data found
+			notify('This image does not contain Card Conjurer save data', 5);
+		}
+		return;
 	}
-	reader.readAsText(event.target.files[0]);
+	
+	// Otherwise, treat as text file (traditional .cardconjurer format)
+	reader.onload = function () {
+		try {
+			const parsedData = JSON.parse(reader.result);
+			if (Array.isArray(parsedData)) {
+				parsedData.forEach(item => saveCard(item));
+				notify('Cards imported successfully!', 3);
+			} else {
+				notify('Invalid file format. Expected an array of cards.', 5);
+			}
+		} catch (error) {
+			notify('Failed to parse file. Please ensure it is a valid Card Conjurer save file.', 5);
+		}
+	}
+	reader.onerror = function () {
+		notify('Failed to read file', 5);
+	}
+	reader.readAsText(file);
 }
 //TUTORIAL TAB
 function loadTutorialVideo() {
@@ -6666,13 +6809,22 @@ function imageURL(url, destination, otherParams) {
 }
 async function imageLocal(event, destination, otherParams) {
 	var reader = new FileReader();
-	reader.onload = function () {
+	const file = event.target.files[0];
+	
+	reader.onload = async function () {
+		// Check if this is an image file with potential trailer data
+		if (file && file.type.startsWith('image/')) {
+			const cardData = await extractTrailerData(file);
+			if (cardData && confirm('This image contains Card Conjurer save data. Import it?\n\n(Cancel to just use the image)')) {
+				importCard(cardData);
+				notify('Card loaded from image!', 3);
+				return;
+			}
+		}
 		destination(reader.result, otherParams);
 	}
-	reader.onerror = function () {
-		destination('/img/blank.png', otherParams);
-	}
-	await reader.readAsDataURL(event.target.files[0]);
+	reader.onerror = () => destination('/img/blank.png', otherParams);
+	await reader.readAsDataURL(file);
 }
 function loadScript(scriptPath) {
 	var script = document.createElement('script');
