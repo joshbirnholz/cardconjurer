@@ -10,10 +10,8 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameG.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameM.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameA.png', masks:masks},
-	{name:'Artifact 2 Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameA2.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameL.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameC.png', masks:masks},
-	{name:'Black (Alt) Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameBAlt.png', masks:masks},
 
 	{name:'White Power/Toughness', src:'/img/frames/m15/borderless/pt/w.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/borderless/pt/u.png', bounds:bounds},
@@ -22,7 +20,6 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/borderless/pt/g.png', bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/borderless/pt/m.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/borderless/pt/a.png', bounds:bounds},
-	{name:'Artifact 2 Power/Toughness', src:'/img/frames/m15/borderless/pt/a2.png', bounds:bounds},
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/borderless/pt/l.png', bounds:bounds},
 	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds},
 	{name:'Black (Alt) Power/Toughness', src:'/img/frames/m15/borderless/pt/bAlt.png', bounds:bounds},
@@ -36,8 +33,7 @@ availableFrames = [
 	{name:'Artifact Land Frame', src:'/img/frames/m15/borderless/innerGlow/a.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks},
 	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks},
-	{name:'Land (Color Type) Frame Inner Glow', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks},
-	{name:'Black (Alt) Land Frame Inner Glow', src:'/img/frames/m15/borderless/innerGlow/bAlt.png', masks:masks}	
+	{name:'Land (Color Type) Frame Inner Glow', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
