@@ -22,7 +22,6 @@ availableFrames = [
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/borderless/pt/a.png', bounds:bounds},
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/borderless/pt/l.png', bounds:bounds},
 	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds},
-	{name:'Black (Alt) Power/Toughness', src:'/img/frames/m15/borderless/pt/bAlt.png', bounds:bounds},
 
 	{name:'White Land Frame', src:'/img/frames/m15/borderless/innerGlow/w.png', masks:masks},
 	{name:'Blue Land Frame', src:'/img/frames/m15/borderless/innerGlow/u.png', masks:masks},
