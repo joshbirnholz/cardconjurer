@@ -3233,6 +3233,9 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	if (frameToAdd.erase) {
 		frameElementLabel.innerHTML += ', Erase Card';
 	}
+	if (frameToAdd.preserveAlpha) {
+		frameElementLabel.innerHTML += ', Preserve Alpha';
+	}
 	frameToAdd.masks.forEach(item => frameElementLabel.innerHTML += ', ' + item.name);
 	frameElement.appendChild(frameElementLabel);
 	var frameElementClose = document.createElement('h4');
@@ -3272,7 +3275,7 @@ function frameElementClicked(event) {
 		document.querySelector('#frame-editor-erase').checked = selectedFrame.erase || false;
 		document.querySelector('#frame-editor-erase').onchange = (event) => {selectedFrame.erase = event.target.checked; drawFrames(); updateFrameLabel();}
 		document.querySelector('#frame-editor-alpha').checked = selectedFrame.preserveAlpha || false;
-		document.querySelector('#frame-editor-alpha').onchange = (event) => {selectedFrame.preserveAlpha = event.target.checked; drawFrames();}
+		document.querySelector('#frame-editor-alpha').onchange = (event) => {selectedFrame.preserveAlpha = event.target.checked; drawFrames(); updateFrameLabel();}
 		document.querySelector('#frame-editor-color-overlay-check').checked = selectedFrame.colorOverlayCheck || false;
 		document.querySelector('#frame-editor-color-overlay-check').onchange = (event) => {selectedFrame.colorOverlayCheck = event.target.checked; drawFrames();}
 		document.querySelector('#frame-editor-color-overlay').value = selectedFrame.colorOverlay || false;
@@ -3352,8 +3355,18 @@ function updateFrameLabel() {
 	const frameIndex = card.frames.indexOf(selectedFrame);
 	if (frameIndex === -1) return;
 	
+	// Find the DOM element that corresponds to selectedFrame
+	// by checking which element's index matches the frame when we look it up the same way frameElementClicked does
 	const frameElements = document.querySelectorAll('#frame-list .frame-element');
-	const frameElement = frameElements[frameElements.length - 1 - frameIndex];
+	let frameElement = null;
+	for (let i = 0; i < frameElements.length; i++) {
+		const domIndex = i;
+		const frameAtThisPosition = card.frames[Array.from(frameElements[domIndex].parentElement.children).indexOf(frameElements[domIndex])];
+		if (frameAtThisPosition === selectedFrame) {
+			frameElement = frameElements[domIndex];
+			break;
+		}
+	}
 	if (!frameElement) return;
 	
 	const label = frameElement.querySelector('h4:not(.frame-element-close)');
@@ -3361,6 +3374,9 @@ function updateFrameLabel() {
 		label.innerHTML = selectedFrame.name;
 		if (selectedFrame.erase) {
 			label.innerHTML += ', Erase Card';
+		}
+		if (selectedFrame.preserveAlpha) {
+			label.innerHTML += ', Preserve Alpha';
 		}
 		selectedFrame.masks.forEach(mask => label.innerHTML += ', ' + mask.name);
 	}
