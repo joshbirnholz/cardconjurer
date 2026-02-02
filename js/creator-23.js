@@ -6,6 +6,16 @@ if (debugging) {
 	document.querySelectorAll('.debugging').forEach(element => element.classList.remove('hidden'));
 }
 
+// IndexDB setup
+// Initialize Filer
+let fs = new Filer.FileSystem({ name: "cardconjurer" }, (err) => {
+	if (err) {
+		console.error(`Error initializing Filer: ${err}`);
+		return;
+	}
+	console.log("Filer VFS initialized!");
+}).promises;
+
 //To save the server from being overloaded? Maybe?
 function fixUri(input) {
 	/* --- DISABLED FOR LOCAL VERSION --
@@ -47,7 +57,7 @@ function getStandardHeight() {
 }
 
 //card object
-var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
+let card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
 //core images/masks
 const black = new Image(); black.crossOrigin = 'anonymous'; black.src = fixUri('/img/black.png');
 const blank = new Image(); blank.crossOrigin = 'anonymous'; blank.src = fixUri('/img/blank.png');
@@ -6398,12 +6408,53 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 		fetchSetSymbol();
 	}
 }
-function loadAvailableCards(cardKeys = JSON.parse(localStorage.getItem('cardKeys'))) {
-	if (!cardKeys) {
-		cardKeys = [];
-		cardKeys.sort();
-		localStorage.setItem('cardKeys', JSON.stringify(cardKeys));
+
+async function getCardKeys() {
+    try {
+        const entries = await fs.readdir("/"); // Read directory contents
+        return entries
+            .filter(str => str.toLowerCase().endsWith(".cardconjurer")) // Keep only `.cardconjurer` files
+            .map(str => str.slice(0, -13)); // Remove `.cardconjurer` from the end
+    } catch (err) {
+        throw err; // Propagate the error
+    }
+}
+
+async function loadCardData(cardKey){
+	let _fileData = await fs.readFile(`/${cardKey}.cardconjurer`);
+	return _fileData.toString("utf8");
+}
+
+async function migrateLocalStorageToIndexDB(cardKeysLS) {
+	//alert("Cards have been found in localstorage the following prompts will be to migrate to IndexDB/Filer if any prompts fix file names")
+	let arrCardKeysLS = JSON.parse(cardKeysLS);
+
+	for (const cardKey of arrCardKeysLS) {
+		try {
+			console.log(cardKey)
+			const cardData = localStorage.getItem(cardKey);
+			if (cardData) {
+				await saveCard([{key:cardKey, data:JSON.parse(cardData)}], true); // Wait for each save to finish before proceeding, supress reload
+				localStorage.removeItem(cardKey); // Remove only after saving successfully
+			}
+		} catch (error) {
+			console.error(`Error saving ${item}:`, error); // Handle failed saves gracefully
+		}
 	}
+	localStorage.removeItem("cardKeys"); // Remove the key list only after all items have been processed
+	console.log("Migration completed!");
+}
+
+async function loadAvailableCards() {
+	let cardKeysLS = localStorage.getItem("cardKeys");
+	if (cardKeysLS !== null) {
+		await migrateLocalStorageToIndexDB(cardKeysLS);
+	}
+	cardKeysLS = localStorage.getItem("cardKeys");
+	
+	if (cardKeysLS !== null) {alert("Catastrophic failure, delete all cards and reload"); return} // We should never see this unless there is a permission error or something
+	
+	let cardKeys = await getCardKeys();
 	document.querySelector('#load-card-options').innerHTML = '<option selected="selected" disabled>None selected</option>';
 	cardKeys.forEach(item => {
 		var cardKeyOption = document.createElement('option');
@@ -6415,9 +6466,13 @@ function importChanged() {
 	var unique = document.querySelector('#importAllPrints').checked ? 'prints' : '';
 	fetchScryfallData(document.querySelector("#import-name").value, importCard, unique);
 }
-function saveCard(saveFromFile) {
-	var cardKeys = JSON.parse(localStorage.getItem('cardKeys')) || [];
-	var cardKey, cardToSave;
+
+
+async function saveCard(saveFromFile, supressReload) {
+	// saveWithLocalStorage
+	if (saveFromFile && Array.isArray(saveFromFile)) return saveFromFile.forEach(item => saveCard(item))
+	let cardKeys = await getCardKeys();
+	let cardKey, cardToSave;
 	if (saveFromFile) {
 		cardKey = saveFromFile.key;
 	} else {
@@ -6428,7 +6483,8 @@ function saveCard(saveFromFile) {
 		if (!cardKey) {return null;}
 	}
 	cardKey = cardKey.trim();
-	if (cardKeys.includes(cardKey)) {
+	let compareKeys = cardKeys.map(str => str.toLowerCase())
+	if (compareKeys.includes(cardKey.toLowerCase())) {
 		if (!confirm('Would you like to overwrite your card previously saved as "' + cardKey + '"?\n(Clicking "cancel" will affix a version number)')) {
 			var originalCardKey = cardKey;
 			var cardKeyNumber = 1;
@@ -6447,24 +6503,24 @@ function saveCard(saveFromFile) {
 			frame.masks.forEach(mask => delete mask.image);
 		});
 	}
-	try {
-		localStorage.setItem(cardKey, JSON.stringify(cardToSave));
-		if (!cardKeys.includes(cardKey)) {
-			cardKeys.push(cardKey);
-			cardKeys.sort();
-			localStorage.setItem('cardKeys', JSON.stringify(cardKeys));
-			loadAvailableCards(cardKeys);
-		}
-	} catch (error) {
-		notify('You have exceeded your 5MB of local storage, and your card has failed to save. If you would like to continue saving cards, please download all saved cards, then delete all saved cards to free up space.<br><br>Local storage is most often exceeded by uploading large images directly from your computer. If possible/convenient, using a URL avoids the need to save these large images.<br><br>Apologies for the inconvenience.');
-	}
+	let cardFilename = "/" + cardKey + ".cardconjurer";
+	let cardFileString = JSON.stringify([{key:cardKey, data:cardToSave}]);
+	await fs.writeFile(cardFilename, cardFileString, "utf8", (err) => {
+		if (err) console.error("Error writing text:", err);
+		else console.log("Stored card in IndexDB as:", fullPath);
+	});
+	if (!supressReload) {loadAvailableCards()};
 }
 async function loadCard(selectedCardKey) {
 	//clear the draggable frames
 	document.querySelector('#frame-list').innerHTML = null;
 	//clear the existing card, then replace it with the new JSON
 	card = {};
-	card = JSON.parse(localStorage.getItem(selectedCardKey));
+	let _cardText = await loadCardData(selectedCardKey);
+	let _card = JSON.parse(_cardText);
+	if (_card.length === 1) {
+		card = _card[0].data; // Unwrap the array if it contains a single object
+	}
 	//if the card was loaded properly...
 	if (card) {
 		//load values from card into html inputs
@@ -6527,44 +6583,62 @@ async function loadCard(selectedCardKey) {
 		notify(selectedCardKey + ' failed to load.', 5)
 	}
 }
-function deleteCard() {
-	var keyToDelete = document.querySelector('#load-card-options').value;
-	if (keyToDelete) {
-		var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-		cardKeys.splice(cardKeys.indexOf(keyToDelete), 1);
-		cardKeys.sort();
-		localStorage.setItem('cardKeys', JSON.stringify(cardKeys));
-		localStorage.removeItem(keyToDelete);
-		loadAvailableCards(cardKeys);
-	}
+async function deleteCard() {
+	let keyToDelete = document.querySelector('#load-card-options').value;
+	fs.unlink(`/${keyToDelete}.cardconjurer`, (err) => {
+		if (err) {
+			console.error("Error deleting file:", err);
+		} else {
+			console.log("File deleted successfully!");
+		}
+	});
+	loadAvailableCards()
 }
 function deleteSavedCards() {
 	if (confirm('WARNING:\n\nALL of your saved cards will be deleted! If you would like to save these cards, please make sure you have downloaded them first. There is no way to undo this.\n\n(Press "OK" to delete your cards)')) {
-		var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-		cardKeys.forEach(key => localStorage.removeItem(key));
-		localStorage.setItem('cardKeys', JSON.stringify([]));
-		loadAvailableCards([]);
+		let cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
+		if (cardKeys !== null) { cardKeys.forEach(key => localStorage.removeItem(key)) }
+		fs = null;
+		fs = new Filer.FileSystem({ name: "cardconjurer", flags: [ 'FORMAT' ] }, (err) => {
+			if (err) {
+				console.error(`Error initializing Filer: ${err}`);
+				return;
+			}
+			console.log("Filer VFS re-initialized!");
+		}).promises;
+		loadAvailableCards();
 	}
 }
 async function downloadSavedCards() {
-	var cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
-	if (cardKeys) {
-		var allSavedCards = [];
-		cardKeys.forEach(item => {
-			allSavedCards.push({key:item, data:JSON.parse(localStorage.getItem(item))});
-		});
-		var download = document.createElement('a');
-		download.href = URL.createObjectURL(new Blob([JSON.stringify(allSavedCards)], {type:'text'}));
-		download.download = 'saved-cards.cardconjurer';
-		document.body.appendChild(download);
-		await download.click();
-		download.remove();
-	}
+    let cardKeys = await getCardKeys(); // Get all saved card keys
+    
+    if (cardKeys && cardKeys.length > 0) {
+        let allSavedCards = [];
+
+        for (const cardKey of cardKeys) {
+            try {
+                let _cardText = await loadCardData(cardKey);
+                let _card = JSON.parse(_cardText)[0];
+                allSavedCards.push(_card);
+            } catch (error) {
+                console.error(`Error loading card ${cardKey}:`, error);
+            }
+        }
+
+        let download = document.createElement("a");
+        download.href = URL.createObjectURL(new Blob([JSON.stringify(allSavedCards, null, 2)], { type: "application/json" }));
+        download.download = "saved-cards.cardconjurer";
+
+        document.body.appendChild(download);
+        download.click();
+        document.body.removeChild(download);
+    }
 }
+
 function uploadSavedCards(event) {
 	var reader = new FileReader();
 	reader.onload = function () {
-		JSON.parse(reader.result).forEach(item => saveCard(item));
+		saveCard(JSON.parse(reader.result));
 	}
 	reader.readAsText(event.target.files[0]);
 }
