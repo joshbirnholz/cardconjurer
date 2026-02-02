@@ -77,6 +77,39 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		rules: {name:'Rules Text', text:'', x:0.086, y:0.692, width:0.771, height:0.206, size:0.033, outlineWidth:0.008, font:'Plantin-MT-Pro-Rg', color:'white'},
 		pt: {name:'Power/Toughness', text:'', x:0.804, y:0.896, width:0.1180, height:0.049, size:0.04,  outlineWidth:0.008, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
+
+		const originalAddTextbox = addTextbox;
+	addTextbox = function(textboxType) {
+		if (textboxType == 'Nickname' && !card.text.nickname) {
+			// Preserve the existing title text
+			const existingTitleText = card.text.title ? card.text.title.text : '';
+			
+			// When nickname is added, switch title to lower position and smaller size and add nickname textbox
+			loadTextOptions({
+				nickname: {name:'Nickname', text:'', x:163/2010, y:139/2814, width:1667/2010, height:153/2814, oneLine:true, font:'belerenb', size:0.0381, outlineWidth:0.008, color:'white'},
+				title: {name:'Title', text:existingTitleText, x:172/2010, y:315/2814, width:0.768, height:0.0243, oneLine:true, outlineWidth:0.0080, font:'mplantini', size:0.0240, color:'white', align:'left'}
+			}, false);
+			
+			// Refresh the text options UI
+			document.querySelector('#text-options').innerHTML = null;
+			Object.entries(card.text).forEach(item => {
+				var textOptionElement = document.createElement('h4');
+				textOptionElement.innerHTML = item[1].name;
+				textOptionElement.classList = 'selectable text-option'
+				textOptionElement.onclick = textOptionClicked;
+				document.querySelector('#text-options').appendChild(textOptionElement);
+			});
+			
+			// Select the newly added nickname textbox
+			const nicknameIndex = Object.keys(card.text).indexOf('nickname');
+			if (nicknameIndex >= 0) {
+				document.querySelector('#text-options').children[nicknameIndex].click();
+			}
+		} else {
+			originalAddTextbox(textboxType);
+		}
+	};
+	
 }
 //loads available frames
 loadFramePack();
