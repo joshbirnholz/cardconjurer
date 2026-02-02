@@ -26,17 +26,15 @@ availableFrames = [
 document.querySelector('#loadFrameVersion').disabled = false;
 //defines process for loading this version, if applicable
 document.querySelector('#loadFrameVersion').onclick = async function() {
-	// Notification
-	notify('At this time, rotated set symbols are not an option, unless added manually with external software. Apologies for the inconvenience!', 10);
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
 	card.version = 'room';
-	//art bounds
-	card.artBounds = {x:276/2010, y:133/2814, width:1115/2010, height:2428/2814};
+	//art bounds - rotation adjusted for portrait orientation
+	card.artBounds = {x:-0.196, y:0.2756, width:1.22, height:0.4080, rotation:-90};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:3195/2010, y:207/2814, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:1140/2010, y:250/2814, width:0.12, height:0.0280, vertical:'center', horizontal: 'center', rotation:-90};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
