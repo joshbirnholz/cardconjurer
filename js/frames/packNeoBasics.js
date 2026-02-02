@@ -1,21 +1,27 @@
 //Create objects for common properties across available frames
-var masks = []//[{src:'/img/frames/mysticalArchive/jp/pinline.svg', name:'Pinline'}, {src:'/img/frames/mysticalArchive/jp/rightHalf.svg', name:'Right Half'}];
+var masks = [{src:'/img/frames/neo/basics/masks/w.svg', name:'Plains Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks2 = [{src:'/img/frames/neo/basics/masks/u.svg', name:'Island Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks3 = [{src:'/img/frames/neo/basics/masks/b.svg', name:'Swamp Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks4 = [{src:'/img/frames/neo/basics/masks/r.svg', name:'Mountain Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks5 = [{src:'/img/frames/neo/basics/masks/g.svg', name:'Forest Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
+var masks6 = [{src:'/img/frames/neo/basics/masks/c.svg', name:'Colorless Symbol'}, {src:'/img/frames/neo/basics/masks/title.svg', name:'Title'}, {src:'/img/frames/neo/basics/masks/border.svg', name:'Border'}];
 var stretch = [
 	{name:'outline', targets: [3, 11], change:[0, 0]},
 	{name:'top', targets: [0, -2], change:[0, 0]},
 	{name:'bottom', targets: [0], change:[0, 0]},
-	{name:'symbol', targets: [0], change:[0, 0]}
+	{name:'symbol', targets: [0], change:[0, 0]},
+	{name:'Border', targets: [], change:[0, 0]}
 ];
 // Notification
 notify('When you load the Kamigawa Basics frame version, a "Kamigawa Basics" tab will appear. This tab allows you to control the height of the title bar.', 15);
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/neo/basics/w.svg', stretch:stretch, masks:masks},
-	{name:'Blue Frame', src:'/img/frames/neo/basics/u.svg', stretch:stretch, masks:masks},
-	{name:'Black Frame', src:'/img/frames/neo/basics/b.svg', stretch:stretch, masks:masks},
-	{name:'Red Frame', src:'/img/frames/neo/basics/r.svg', stretch:stretch, masks:masks},
-	{name:'Green Frame', src:'/img/frames/neo/basics/g.svg', stretch:stretch, masks:masks},
-	{name:'Colorless Frame', src:'/img/frames/neo/basics/c.svg', stretch:stretch, masks:masks}
+	{name:'Blue Frame', src:'/img/frames/neo/basics/u.svg', stretch:stretch, masks:masks2},
+	{name:'Black Frame', src:'/img/frames/neo/basics/b.svg', stretch:stretch, masks:masks3},
+	{name:'Red Frame', src:'/img/frames/neo/basics/r.svg', stretch:stretch, masks:masks4},
+	{name:'Green Frame', src:'/img/frames/neo/basics/g.svg', stretch:stretch, masks:masks5},
+	{name:'Colorless Frame', src:'/img/frames/neo/basics/c.svg', stretch:stretch, masks:masks6}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
