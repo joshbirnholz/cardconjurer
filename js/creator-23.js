@@ -317,9 +317,6 @@ function getCardName() {
 	if (card.text.nickname) {
 		imageName += ' (' + card.text.nickname.text + ')';
 	}
-	if (document.querySelector('#cardname-include-number').checked) {
-		imageName = card.infoNumber + ' ' + imageName
-	}
 	return imageName.replace(/\{[^}]+\}/g, '');
 }
 function getInlineCardName() {
@@ -860,10 +857,6 @@ function cardFrameProperties(colors, manaCost, typeLine, power, style) {
 function setAutoframeNyx(value) {
 	localStorage.setItem('autoframe-always-nyx', document.querySelector('#autoframe-always-nyx').checked);
 	setAutoFrame();
-}
-
-function setCardnameIncludeNumber(value) {
-	localStorage.setItem('cardname-include-number', document.querySelector('#cardname-include-number').checked);
 }
 
 var autoFramePack;
