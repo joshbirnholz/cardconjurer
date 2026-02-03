@@ -46,8 +46,107 @@ function getStandardHeight() {
 	return 2814;
 }
 
+// Trackers for bulk download
+window.ImageLoadTracker = {
+    promises: [],
+    isTracking: false,
+
+    // Call this to start a new tracking session.
+    start: function() {
+        this.promises = [];
+        this.isTracking = true;
+    },
+
+    // Call this to end the session.
+    stop: function() {
+        this.isTracking = false;
+        this.promises = [];
+    },
+
+    /**
+     * Creates a promise that resolves when the image from 'src' is loaded.
+     * Adds this promise to the tracking array.
+     * @param {string} src - The source URL of the image to load.
+     */
+    track: function(src) {
+        // Only track if a session is active and the src is valid.
+        if (!this.isTracking || !src || src.includes('blank.png')) {
+            return;
+        }
+
+        const promise = new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            // Resolve the promise on load.
+            img.onload = () => resolve(img);
+            // Also resolve on error to prevent Promise.all from failing on a single broken image.
+            // The app's own error handlers will manage displaying a blank image.
+            img.onerror = () => {
+                console.warn(`Could not load tracked image: ${src}`);
+                resolve(null); 
+            };
+            img.src = src;
+        });
+        this.promises.push(promise);
+    },
+
+    /**
+     * Returns a single promise that resolves when all tracked images have finished loading.
+     */
+    waitForAll: function() {
+        return Promise.all(this.promises);
+    }
+};
+window.FontLoadTracker = {
+    fonts: new Set(),
+    isTracking: false,
+
+    // Call this to start a new font tracking session.
+    start: function() {
+        this.fonts.clear();
+        this.isTracking = true;
+    },
+
+    // Call this to end the session.
+    stop: function() {
+        this.isTracking = false;
+        this.fonts.clear();
+    },
+
+    /**
+     * Adds a font family to the set of required fonts for the current card.
+     * @param {string} fontFamily - The name of the font family to track (e.g., 'belerenbsc').
+     */
+    track: function(fontFamily) {
+        if (this.isTracking && fontFamily) {
+            this.fonts.add(fontFamily);
+        }
+    },
+
+    /**
+     * Uses the document.fonts API to wait for all tracked fonts to be loaded and ready.
+     * @returns {Promise} A promise that resolves when all fonts in the set are available.
+     */
+    waitForAll: function() {
+        if (this.fonts.size === 0) {
+            return Promise.resolve(); // No fonts to wait for.
+        }
+
+        const fontPromises = [];
+        // The document.fonts.load() method checks if a font is ready for use.
+        // It requires a size (e.g., '12px'), but the family name is the crucial part.
+        for (const font of this.fonts) {
+            fontPromises.push(document.fonts.load(`12px ${font}`));
+        }
+
+        console.log('Waiting for fonts to load:', Array.from(this.fonts));
+        return Promise.all(fontPromises);
+    }
+};
+
 //card object
 var card = {width:getStandardWidth(), height:getStandardHeight(), marginX:0, marginY:0, frames:[], artSource:fixUri('/img/blank.png'), artX:0, artY:0, artZoom:1, artRotate:0, setSymbolSource:fixUri('/img/blank.png'), setSymbolX:0, setSymbolY:0, setSymbolZoom:1, watermarkSource:fixUri('/img/blank.png'), watermarkX:0, watermarkY:0, watermarkZoom:1, watermarkLeft:'none', watermarkRight:'none', watermarkOpacity:0.4, version:'', manaSymbols:[]};
+window.cardDrawingPromiseResolver = null;
 //core images/masks
 const black = new Image(); black.crossOrigin = 'anonymous'; black.src = fixUri('/img/black.png');
 const blank = new Image(); blank.crossOrigin = 'anonymous'; blank.src = fixUri('/img/blank.png');
@@ -3184,6 +3283,7 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 		item.image.crossOrigin = 'anonymous';
 		item.image.src = blank.src;
 		item.image.onload = drawFrames;
+		ImageLoadTracker.track(fixUri(item.src));
 		item.image.src = fixUri(item.src);
 	});
 	frameToAdd.image = new Image();
@@ -3193,6 +3293,7 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	if ('stretch' in frameToAdd) {
 		stretchSVG(frameToAdd);
 	} else {
+		ImageLoadTracker.track(fixUri(frameToAdd.src));
 		frameToAdd.image.src = fixUri(frameToAdd.src);
 	}
 	if (!loadingFrame) {
@@ -3712,6 +3813,7 @@ function writeText(textObject, targetContext) {
 		    }
 		}
 		var textFont = textObject.font || 'mplantin';
+		FontLoadTracker.track(textFont);
 		var textAlign = textObject.align || 'left';
 		var textJustify = textObject.justify || 'left';
 		var textShadowColor = textObject.shadow || 'black';
@@ -3931,6 +4033,7 @@ function writeText(textObject, targetContext) {
 						textFont = savedFont;
 						wordToWrite = word;
 					}
+					FontLoadTracker.track(textFont);
 					textFontExtension = '';
 					textFontStyle = '';
 					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
@@ -4554,6 +4657,7 @@ async function addTextbox(textboxType) {
 }
 //ART TAB
 function uploadArt(imageSource, otherParams) {
+	ImageLoadTracker.track(imageSource);
 	art.src = imageSource;
 	if (otherParams && otherParams == 'autoFit') {
 		art.onload = function() {
@@ -4748,6 +4852,7 @@ function artStopDrag(e) {
 }
 //SET SYMBOL TAB
 function uploadSetSymbol(imageSource, otherParams) {
+	ImageLoadTracker.track(imageSource);
 	setSymbol.src = imageSource;
 	if (otherParams && otherParams == 'resetSetSymbol') {
 		setSymbol.onload = function() {
@@ -4838,6 +4943,7 @@ function lockSetSymbolURL() {
 }
 //WATERMARK TAB
 function uploadWatermark(imageSource, otherParams) {
+	ImageLoadTracker.track(imageSource);
 	watermark.src = imageSource;
 	if (otherParams && otherParams == 'resetWatermark') {
 		watermark.onload = function() {
@@ -5221,6 +5327,11 @@ function drawCard() {
 	// show preview
 	previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 	previewContext.drawImage(cardCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+
+	if (window.cardDrawingPromiseResolver) {
+        window.cardDrawingPromiseResolver();
+        window.cardDrawingPromiseResolver = null;
+	}
 }
 //DOWNLOADING
 function downloadCard(alt = false, jpeg = false) {
@@ -5256,6 +5367,127 @@ function downloadCard(alt = false, jpeg = false) {
 			downloadElement.remove();
 		}
 	}
+}
+async function bulkDownloadZip() {
+    // 1. Initial checks for libraries and saved cards.
+    if (typeof JSZip === 'undefined') {
+        notify('Required library (JSZip) has not loaded yet. Please wait a moment and try again.', 5);
+        return;
+    }
+    const cardKeys = JSON.parse(localStorage.getItem('cardKeys'));
+    if (!cardKeys || cardKeys.length === 0) {
+        notify('No saved cards found to download.', 3);
+        return;
+    }
+
+    let fileHandle = null;
+    let useStreaming = false;
+
+    // 2. Trigger the file picker immediately to capture the user gesture.
+    if (window.showSaveFilePicker) {
+        try {
+            notify('Please choose a location to save your ZIP file.', 15);
+            fileHandle = await window.showSaveFilePicker({
+                suggestedName: 'CardConjurer_Bulk.zip',
+                types: [{
+                    description: 'ZIP file',
+                    accept: { 'application/zip': ['.zip'] },
+                }],
+            });
+            useStreaming = true;
+        } catch (err) {
+            // This error occurs if the user clicks "Cancel" in the save dialog.
+            if (err.name === 'AbortError') {
+                notify('Save operation cancelled.', 3);
+                return; // Exit the function entirely if the user cancels.
+            }
+            // If another error occurs, fall back to the in-memory method.
+            console.error("Could not get file handle, falling back to in-memory method:", err);
+        }
+    }
+
+    // 3. Save the current state and prepare the zip object.
+    notify(`Preparing to process ${cardKeys.length} cards...`, 10);
+    const zip = new JSZip();
+    const tempKey = '__temp_current_card_state__';
+    const cardToSave = JSON.parse(JSON.stringify(card));
+    cardToSave.frames.forEach(frame => {
+        delete frame.image;
+        frame.masks.forEach(mask => delete mask.image);
+    });
+    localStorage.setItem(tempKey, JSON.stringify(cardToSave));
+
+    // 4. Loop through each saved card to render and add it to the zip object.
+    for (const [index, key] of cardKeys.entries()) {
+        try {
+			notify(`Processing card ${index + 1} of ${cardKeys.length}: ${key}`, 1);
+
+            ImageLoadTracker.start();
+            FontLoadTracker.start();
+            await loadCard(key);
+            drawText();
+            
+            const imagePromise = ImageLoadTracker.waitForAll();
+            const fontPromise = FontLoadTracker.waitForAll();
+            await Promise.all([imagePromise, fontPromise]);
+            
+            await new Promise(resolve => setTimeout(resolve, 50));
+            drawCard();
+            
+            const imageName = getCardName() + '.png';
+            const imageData = cardCanvas.toDataURL('image/png').split(',')[1];
+            
+            zip.file(imageName, imageData, { base64: true });
+            console.log(`Zipped: ${imageName}`);
+
+        } catch (error) {
+            console.error(`Failed to process and zip card "${key}":`, error);
+            notify(`Skipping card "${key}" due to an error.`, 3);
+        } finally {
+            ImageLoadTracker.stop();
+            FontLoadTracker.stop();
+        }
+    }
+
+    // 5. Generate and save the ZIP file using the appropriate method.
+    try {
+        if (useStreaming && fileHandle) {
+            // Ideal Path: Manually pump the JSZip stream to the WritableStream.
+            notify('Saving ZIP file to disk...', 10);
+            const writable = await fileHandle.createWritable();
+
+            await new Promise((resolve, reject) => {
+                const stream = zip.generateInternalStream({ type: 'uint8array', streamFiles: true });
+                
+                stream
+                    .on('data', (chunk) => { writable.write(chunk).catch(reject); })
+                    .on('end', () => { writable.close().then(resolve).catch(reject); })
+                    .on('error', (err) => { reject(err); })
+                    .resume();
+            });
+            notify('ZIP file saved successfully!', 5);
+
+        } else {
+            // Fallback Path: For browsers without streaming support.
+            notify('Streaming not supported. Building ZIP in memory... This may be slow or fail.', 10);
+            const content = await zip.generateAsync({ type: 'blob' });
+            
+            const downloadElement = document.createElement('a');
+            downloadElement.href = URL.createObjectURL(content);
+            downloadElement.download = 'CardConjurer_Bulk.zip';
+            document.body.appendChild(downloadElement);
+            downloadElement.click();
+            document.body.removeChild(downloadElement);
+        }
+    } catch (err) {
+        console.error('Failed to generate or save ZIP file:', err);
+        notify('An error occurred while saving the ZIP file.', 5);
+    }
+    
+    // 6. Restore the user's original card state.
+    await loadCard(tempKey);
+    localStorage.removeItem(tempKey);
+    console.log('Bulk download process finished. User state restored.');
 }
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
@@ -6949,5 +7181,6 @@ bindInputs('#show-guidelines', '#show-guidelines-2', true);
 
 // Load / init whatever
 loadScript('/js/frames/groupStandard-3.js');
+loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
 loadAvailableCards();
 initDraggableArt();

@@ -700,8 +700,10 @@
 							<button class='input' onclick='deleteCard();'>Delete Card</button>
 						</div>
 						<div class='readable-background padding margin-bottom'>
-							<h5 class='padding margin-bottom input-description'>Download all saved cards</h5>
-							<button class='input margin-bottom' onclick='downloadSavedCards();'>Download All</button>
+							<h5 class='padding margin-bottom input-description'>Download all saved cards as a file</h5>
+							<button class='input margin-bottom' onclick='downloadSavedCards();'>Download Cards File</button>
+							<h5 class='padding margin-bottom input-description'>Download all saved card images as a zip file(can take a long time)</h5>
+							<button class='input margin-bottom' onclick="bulkDownloadZip();">Download All Images</button>
 							<h5 class='padding margin-bottom input-description'>Upload previously downloaded file of saved cards (downloaded from above)</h5>
 							<input type='file' accept='.cardconjurer,.txt' class='input margin-bottom' oninput='uploadSavedCards(event);'>
 							<h5 class='padding margin-bottom input-description'>Delete ALL saved cards</h5>
