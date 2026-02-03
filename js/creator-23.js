@@ -5265,7 +5265,7 @@ function drawCard() {
 		var y = parseInt(card.serialY) || 1383;
 		var scale = parseFloat(card.serialScale) || 1.0;
 
-		cardContext.drawImage(serial, scaleX(x/2010), scaleY(y/2814), scaleX(464/2010) * scale, scaleY(143/2814) * scale);
+		cardContext.drawImage(serial, scaleX(x/2010), scaleY(y/2814), scaleWidth(464/2010) * scale, scaleHeight(143/2814) * scale);
 
 		var number = {
 			name:"Number",
