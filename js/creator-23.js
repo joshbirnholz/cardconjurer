@@ -5914,7 +5914,7 @@ function parseRollAbilities(text) {
 }
 
 function parseStationCard(oracleText) {
-    if (!oracleText || !oracleText.includes('STATION')) {
+    if (!oracleText || !oracleText.includes('Station')) {
         return null;
     }
 
@@ -5927,8 +5927,8 @@ function parseStationCard(oracleText) {
     // Format station reminder text with italics
     preStationText = preStationText.replace(/Station (\([^)]+\))/g, 'Station {i}$1{/i}');
     
-    // Find all STATION abilities with their numbers - more flexible regex
-    const stationRegex = /STATION (\d+\+)\s*\n([^]*?)(?=\nSTATION \d+\+|$)/g;
+    // Updated regex to match new scryfall format: "10+ | ability text"
+    const stationRegex = /(\d+\+)\s*\|\s*([^\n]+)/g;
     const stationAbilities = [];
     
     let match;
@@ -6200,7 +6200,7 @@ function changeCardIndex() {
         textEdited();
     }
 
-else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION') && card.version.includes('station')) {
+else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station') && card.version.includes('station')) {
 
     // Clear existing station fields
     if (card.text) {
@@ -6907,13 +6907,17 @@ async function imageLocal(event, destination, otherParams) {
 	await reader.readAsDataURL(event.target.files[0]);
 }
 function loadScript(scriptPath) {
+	return new Promise((resolve, reject) => {
 	var script = document.createElement('script');
 	script.setAttribute('type', 'text/javascript');
-	script.onerror = function(){notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');}
-	script.setAttribute('src', scriptPath);
-	if (typeof script != 'undefined') {
-		document.querySelectorAll('head')[0].appendChild(script);
+	script.onload = resolve;
+	script.onerror = function(){
+		notify('A script failed to load, likely due to an update. Please reload your page. Sorry for the inconvenience.');
+		reject();
 	}
+	script.setAttribute('src', scriptPath);
+	document.querySelectorAll('head')[0].appendChild(script);
+	});
 }
 // Stretchable SVGs
 function stretchSVG(frameObject) {
