@@ -23,16 +23,16 @@ availableFrames = [
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/borderless/pt/l.png', bounds:bounds},
 	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds},
 
-	{name:'White Land Frame', src:'/img/frames/m15/borderless/innerGlow/w.png', masks:masks},
-	{name:'Blue Land Frame', src:'/img/frames/m15/borderless/innerGlow/u.png', masks:masks},
-	{name:'Black Land Frame', src:'/img/frames/m15/borderless/innerGlow/b.png', masks:masks},
-	{name:'Red Land Frame', src:'/img/frames/m15/borderless/innerGlow/r.png', masks:masks},
-	{name:'Green Land Frame', src:'/img/frames/m15/borderless/innerGlow/g.png', masks:masks},
-	{name:'Multicolored Land Frame', src:'/img/frames/m15/borderless/innerGlow/m.png', masks:masks},
-	{name:'Artifact Land Frame', src:'/img/frames/m15/borderless/innerGlow/a.png', masks:masks},
-	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks},
-	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks},
-	{name:'Land (Color Type) Frame', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks}
+	{name:'White Land Frame', src:'/img/frames/m15/borderless/innerGlow/w.png', masks:masks, preserveAlpha:true},
+	{name:'Blue Land Frame', src:'/img/frames/m15/borderless/innerGlow/u.png', masks:masks, preserveAlpha:true},
+	{name:'Black Land Frame', src:'/img/frames/m15/borderless/innerGlow/b.png', masks:masks, preserveAlpha:true},
+	{name:'Red Land Frame', src:'/img/frames/m15/borderless/innerGlow/r.png', masks:masks, preserveAlpha:true},
+	{name:'Green Land Frame', src:'/img/frames/m15/borderless/innerGlow/g.png', masks:masks, preserveAlpha:true},
+	{name:'Multicolored Land Frame', src:'/img/frames/m15/borderless/innerGlow/m.png', masks:masks, preserveAlpha:true},
+	{name:'Artifact Land Frame', src:'/img/frames/m15/borderless/innerGlow/a.png', masks:masks, preserveAlpha:true},
+	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks, preserveAlpha:true},
+	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks, preserveAlpha:true},
+	{name:'Land (Color Type) Frame', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks, preserveAlpha:true}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;

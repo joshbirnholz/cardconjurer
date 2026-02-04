@@ -308,6 +308,24 @@ function dragOver(event, drag=true) {
 			var originalMovingElement = card.frames[movingElementOldIndex];
 			card.frames.splice(movingElementOldIndex, 1);
 			card.frames.splice(movingElementNewIndex, 0, originalMovingElement);
+			
+			// Update preserveAlpha for frames that support it based on their new positions
+			card.frames.forEach((frame, index) => {
+				// Only update frames that were defined with preserveAlpha support
+				if (frame.supportsPreserveAlpha) {
+					// If frame is at the bottom (last index), disable preserveAlpha
+					if (index === card.frames.length - 1) {
+						delete frame.preserveAlpha;
+					} else {
+						// If frame is not at the bottom, enable preserveAlpha
+						frame.preserveAlpha = true;
+					}
+				}
+			});
+			
+			// Update all frame labels to reflect the new preserveAlpha states
+			updateAllFrameLabels();
+			
 			drawFrames();
 		}
 	}
@@ -3140,6 +3158,12 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	var frameToAdd = JSON.parse(JSON.stringify(availableFrames[selectedFrameIndex]));
 	var maskThumbnail = true;
 	if (!loadingFrame) {
+		// Store the available masks from the frame pack for later use in the editor
+		if (availableFrames[selectedFrameIndex] && availableFrames[selectedFrameIndex].masks) {
+			frameToAdd.availableMasks = JSON.parse(JSON.stringify(availableFrames[selectedFrameIndex].masks));
+		} else {
+			frameToAdd.availableMasks = [];
+		}
 		// The frame is being added manually by the user, so we must process which mask(s) they have selected
 		var noDefaultMask = 0;
 		if (frameToAdd.noDefaultMask) {noDefaultMask = 1;}
@@ -3196,6 +3220,25 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 		frameToAdd.image.src = fixUri(frameToAdd.src);
 	}
 	if (!loadingFrame) {
+		// Check if this frame should have preserveAlpha enabled by default
+		// This applies when a frame:
+		// 1. Has masks
+		// 2. Is not the bottom layer (card.frames.length > 0 means there are already frames)
+		// 3. Has preserveAlpha set to true in the frame pack definition
+		if (frameToAdd.preserveAlpha === true && frameToAdd.masks && frameToAdd.masks.length > 0) {
+			// Track that this frame supports preserveAlpha management
+			frameToAdd.supportsPreserveAlpha = true;
+			if (card.frames.length > 0) {
+				// Keep preserveAlpha as true if not the bottom layer
+				frameToAdd.preserveAlpha = true;
+			} else {
+				// Remove preserveAlpha if it's the first frame
+				delete frameToAdd.preserveAlpha;
+			}
+		} else {
+			// Remove preserveAlpha if conditions aren't met
+			delete frameToAdd.preserveAlpha;
+		}
 		card.frames.unshift(frameToAdd);
 	}
 	var frameElement = document.createElement('div');
@@ -3224,6 +3267,12 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	frameElement.appendChild(frameElementMask);
 	var frameElementLabel = document.createElement('h4');
 	frameElementLabel.innerHTML = frameToAdd.name;
+	if (frameToAdd.erase) {
+		frameElementLabel.innerHTML += ', Erase Card';
+	}
+	if (frameToAdd.preserveAlpha) {
+		frameElementLabel.innerHTML += ', Preserve Alpha';
+	}
 	frameToAdd.masks.forEach(item => frameElementLabel.innerHTML += ', ' + item.name);
 	frameElement.appendChild(frameElementLabel);
 	var frameElementClose = document.createElement('h4');
@@ -3261,9 +3310,9 @@ function frameElementClicked(event) {
 		document.querySelector('#frame-editor-opacity').value = selectedFrame.opacity || 100;
 		document.querySelector('#frame-editor-opacity').onchange = (event) => {selectedFrame.opacity = event.target.value; drawFrames();}
 		document.querySelector('#frame-editor-erase').checked = selectedFrame.erase || false;
-		document.querySelector('#frame-editor-erase').onchange = (event) => {selectedFrame.erase = event.target.checked; drawFrames();}
+		document.querySelector('#frame-editor-erase').onchange = (event) => {selectedFrame.erase = event.target.checked; drawFrames(); updateFrameLabel();}
 		document.querySelector('#frame-editor-alpha').checked = selectedFrame.preserveAlpha || false;
-		document.querySelector('#frame-editor-alpha').onchange = (event) => {selectedFrame.preserveAlpha = event.target.checked; drawFrames();}
+		document.querySelector('#frame-editor-alpha').onchange = (event) => {selectedFrame.preserveAlpha = event.target.checked; drawFrames(); updateFrameLabel();}
 		document.querySelector('#frame-editor-color-overlay-check').checked = selectedFrame.colorOverlayCheck || false;
 		document.querySelector('#frame-editor-color-overlay-check').onchange = (event) => {selectedFrame.colorOverlayCheck = event.target.checked; drawFrames();}
 		document.querySelector('#frame-editor-color-overlay').value = selectedFrame.colorOverlay || false;
@@ -3280,22 +3329,70 @@ function frameElementClicked(event) {
 		document.querySelector('#frame-editor-hsl-lightness-slider').value = selectedFrame.hslLightness || 0;
 		document.querySelector('#frame-editor-hsl-lightness').onchange = (event) => {selectedFrame.hslLightness = event.target.value; drawFrames();}
 		document.querySelector('#frame-editor-hsl-lightness-slider').onchange = (event) => {selectedFrame.hslLightness = event.target.value; drawFrames();}
-		// Removing masks
-		const selectMaskElement = document.querySelector('#frame-editor-masks');
-		selectMaskElement.innerHTML = null;
-		const maskOptionNone = document.createElement('option');
-		maskOptionNone.disabled = true;
-		maskOptionNone.innerHTML = 'None Selected';
-		selectMaskElement.appendChild(maskOptionNone);
-		selectedFrame.masks.forEach(mask => {
-			const maskOption = document.createElement('option');
-			maskOption.innerHTML = mask.name;
-			selectMaskElement.appendChild(maskOption);
-		});
-		selectMaskElement.selectedIndex = 0;
+		// Refresh mask dropdown
+		refreshMaskDropdown();
 	}
 }
+function addMaskToList(list, mask) {
+	if (!list.find(m => m.name === mask.name && m.src === mask.src)) {
+		list.push({name: mask.name, src: mask.src});
+	}
+}
+function buildFrameLabelText(frame) {
+	const parts = [frame.name];
+	if (frame.erase) parts.push('Erase Card');
+	if (frame.preserveAlpha) parts.push('Preserve Alpha');
+	parts.push(...frame.masks.map(m => m.name));
+	return parts.join(', ');
+}
+function updateFrameLabel() {
+	if (!selectedFrame) return;
+	Array.from(document.querySelectorAll('#frame-list .frame-element')).forEach(el => {
+		const frame = card.frames[Array.from(el.parentElement.children).indexOf(el)];
+		if (frame === selectedFrame) {
+			const label = el.querySelector('h4:not(.frame-element-close)');
+			if (label) label.innerHTML = buildFrameLabelText(frame);
+		}
+	});
+}
+function updateAllFrameLabels() {
+	Array.from(document.querySelectorAll('#frame-list .frame-element')).forEach(el => {
+		const frame = card.frames[Array.from(el.parentElement.children).indexOf(el)];
+		const label = el.querySelector('h4:not(.frame-element-close)');
+		if (label && frame) label.innerHTML = buildFrameLabelText(frame);
+	});
+}
+function createMaskObject(name, src, noThumb = false) {
+	const mask = {name, src, image: new Image()};
+	if (noThumb) mask.noThumb = true;
+	mask.image.crossOrigin = 'anonymous';
+	mask.image.onload = drawFrames;
+	mask.image.src = fixUri(src);
+	return mask;
+}
+function refreshMaskDropdown() {
+	if (!selectedFrame) return;
+	// Ensure masks array exists
+	if (!selectedFrame.masks) {
+		selectedFrame.masks = [];
+	}
+	
+	// Refresh "Select and remove masks" dropdown
+	const selectMaskElement = document.querySelector('#frame-editor-masks');
+	selectMaskElement.innerHTML = '';
+	const maskOptionNone = document.createElement('option');
+	maskOptionNone.disabled = true;
+	maskOptionNone.innerHTML = 'None Selected';
+	selectMaskElement.appendChild(maskOptionNone);
+	selectedFrame.masks.forEach(mask => {
+		const maskOption = document.createElement('option');
+		maskOption.innerHTML = mask.name;
+		selectMaskElement.appendChild(maskOption);
+	});
+	selectMaskElement.selectedIndex = 0;
+}
 function frameElementMaskRemoved() {
+	if (!selectedFrame) return;
 	const selectElement = document.querySelector('#frame-editor-masks');
 	const selectedOption = selectElement.value;
 	if (selectedOption != 'None Selected') {
@@ -3304,17 +3401,25 @@ function frameElementMaskRemoved() {
 		selectedFrame.masks.forEach(mask => {
 			if (mask.name == selectedOption) {
 				selectedFrame.masks = selectedFrame.masks.filter(item => item.name != selectedOption);
+				
+				// If all masks are removed, disable preserveAlpha management
+				if (selectedFrame.masks.length === 0) {
+					delete selectedFrame.supportsPreserveAlpha;
+					delete selectedFrame.preserveAlpha;
+				}
+				
 				drawFrames();
+				updateFrameLabel();
 			}
 		});
 	}
 }
 function uploadMaskOption(imageSource) {
-	const uploadedMask = {name:`Uploaded Image (${customCount})`, src:imageSource, noThumb:true, image: new Image()};
-	customCount ++;
-	selectedFrame.masks.push(uploadedMask);
-	uploadedMask.image.onload = drawFrames;
-	uploadedMask.image.src = imageSource;
+	if (!selectedFrame) return;
+	customCount++;
+	selectedFrame.masks.push(createMaskObject(`Uploaded Image (${customCount})`, imageSource, true));
+	updateFrameLabel();
+	refreshMaskDropdown();
 }
 function uploadFrameOption(imageSource) {
 	const uploadedFrame = {name:`Uploaded Image (${customCount})`, src:imageSource, noThumb:true};
