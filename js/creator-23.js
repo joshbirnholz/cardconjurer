@@ -425,17 +425,18 @@ loadManaSymbols(['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '
 loadManaSymbols(true, ['e', 'a', 'p']);
 loadManaSymbols(['wu', 'wb', 'ub', 'ur', 'br', 'bg', 'rg', 'rw', 'gw', 'gu', '2w', '2u', '2b', '2r', '2g', 'wp', 'up', 'bp', 'rp', 'gp', 'h',
 				 'wup', 'wbp', 'ubp', 'urp', 'brp', 'bgp', 'rgp', 'rwp', 'gwp', 'gup', 'purplew', 'purpleu', 'purpleb', 'purpler', 'purpleg',
-				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2]);
+				 '2purple', 'purplep', 'cw', 'cu', 'cb', 'cr', 'cg'], [1.2, 1.2, 0.03]);
 loadManaSymbols(['bar.png', 'whitebar.png']);
 loadManaSymbols(['brush', 'whitebrush'], [2.85, 2.85]);
-loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'], [1.2, 1.2]);
+loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 'xxurg', 'xxwbr', 'xxwub'], [1.2, 1.2, 0.03]);
 loadManaSymbols(true, ['chaos'], [1.2, 1]);
 loadManaSymbols(true, ['tk'], [0.8, 1]);
 loadManaSymbols(true, ['planeswalker'], [0.6, 1.2]);
 loadManaSymbols(true, ['+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '-1', '-2', '-3', '-4', '-5', '-6', '-7', '-8', '-9', '+0'], [1.6, 1]);
-function loadManaSymbols(matchColor, manaSymbolPaths, size = [1, 1]) {
+function loadManaSymbols(matchColor, manaSymbolPaths, size = [1, 1], spacing = 1) {
 	if (typeof matchColor === 'object') {
 		// Hacky way to add a default argument for matchColor without breaking the function call from other places
+		spacing = size || 1;
 		size = manaSymbolPaths || [1,1];
 		manaSymbolPaths = matchColor;
 		matchColor = false;
@@ -466,6 +467,8 @@ function loadManaSymbols(matchColor, manaSymbolPaths, size = [1, 1]) {
 
 		manaSymbol.width = size[0];
 		manaSymbol.height = size[1];
+		manaSymbol.yOffset = size[2] || 0;
+		manaSymbol.spacing = spacing;
 		manaSymbol.image = new Image();
 		manaSymbol.image.crossOrigin = 'anonymous';
 		var manaSymbolPath = '/img/manaSymbols/' + manaSymbol.path;
@@ -3423,6 +3426,181 @@ function uploadFrameOption(imageSource) {
 	availableFrames.push(uploadedFrame);
 	loadFramePack();
 }
+//CUSTOM MANA SYMBOLS
+const customManaSets = new Map();
+let customManaCount = 0;
+let currentManaPrefix = ''; // Global prefix that applies to all text boxes
+
+// Built-in custom mana symbol sets
+const builtInManaSets = [
+	{name: 'Breaking News', prefix: 'breakingNews', script: '/js/frames/manaSymbolsBreakingNews.js'},
+	{name: 'Cartoony', prefix: 'c', script: '/js/frames/manaSymbolsCartoony.js'},
+	{name: 'FAB', prefix: 'fab', script: '/js/frames/manaSymbolsFAB.js'},
+	{name: 'Future', prefix: 'f', script: '/js/frames/manaSymbolsFuture.js'},
+	{name: 'M21', prefix: 'm21', script: '/js/frames/manaSymbolsM21.js'},
+	{name: 'Mystical Archive JP', prefix: 'majp', script: '/js/frames/manaSymbolsMysticalArchiveJP.js'},
+	{name: 'Neon', prefix: 'neon', script: '/js/frames/manaSymbolsNeon.js'},
+	{name: 'Oil Slick', prefix: 'oilslick', script: '/js/frames/manaSymbolsOilSlick.js'},
+	{name: 'Old', prefix: 'old', script: '/js/frames/manaSymbolsOld.js'},
+	{name: 'Outline', prefix: 'outline', script: '/js/frames/manaSymbolsOutline.js'},
+	{name: 'Outline Alt', prefix: 'outlineAlt', script: '/js/frames/manaSymbolsOutlineAlt.js'},
+	{name: 'Pokemon', prefix: 'pokemon', script: '/js/frames/manaSymbolsPokemon.js'},
+	{name: 'Wanted', prefix: 'wanted', script: '/js/frames/manaSymbolsWanted.js'}
+];
+
+function populateManaSetsDropdown() {
+	const selector = document.querySelector('#custom-mana-selector');
+	if (!selector) return;
+	
+	// Check if already populated (more than just the default option)
+	if (selector.options.length > 1) return;
+	
+	// Add built-in sets
+	builtInManaSets.forEach(set => {
+		const option = document.createElement('option');
+		option.value = 'builtin:' + set.prefix;
+		option.textContent = set.name;
+		selector.appendChild(option);
+	});
+}
+function uploadCustomManaFolder(files) {
+	if (files.length === 0) return;
+	
+	// Get folder name from the first file's webkitRelativePath
+	const firstFile = files[0];
+	let folderName = 'Custom Set ' + (++customManaCount);
+	if (firstFile.webkitRelativePath) {
+		const pathParts = firstFile.webkitRelativePath.split('/');
+		if (pathParts.length > 1) {
+			folderName = pathParts[0];
+		}
+	}
+	
+	const setName = folderName;
+	const prefix = `custom${customManaCount}`;
+	const manaImages = new Map();
+	
+	// Standard mana symbol names we're looking for
+	const standardSymbols = ['w', 'u', 'b', 'r', 'g', 'c', 'cc', 's', 'x', 't', 
+		'wu', 'wb', 'ub', 'ur', 'br', 'bg', 'rg', 'rw', 'gw', 'gu',
+		'wp', 'up', 'bp', 'rp', 'gp', 'cp', 
+		'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+		'10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20',
+		'y', 'z', 'q', 'e', 'chaos', 'pw', 'energy', 'acorn', 'halfwhite',
+		'half', 'tap', 'untap', 'snow'];
+	
+	// Process each file
+	Array.from(files).forEach(file => {
+		if (!file.type.startsWith('image/')) return;
+		
+		// Extract the mana symbol name from filename (without extension)
+		const fileName = file.name.split('.')[0].toLowerCase();
+		
+		// Try to find which standard symbol this file represents
+		// Look for the symbol at the end of the filename
+		let symbolName = null;
+		for (const symbol of standardSymbols) {
+			if (fileName.endsWith(symbol)) {
+				symbolName = symbol;
+				break;
+			}
+		}
+		
+		// If we couldn't identify the symbol, use the full filename
+		if (!symbolName) {
+			symbolName = fileName;
+		}
+		
+		// Read the file
+		const reader = new FileReader();
+		reader.onload = function(e) {
+			manaImages.set(symbolName, e.target.result);
+			
+			// When all images are loaded, save the set
+			if (manaImages.size === Array.from(files).filter(f => f.type.startsWith('image/')).length) {
+				customManaSets.set(setName, {
+					name: setName,
+					prefix: prefix,
+					images: manaImages
+				});
+				
+				// Add to dropdown
+				const selector = document.querySelector('#custom-mana-selector');
+				const option = document.createElement('option');
+				option.value = setName;
+				option.textContent = setName;
+				selector.appendChild(option);
+				
+				// Automatically select the newly uploaded set
+				selector.value = setName;
+				selectCustomManaSet(setName);
+				
+				notify(`Custom mana set "${setName}" loaded with ${manaImages.size} symbols`, 3);
+			}
+		};
+		reader.readAsDataURL(file);
+	});
+}
+
+function selectCustomManaSet(setName) {
+	if (!setName || setName === '') {
+		// Reset to default mana symbols
+		currentManaPrefix = '';
+	} else if (setName.startsWith('builtin:')) {
+		// Handle built-in mana symbol sets
+		const prefix = setName.replace('builtin:', '');
+		const builtInSet = builtInManaSets.find(s => s.prefix === prefix);
+		
+		if (builtInSet) {
+			// Set the global mana prefix
+			currentManaPrefix = builtInSet.prefix;
+			
+			// Load the mana symbols script if not already loaded
+			if (!card.manaSymbols.includes(builtInSet.script)) {
+				loadScript(builtInSet.script);
+			}
+		}
+	} else {
+		// Handle user-uploaded custom sets
+		const customSet = customManaSets.get(setName);
+		if (customSet) {
+			// Set the global mana prefix
+			currentManaPrefix = customSet.prefix;
+			
+			// Load the custom mana symbols into the mana Map
+			loadCustomManaSymbols(customSet);
+		}
+	}
+	
+	// Redraw text with new mana symbols
+	drawTextBuffer();
+}
+function loadCustomManaSymbols(customSet) {
+	// Check if already loaded
+	if (mana.get(customSet.prefix + 'w')) {
+		return; // Already loaded
+	}
+	
+	// Load each image from the custom set
+	// symbolName is like 'w', 'u', 'b', etc.
+	// We store them as 'custom1w', 'custom1u', 'custom1b', etc.
+	customSet.images.forEach((imageData, symbolName) => {
+		const fullName = customSet.prefix + symbolName;
+		
+		const manaSymbol = {
+			name: fullName,
+			path: imageData,
+			matchColor: false,
+			width: 1,
+			height: 1,
+			yOffset: 0,
+			image: new Image()
+		};
+		
+		manaSymbol.image.src = imageData;
+		mana.set(fullName, manaSymbol);
+	});
+}
 function hsl(canvas, inputH, inputS, inputL) {
 	//adjust inputs
 	var hue = parseInt(inputH) / 360;
@@ -3562,6 +3740,7 @@ function loadTextOptions(textObject, replace=true) {
 		document.querySelector('#text-options').appendChild(textOptionElement);
 	});
 	document.querySelector('#text-options').firstChild.click();
+	populateManaSetsDropdown();
 	drawTextBuffer();
 	drawNewGuidelines();
 }
@@ -3898,7 +4077,7 @@ function writeText(textObject, targetContext) {
 					var barDistance = 0;
 					realTextAlign = textAlign;
 					textAlign = 'left';
-					if (card.version == 'cartoony') {
+					if (card.version == 'cartoony' || currentManaPrefix == 'c') {
 						barImageName = 'cflavor';
 						barWidth = scaleWidth(0.8547);
 						barHeight = scaleHeight(0.0458);
@@ -4145,11 +4324,21 @@ function writeText(textObject, targetContext) {
 				} else if (possibleCode.includes('kerning')) {
 					lineContext.letterSpacing = possibleCode.replace('kerning', '') + 'px';
 					lineContext.font = lineContext.font; //necessary for the letterspacing update to be recognized
-				} else if (getManaSymbol(possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined) {
+				} else if (
+					// Check if symbol exists with custom prefix or in default set
+					(currentManaPrefix && (getManaSymbol(currentManaPrefix + possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(currentManaPrefix + possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined)) ||
+					(textObject.manaPrefix && (getManaSymbol(textObject.manaPrefix + possibleCode.replaceAll('/', '')) != undefined || getManaSymbol(textObject.manaPrefix + possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined)) ||
+					getManaSymbol(possibleCode.replaceAll('/', '')) != undefined || 
+					getManaSymbol(possibleCode.replaceAll('/', '').split('').reverse().join('')) != undefined
+				) {
 					var possibleCode = possibleCode.replaceAll('/', '');
 					var manaSymbol;
 					// Add symbol to render queue without drawing immediately
-					if (textObject.manaPrefix && 
+					// Check global prefix first, then textObject prefix, then default
+					if (currentManaPrefix && 
+						(getManaSymbol(currentManaPrefix + possibleCode) != undefined || getManaSymbol(currentManaPrefix + possibleCode.split('').reverse().join('')) != undefined)) {
+						manaSymbol = getManaSymbol(currentManaPrefix + possibleCode) || getManaSymbol(currentManaPrefix + possibleCode.split('').reverse().join(''));
+					} else if (textObject.manaPrefix && 
 						(getManaSymbol(textObject.manaPrefix + possibleCode) != undefined || getManaSymbol(textObject.manaPrefix + possibleCode.split('').reverse().join('')) != undefined)) {
 						manaSymbol = getManaSymbol(textObject.manaPrefix + possibleCode) || getManaSymbol(textObject.manaPrefix + possibleCode.split('').reverse().join(''));
 					} else {
@@ -4168,7 +4357,7 @@ function writeText(textObject, targetContext) {
 					var manaSymbolWidth = manaSymbol.width * textSize * 0.78;
 					var manaSymbolHeight = manaSymbol.height * textSize * 0.78;
 					var manaSymbolX = currentX + canvasMargin + manaSymbolSpacing;
-					var manaSymbolY = canvasMargin + textSize * 0.34 - manaSymbolHeight / 2;
+					var manaSymbolY = canvasMargin + textSize * 0.34 - manaSymbolHeight / 2 + (manaSymbol.yOffset * textSize);
 					if (textObject.manaPlacement) {
 						manaSymbolX = scaleWidth(textObject.manaPlacement.x[manaPlacementCounter] || 0) + canvasMargin;
 						manaSymbolY = canvasMargin;
@@ -4223,7 +4412,14 @@ function writeText(textObject, targetContext) {
 						shadowOffsetY: textShadowOffsetY,
 						shadowBlur: textShadowBlur
 					});
-					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
+					// Calculate how much to advance currentX
+					var symbolAdvance = manaSymbolWidth + manaSymbolSpacing * 2;
+					// If symbol has custom spacing defined, use it to adjust the advance
+					if (manaSymbol.spacing !== undefined && manaSymbol.spacing < 0) {
+						// Negative spacing: reduce the advance to create overlap
+						symbolAdvance += manaSymbol.spacing * textSize;
+					}
+					currentX += symbolAdvance;
 
 					manaSymbolColor = origManaSymbolColor;
 				} else {
@@ -4246,8 +4442,16 @@ function writeText(textObject, targetContext) {
 						var imageToUse = symbolData.symbol.image;
 						var backImageToUse = symbolData.backImage;
 						
-						// For Safari, create a combined canvas first, then apply shadow
-						if (isSafari && (symbolData.symbol.image.src?.includes('.svg') || (backImageToUse?.src?.includes('.svg')))) {
+						// Skip if images aren't loaded yet
+						if (!imageToUse || !imageToUse.complete || imageToUse.naturalWidth === 0) {
+							return;
+						}
+						if (backImageToUse && (!backImageToUse.complete || backImageToUse.naturalWidth === 0)) {
+							return;
+						}
+						
+						// For Safari SVGs or cartoony symbols, create a combined canvas first, then apply shadow
+						if ((isSafari && (symbolData.symbol.image.src?.includes('.svg') || (backImageToUse?.src?.includes('.svg')))) || symbolData.symbol.image.src?.includes('cartoony/')) {
 							// Create a combined canvas for both symbols
 							var combinedCanvas = document.createElement('canvas');
 							combinedCanvas.width = symbolData.width;
@@ -4335,8 +4539,16 @@ function writeText(textObject, targetContext) {
 					var imageToUse = symbolData.symbol.image;
 					var backImageToUse = symbolData.backImage;
 					
-					// For Safari, create a combined canvas first, then apply shadow
-					if (isSafari && (symbolData.symbol.image.src?.includes('.svg') || (backImageToUse?.src?.includes('.svg')))) {
+					// Skip if images aren't loaded yet
+					if (!imageToUse || !imageToUse.complete || imageToUse.naturalWidth === 0) {
+						return;
+					}
+					if (backImageToUse && (!backImageToUse.complete || backImageToUse.naturalWidth === 0)) {
+						return;
+					}
+					
+					// For Safari SVGs or cartoony symbols, create a combined canvas first, then apply shadow
+					if ((isSafari && (symbolData.symbol.image.src?.includes('.svg') || (backImageToUse?.src?.includes('.svg')))) || symbolData.symbol.image.src?.includes('cartoony/')) {
 						// Create a combined canvas for both symbols
 						var combinedCanvas = document.createElement('canvas');
 						combinedCanvas.width = symbolData.width;
@@ -6678,6 +6890,8 @@ function saveCard(saveFromFile) {
 			delete frame.image;
 			frame.masks.forEach(mask => delete mask.image);
 		});
+		// Save custom mana selector value
+		cardToSave.customManaSet = document.querySelector('#custom-mana-selector').value || '';
 	}
 	try {
 		localStorage.setItem(cardKey, JSON.stringify(cardToSave));
@@ -6733,6 +6947,25 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#serial-y').value = card.serialY;
 		document.querySelector('#serial-scale').value = card.serialScale;
 		serialInfoEdited();
+		// Restore custom mana selector
+		if (card.customManaSet !== undefined) {
+			const selector = document.querySelector('#custom-mana-selector');
+			
+			// Check if it's a built-in set or if the custom set still exists
+			const isBuiltIn = card.customManaSet.startsWith('builtin:');
+			const isCustomAndExists = !isBuiltIn && customManaSets.has(card.customManaSet);
+			
+			if (isBuiltIn || isCustomAndExists) {
+				// Set exists, restore it
+				selector.value = card.customManaSet;
+				selectCustomManaSet(card.customManaSet);
+			} else if (card.customManaSet !== '') {
+				// Custom set no longer exists, reset to default and notify user
+				selector.value = '';
+				currentManaPrefix = '';
+				notify(`Custom mana set "${card.customManaSet}" is not available. Using default mana symbols.`, 5);
+			}
+		}
 
 		card.frames.reverse();
 		await card.frames.forEach(item => addFrame([], item));
