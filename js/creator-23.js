@@ -6494,9 +6494,39 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 	if (card.version.includes('planeswalker')) {
 		card.text.loyalty.text = cardToImport.loyalty || '';
 		var planeswalkerAbilities = cardToImport.oracle_text.split('\n');
-		// Replace loyalty ability brackets [+1], [-2], etc. with curly brackets for each ability
+		
+		// Combine lines at the beginning that don't have loyalty costs into the first ability
+		var processedAbilities = [];
+		var staticAbility = [];
+		for (var i = 0; i < planeswalkerAbilities.length; i++) {
+			var line = planeswalkerAbilities[i];
+			// Check if line has a loyalty cost pattern: [+/-/−][number/X]: or [0]:
+			// This matches things like "+1:", "−7:", "0:", "-X:", "+X:", etc. at the start of the line
+			var hasLoyaltyCost = /^[+\-−0][\dX]*\s*:/.test(line.trim()) || /^\[[+\-−0][\dX]*\]/.test(line.trim());
+			
+			if (hasLoyaltyCost) {
+				// This is a loyalty ability
+				if (staticAbility.length > 0) {
+					// Combine all static lines into first ability
+					processedAbilities.push(staticAbility.join('\n'));
+					staticAbility = [];
+				}
+				processedAbilities.push(line);
+			} else {
+				// This is a static ability or triggered ability (no loyalty cost)
+				staticAbility.push(line);
+			}
+		}
+		// If there are remaining static abilities, add them
+		if (staticAbility.length > 0) {
+			processedAbilities.push(staticAbility.join('\n'));
+		}
+		
+		planeswalkerAbilities = processedAbilities;
+		
+		// Replace loyalty ability brackets [+1], [-2], [-X], etc. with curly brackets for each ability
 		planeswalkerAbilities = planeswalkerAbilities.map(ability => {
-			return ability.replace(/\[([+\-−]\d+)\]/g, function(match, number) {
+			return ability.replace(/\[([+\-−][\dX]+)\]/g, function(match, number) {
 				return '{' + number.replace('\u2212', '-') + '}';
 			});
 		});
@@ -6506,23 +6536,33 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('STATION'
 		}
 		for (var i = 0; i < 4; i ++) {
 			if (planeswalkerAbilities[i]) {
-				var planeswalkerAbility = planeswalkerAbilities[i].replace(': ', 'splitstring').split('splitstring');
-				if (!planeswalkerAbility[1]) {
-					planeswalkerAbility = ['', planeswalkerAbility[0]];
+				var abilityText = planeswalkerAbilities[i];
+				var loyaltyCost = '';
+				var abilityContent = abilityText;
+				
+				// Extract loyalty cost from the beginning of the line only (supports -X, +X, numbers, etc.)
+				var loyaltyCostMatch = abilityText.match(/^([+\-−0][\dX]*)\s*:\s*/);
+				if (loyaltyCostMatch) {
+					loyaltyCost = loyaltyCostMatch[1].replace('\u2212', '-');
+					abilityContent = abilityText.substring(loyaltyCostMatch[0].length);
 				}
-				card.text['ability' + i].text = planeswalkerAbility[1].replace('(', '{i}(').replace(')', '){/i}');
+				
+				card.text['ability' + i].text = abilityContent.replace('(', '{i}(').replace(')', '){/i}');
 				if (card.version == 'planeswalkerTall' || card.version == 'planeswalkerCompleated') {
 					document.querySelector('#planeswalker-height-' + i).value = Math.round(scaleHeight(0.3572) / planeswalkerAbilities.length);
 				} else {
 					document.querySelector('#planeswalker-height-' + i).value = Math.round(scaleHeight(0.2915) / planeswalkerAbilities.length);
 				}
-				document.querySelector('#planeswalker-cost-' + i).value = planeswalkerAbility[0].replace('\u2212', '-');
+				document.querySelector('#planeswalker-cost-' + i).value = loyaltyCost;
 			} else {
 				card.text['ability' + i].text = '';
 				document.querySelector('#planeswalker-height-' + i).value = 0;
 			}
 		}
 		planeswalkerEdited();
+		if (typeof updatePlaneswalkerAbilityHeights === 'function') {
+			updatePlaneswalkerAbilityHeights();
+		}
 	} else if (card.version.includes('saga')) {
 		if (card.text.rules2) {
 			const combinedText = [cardToImport.flavor_text, ...(cardToImport.keywords || [])]
