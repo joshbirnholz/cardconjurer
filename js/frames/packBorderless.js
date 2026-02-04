@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/m15/genericShowcase/m15GenericShowcaseMaskPinline.png', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/m15/regular/m15MaskType.png', name:'Type'}, {src:'/img/frames/m15/regular/m15MaskRules.png', name:'Rules'}, {src:'/img/frames/m15/borderless/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/m15/genericShowcase/m15GenericShowcaseMaskPinline.png', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/m15/regular/m15MaskType.png', name:'Type'}, {src:'/img/frames/m15/regular/m15MaskTitleAndType.png', name:'Title and Type'}, {src:'/img/frames/m15/regular/m15MaskRules.png', name:'Rules'}, {src:'/img/frames/m15/borderless/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/m15/regular/m15MaskBorder.png', name:'Border'}];
 var bounds = {x:1146/1500, y:1861/2100, width:274/1500, height:140/2100};
 //defines available frames
 availableFrames = [
@@ -12,6 +12,7 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameA.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameL.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/m15/borderless/m15GenericShowcaseFrameC.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/m15/borderless/pt/w.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/borderless/pt/u.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/borderless/pt/b.png', bounds:bounds},
@@ -20,7 +21,18 @@ availableFrames = [
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/borderless/pt/m.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/borderless/pt/a.png', bounds:bounds},
 	{name:'Colorless Power/Toughness', src:'/img/frames/m15/borderless/pt/l.png', bounds:bounds},
-	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds}
+	{name:'Vehicle Power/Toughness', src:'/img/frames/m15/borderless/pt/v.png', bounds:bounds},
+
+	{name:'White Land Frame', src:'/img/frames/m15/borderless/innerGlow/w.png', masks:masks, preserveAlpha:true},
+	{name:'Blue Land Frame', src:'/img/frames/m15/borderless/innerGlow/u.png', masks:masks, preserveAlpha:true},
+	{name:'Black Land Frame', src:'/img/frames/m15/borderless/innerGlow/b.png', masks:masks, preserveAlpha:true},
+	{name:'Red Land Frame', src:'/img/frames/m15/borderless/innerGlow/r.png', masks:masks, preserveAlpha:true},
+	{name:'Green Land Frame', src:'/img/frames/m15/borderless/innerGlow/g.png', masks:masks, preserveAlpha:true},
+	{name:'Multicolored Land Frame', src:'/img/frames/m15/borderless/innerGlow/m.png', masks:masks, preserveAlpha:true},
+	{name:'Artifact Land Frame', src:'/img/frames/m15/borderless/innerGlow/a.png', masks:masks, preserveAlpha:true},
+	{name:'Land Frame', src:'/img/frames/m15/borderless/innerGlow/L.png', masks:masks, preserveAlpha:true},
+	{name:'Colorless Land Frame', src:'/img/frames/m15/borderless/innerGlow/c.png', masks:masks, preserveAlpha:true},
+	{name:'Land (Color Type) Frame', src:'/img/frames/m15/borderless/innerGlow/L2.png', masks:masks, preserveAlpha:true}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
