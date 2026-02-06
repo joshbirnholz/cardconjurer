@@ -5,6 +5,26 @@ if (debugging) {
 	alert('debugging - 4.0');
 	document.querySelectorAll('.debugging').forEach(element => element.classList.remove('hidden'));
 }
+//Adding a gate funtion to make sure all the fonts are properly loaded and we dont get some formatted one on teh bottom of the card --DSKZ
+async function ensureFontsLoaded() {
+  // list the faces you use in bottom info
+  const faces = [
+    '12px "gothammedium"',
+    '12px "mplantin"'
+  ];
+  try {
+    // kick off specific loads (size value required by spec)
+    await Promise.all(faces.map(f => document.fonts.load(f)));
+    // also wait until the full font set is ready
+    if (document.fonts.status !== 'loaded') {
+      await document.fonts.ready;
+    }
+  } catch (e) {
+    // ignore — worst case we draw with fallback and re-draw later
+    console.warn('Font load wait failed', e);
+  }
+}
+//Adding a gate funtion to make sure all the fonts are properly loaded and we dont get some formatted one on teh bottom of the card --DSKZ
 
 //To save the server from being overloaded? Maybe?
 function fixUri(input) {
@@ -241,6 +261,13 @@ async function resetCardIrregularities({canvas = [getStandardWidth(), getStandar
 	}
 }
 async function setBottomInfoStyle() {
+	// IF statement verifying if user wants to display Artist info only on the card. If not, continue as normal --DSKZ
+	 if (document.querySelector('#enableArtistOnlyCheck')?.checked) {
+		await loadBottomInfo({
+				midLeft: {text:'{savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '} \uFFEE {savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.021, color:card.bottomInfoColor, outlineWidth:0.003},
+		});
+		return; //Exit Early
+	 }
 	if (document.querySelector('#enableNewCollectorStyle').checked) {
 			await loadBottomInfo({
 				midLeft: {text:'{elemidinfo-set} \u2022 {elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
@@ -5053,6 +5080,7 @@ async function bottomInfoEdited() {
 	card.infoNote = document.querySelector('#info-note').value;
 
 	if (document.querySelector('#enableCollectorInfo').checked) {
+		await ensureFontsLoaded(); // Calling the gate guard at the TOP of the file --DSKZ
 		for (var textObject of Object.entries(card.bottomInfo)) {
 			if (["NOT FOR SALE", "Wizards of the Coast", "CardConjurer.com", "cardconjurer.com"].some(v => textObject[1].text.includes(v))) {
 				continue;
@@ -5108,7 +5136,7 @@ function toggleStarDot() {
 function enableNewCollectorInfoStyle() {
 	localStorage.setItem('enableNewCollectorStyle', document.querySelector('#enableNewCollectorStyle').checked);
 	setBottomInfoStyle();
-	bottomInfoEdited();
+	ensureFontsLoaded().then(bottomInfoEdited); // Calling the same gate guard --DSKZ
 }
 function enableCollectorInfo() {
 	localStorage.setItem('enableCollectorInfo', document.querySelector('#enableCollectorInfo').checked);
