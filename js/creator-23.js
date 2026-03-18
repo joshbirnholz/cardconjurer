@@ -4677,7 +4677,7 @@ function uploadArt(imageSource, otherParams) {
 	// Store original URL if it's a Google Drive link (before conversion to object URL)
 	if (typeof imageSource === 'string' && imageSource.includes('drive.google.com/file/d/')) {
 		art.originalSrc = imageSource;
-	} else if (!imageSource.startsWith('blob:')) {
+	} else if (typeof imageSource !== 'string' || !imageSource.startsWith('blob:')) {
 		// Clear originalSrc for non-Google Drive, non-blob URLs
 		delete art.originalSrc;
 	}
@@ -4934,14 +4934,9 @@ function fetchSetSymbol() {
 	} else if (document.querySelector("#set-symbol-source").value == 'gatherer') {
 		if (setSymbolAliases.has(setCode.toLowerCase())) setCode = setSymbolAliases.get(setCode.toLowerCase());
 		uploadSetSymbol('http://gatherer.wizards.com/Handlers/Image.ashx?type=symbol&set=' + setCode + '&size=large&rarity=' + setRarity, 'resetSetSymbol');
-    } else if (document.querySelector("#set-symbol-source").value == 'hexproof') {
-        if (setSymbolAliases.has(setCode.toLowerCase())) setCode = setSymbolAliases.get(setCode.toLowerCase());
-        var hexproofUrl = 'https://api.hexproof.io/symbols/set/' + setCode + '/' + setRarity;
-        // Use CORS proxy for hexproof.io
-        if (params.get('noproxy') == null) {
-            hexproofUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(hexproofUrl);
-        }
-        uploadSetSymbol(hexproofUrl, 'resetSetSymbol');
+	} else if (document.querySelector("#set-symbol-source").value == 'hexproof') {
+		if (setSymbolAliases.has(setCode.toLowerCase())) setCode = setSymbolAliases.get(setCode.toLowerCase());
+		uploadSetSymbol('https://api.hexproof.io/symbols/set/' + setCode + '/' + setRarity, 'resetSetSymbol');
 	} else {
 		var extension = 'svg';
 		if (['xxxx'].includes(setCode.toLowerCase())) {
@@ -6928,9 +6923,25 @@ async function imageURL(url, destination, otherParams) {
 		if (match && match[1]) {
 			const scriptUrl = `https://script.google.com/macros/s/AKfycbw8laScKBfxda2Wb0g63gkYDBdy8NWNxINoC4xDOwnCQ3JMFdruam1MdmNmN4wI5k4/exec?id=${match[1]}`;
 			
+			notify('Attempting to load Google Drive image. Max size 27MB. Can take awhile if the image is large...');
+			
 			try {
 				const response = await fetch(scriptUrl);
 				const base64Text = await response.text();
+				
+				if (!response.ok) {
+					console.error('Google Drive script error:', response.status, base64Text);
+					throw new Error(`Script returned status ${response.status}: ${base64Text}`);
+				}
+				
+				// Dismiss the "Attempting to load" notification
+				const existingNotifications = document.querySelectorAll('.notification');
+				existingNotifications.forEach(n => {
+					const closeBtn = n.querySelector('h3');
+					if (closeBtn) closeBtn.click();
+				});
+				
+				notify('Image Now Loading', 5);
 				
 				// Detect MIME type from Base64 signature
 				let mimeType = 'image/png';
@@ -6957,22 +6968,19 @@ async function imageURL(url, destination, otherParams) {
 				art.src = objectURL;
 			} catch (error) {
 				console.error('Failed to load Google Drive image:', error);
+				
+				// Dismiss the "Attempting to load" notification
+				const existingNotifications = document.querySelectorAll('.notification');
+				existingNotifications.forEach(n => {
+					const closeBtn = n.querySelector('h3');
+					if (closeBtn) closeBtn.click();
+				});
+				
 				notify('Failed to load Google Drive image. Please try a different URL.');
 				destination('/img/blank.png', otherParams);
 			}
 			return;
 		}
-	}
-	
-	// Skip proxy for services with proper CORS headers
-	const skipProxy = url.includes('i.imgur.com') || 
-					url.includes('i.ibb.co') ||
-					url.includes('postimg.cc') ||
-					url.includes('catbox.moe');
-	
-	if (params.get('noproxy') == null && !skipProxy) {
-		//CORS PROXY LINKS - Using Cloudflare Workers based proxy
-		imageurl = 'https://corsproxy.io/?url=' + encodeURIComponent(imageurl);
 	}
 	
 	destination(imageurl, otherParams);
