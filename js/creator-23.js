@@ -3632,6 +3632,163 @@ async function drawText() {
 }
 var justifyWidth = 90;
 let manaSymbolsToRender = [];
+//Split CJK characters individually so Japanese/Chinese text can wrap per-character
+function splitCJKCharacters(splitText) {
+	var result = [];
+	for (var i = 0; i < splitText.length; i++) {
+		var segment = splitText[i];
+		if (segment.includes('{') || segment === ' ') {
+			result.push(segment);
+		} else if (/[\u3000-\u9FFF\uF900-\uFAFF]/.test(segment)) {
+			for (var j = 0; j < segment.length; j++) {
+				result.push(segment[j]);
+			}
+		} else {
+			result.push(segment);
+		}
+	}
+	return result;
+}
+//Pre-scan ruby codes to find the smallest annotation size needed so all ruby text is consistent
+function prescanRubySize(splitText, textObject, ctx, textSize, fontStyle, font, fontExt) {
+	var annSize = textObject.vertical ? textSize * 0.35 : textSize * 0.5;
+	for (var i = 0; i < splitText.length; i++) {
+		var word = splitText[i];
+		if (!word || !word.toLowerCase().startsWith('{ruby:')) { continue; }
+		var parts = word.replace(/[{}]/g, '').split(':');
+		var base = parts[1] || '';
+		var annotation = parts[2] || '';
+		if (base.length == 0) { continue; }
+		if (textObject.vertical) {
+			var charsPerBase = Math.ceil(annotation.length / base.length);
+			for (var j = 0; j < base.length; j++) {
+				var charCount = Math.min(charsPerBase, annotation.length - j * charsPerBase);
+				if (charCount > 0) {
+					annSize = Math.min(annSize, textSize / charCount);
+				}
+			}
+		} else {
+			var baseWidth = ctx.measureText(base).width;
+			ctx.font = fontStyle + annSize + 'px ' + font + fontExt;
+			var annWidth = ctx.measureText(annotation).width;
+			if (annWidth > baseWidth && baseWidth > 0) {
+				annSize = Math.min(annSize, annSize * (baseWidth / annWidth));
+			}
+			ctx.font = fontStyle + textSize + 'px ' + font + fontExt;
+		}
+	}
+	return annSize;
+}
+//Draw ruby text (base with annotation above or to the right)
+function drawRubyText(word, textObject, ctx, paragraphCtx, lineCanvas, annSize, state, opts) {
+	var parts = word.replace(/[{}]/g, '').split(':');
+	var base = parts[1] || '';
+	var annotation = parts[2] || '';
+	var savedFont = ctx.font;
+	if (textObject.vertical) {
+		drawRubyVertical(base, annotation, ctx, paragraphCtx, lineCanvas, annSize, state, opts, savedFont);
+	} else {
+		drawRubyHorizontal(base, annotation, ctx, paragraphCtx, lineCanvas, annSize, state, opts, savedFont);
+	}
+}
+//Vertical ruby: base chars stacked top-to-bottom, annotation to the right
+function drawRubyVertical(base, annotation, ctx, paragraphCtx, lineCanvas, annSize, state, opts, savedFont) {
+	var charsPerBase = Math.ceil(annotation.length / base.length);
+	for (var i = 0; i < base.length; i++) {
+		var baseChar = base[i];
+		var annStart = i * charsPerBase;
+		var annChars = annotation.substring(annStart, Math.min(annStart + charsPerBase, annotation.length));
+		//Flush line before drawing next base character
+		if (i > 0) {
+			var hAdj = 0;
+			if (opts.textAlign == 'center') { hAdj = (opts.textWidth - state.currentX) / 2; }
+			else if (opts.textAlign == 'right') { hAdj = opts.textWidth - state.currentX; }
+			if (state.currentX > state.widestLineWidth) { state.widestLineWidth = state.currentX; }
+			paragraphCtx.drawImage(lineCanvas, hAdj, state.currentY);
+			state.lineY = 0;
+			ctx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+			state.currentX = opts.startingCurrentX;
+			state.currentY += opts.textSize + state.newLineSpacing;
+			state.newLineSpacing = (textObject.lineSpacing || 0) * opts.textSize;
+		}
+		//Draw base character
+		var baseCharWidth = ctx.measureText(baseChar).width;
+		var baseY = opts.canvasMargin + opts.textSize * opts.textFontHeightRatio + state.lineY;
+		if (opts.textOutlineWidth >= 1) { ctx.strokeText(baseChar, state.currentX + opts.canvasMargin, baseY); }
+		ctx.fillText(baseChar, state.currentX + opts.canvasMargin, baseY);
+		//Draw annotation chars to the right, centered vertically
+		if (annChars.length > 0) {
+			ctx.font = opts.textFontStyle + annSize + 'px ' + opts.textFont + opts.textFontExtension;
+			var annX = state.currentX + opts.canvasMargin + baseCharWidth;
+			var totalAnnH = annChars.length * annSize;
+			var baseTopY = opts.canvasMargin + state.lineY;
+			var annStartY = baseTopY + (opts.textSize - totalAnnH) / 2 + annSize * opts.textFontHeightRatio - opts.textSize * 0.08;
+			for (var j = 0; j < annChars.length; j++) {
+				var charY = annStartY + j * annSize;
+				if (opts.textOutlineWidth >= 1) { ctx.strokeText(annChars[j], annX, charY); }
+				ctx.fillText(annChars[j], annX, charY);
+			}
+			ctx.font = savedFont;
+		}
+		state.currentX += baseCharWidth;
+	}
+}
+//Horizontal ruby: annotation drawn above base text, evenly distributed
+function drawRubyHorizontal(base, annotation, ctx, paragraphCtx, lineCanvas, annSize, state, opts, savedFont) {
+	var baseWidth = ctx.measureText(base).width;
+	ctx.font = opts.textFontStyle + annSize + 'px ' + opts.textFont + opts.textFontExtension;
+	var annWidth = ctx.measureText(annotation).width;
+	ctx.font = savedFont;
+	var totalWidth = Math.max(baseWidth, annWidth);
+	//Wrap to new line if needed
+	if (totalWidth + state.currentX >= opts.textWidth && opts.textArcRadius == 0 && !opts.textOneLine) {
+		var hAdj = 0;
+		if (opts.textAlign == 'center') { hAdj = (opts.textWidth - state.currentX) / 2; }
+		else if (opts.textAlign == 'right') { hAdj = opts.textWidth - state.currentX; }
+		if (state.currentX > state.widestLineWidth) { state.widestLineWidth = state.currentX; }
+		paragraphCtx.drawImage(lineCanvas, hAdj, state.currentY);
+		state.lineY = 0;
+		ctx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+		state.currentX = opts.startingCurrentX;
+		state.currentY += opts.textSize + state.newLineSpacing;
+		state.newLineSpacing = (textObject.lineSpacing || 0) * opts.textSize;
+	}
+	var baseOffsetX = (totalWidth - baseWidth) / 2;
+	var baseY = opts.canvasMargin + opts.textSize * opts.textFontHeightRatio + state.lineY;
+	//Position annotation using font metrics for zero-gap placement
+	var baseMetrics = ctx.measureText(base);
+	var baseFontAscent = baseMetrics.fontBoundingBoxAscent || opts.textSize * opts.textFontHeightRatio;
+	ctx.font = opts.textFontStyle + annSize + 'px ' + opts.textFont + opts.textFontExtension;
+	var annMetrics = ctx.measureText(annotation);
+	var annFontDescent = annMetrics.fontBoundingBoxDescent || annSize * 0.1;
+	var annY = baseY - baseFontAscent - annFontDescent;
+	//Distribute annotation chars evenly when base is wider
+	if (annotation.length > 1 && baseWidth > annWidth) {
+		var charWidths = [];
+		var totalCharWidth = 0;
+		for (var i = 0; i < annotation.length; i++) {
+			var w = ctx.measureText(annotation[i]).width;
+			charWidths.push(w);
+			totalCharWidth += w;
+		}
+		var spacing = (baseWidth - totalCharWidth) / (annotation.length + 1);
+		var drawX = state.currentX + opts.canvasMargin + baseOffsetX + spacing;
+		for (var i = 0; i < annotation.length; i++) {
+			if (opts.textOutlineWidth >= 1) { ctx.strokeText(annotation[i], drawX, annY); }
+			ctx.fillText(annotation[i], drawX, annY);
+			drawX += charWidths[i] + spacing;
+		}
+	} else {
+		var annOffsetX = (totalWidth - annWidth) / 2;
+		if (opts.textOutlineWidth >= 1) { ctx.strokeText(annotation, state.currentX + opts.canvasMargin + annOffsetX, annY); }
+		ctx.fillText(annotation, state.currentX + opts.canvasMargin + annOffsetX, annY);
+	}
+	ctx.font = savedFont;
+	//Draw base text
+	if (opts.textOutlineWidth >= 1) { ctx.strokeText(base, state.currentX + opts.canvasMargin + baseOffsetX, baseY); }
+	ctx.fillText(base, state.currentX + opts.canvasMargin + baseOffsetX, baseY);
+	state.currentX += totalWidth;
+}
 function writeText(textObject, targetContext) {
 	manaSymbolsToRender = [];
 	//Most bits of info about text loaded, with defaults when needed
@@ -3721,6 +3878,7 @@ function writeText(textObject, targetContext) {
 	splitText = splitText.replace(/{/g, splitString + '{').replace(/}/g, '}' + splitString).replace(/ /g, splitString + ' ' + splitString).split(splitString);
 
 	splitText = splitText.filter(item => item);
+	splitText = splitCJKCharacters(splitText);
 	if (textObject.manaCost) {
 		splitText = splitText.filter(item => item != ' ');
 	}
@@ -3890,6 +4048,7 @@ function writeText(textObject, targetContext) {
 		lineContext.lineWidth = textOutlineWidth;
 		lineContext.lineCap = textLineCap;
 		lineContext.lineJoin = textLineJoin;
+		var rubyGlobalAnnSize = prescanRubySize(splitText, textObject, lineContext, textSize, textFontStyle, textFont, textFontExtension);
 		//Begin looping through words/codes
 		innerloop: for (word of splitText) {
 			var wordToWrite = word;
@@ -3961,6 +4120,16 @@ function writeText(textObject, targetContext) {
 					textJustify = 'center';
 				} else if (possibleCode == 'justify-right') {
 					textJustify = 'right';
+				} else if (possibleCode.startsWith('ruby:')) {
+					var rubyState = {currentX:currentX, currentY:currentY, lineY:lineY, widestLineWidth:widestLineWidth, newLineSpacing:newLineSpacing};
+					drawRubyText(word, textObject, lineContext, paragraphContext, lineCanvas, rubyGlobalAnnSize, rubyState, {
+						textSize:textSize, textFontStyle:textFontStyle, textFont:textFont, textFontExtension:textFontExtension,
+						textFontHeightRatio:textFontHeightRatio, textAlign:textAlign, textWidth:textWidth, textArcRadius:textArcRadius,
+						textOneLine:textOneLine, textOutlineWidth:textOutlineWidth, canvasMargin:canvasMargin, startingCurrentX:startingCurrentX
+					});
+					currentX = rubyState.currentX; currentY = rubyState.currentY; lineY = rubyState.lineY;
+					widestLineWidth = rubyState.widestLineWidth; newLineSpacing = rubyState.newLineSpacing;
+					wordToWrite = null;
 				} else if (possibleCode.includes('conditionalcolor')) {
 				    const codeParams = possibleCode.split(":");
 				    const tagParts = codeParams[1].split(",");
@@ -4452,7 +4621,17 @@ function writeText(textObject, targetContext) {
 					maxSpaceSize: 6,
 					minSpaceSize: 0
 				};
-
+				//Rotate katakana prolonged sound mark (ー) 90° CW in vertical text
+				var verticalRotateChar = textObject.vertical && wordToWrite === '\u30FC';
+				if (verticalRotateChar) {
+					var charWidth = lineContext.measureText(wordToWrite).width;
+					var centerX = currentX + canvasMargin + charWidth / 2;
+					var centerY = canvasMargin + textSize * textFontHeightRatio + lineY - textSize * 0.3;
+					lineContext.save();
+					lineContext.translate(centerX, centerY);
+					lineContext.rotate(Math.PI / 2);
+					lineContext.translate(-centerX, -centerY);
+				}
 				if (textArcRadius > 0) {
 					lineContext.fillTextArc(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY, textArcRadius, textArcStart, currentX, textOutlineWidth);
 				} else {
@@ -4468,6 +4647,9 @@ function writeText(textObject, targetContext) {
 					} else {
 						lineContext.fillText(wordToWrite, currentX + canvasMargin, canvasMargin + textSize * textFontHeightRatio + lineY);
 					}
+				}
+				if (verticalRotateChar) {
+					lineContext.restore();
 				}
 
 				if (fillJustify) {
