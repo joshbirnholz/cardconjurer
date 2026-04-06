@@ -10,7 +10,7 @@ SETTINGS
 """
 
 NAME = "localhost"
-PORT = 8080
+PORT = 8081
 DIRECTORY = os.getcwd()
 
 """
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     print("Server started http://%s:%s" % (NAME, PORT))
 
     try:
-        webbrowser.open('http://localhost:8080', new=2)
+        webbrowser.open('http://%s:%s' % (NAME, PORT), new=2)
         webServer.serve_forever()
     except KeyboardInterrupt:
         pass
