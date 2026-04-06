@@ -47,6 +47,7 @@ const frameNames = new Map ([
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
 	['Pixel (TMT)', 'PixelTMT'],
+	['Sewer (TMT)', 'SewerTMT'],
 	['Mystical Archive (SOA)', 'MysticalArchiveSOA'],
 	['Fable (ECL)', 'FableECL'],
 	['Neon Ink (TLA)', 'NeonInk'],

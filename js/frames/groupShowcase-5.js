@@ -1,6 +1,7 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
 	{name:'Pixel (TMT)', value:'PixelTMT'},
+	{name:'Sewer (TMT)', value:'SewerTMT'},
 	{name:'Mystical Archive (SOA)', value:'MysticalArchiveSOA'},
 	{name:'Fable (ECL)', value:'FableECL'},
 	{name:'Neon Ink (TLA)', value:'NeonInk'},

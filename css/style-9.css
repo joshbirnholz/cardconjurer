@@ -203,6 +203,10 @@
 	font-family: thunderman;
 	src: url('../fonts/Thunderman.ttf') format("truetype");
 }
+@font-face {
+	font-family: sewertmt-ccrumble;
+	src: url('../fonts/SewerTMT-CCRumble.ttf') format('truetype');
+}
 /*Variables*/
 :root {
 	--site-background: url('../img/lowpolyBackground.svg');
