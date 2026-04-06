@@ -4885,6 +4885,62 @@ async function pasteArt() {
     notify('Clipboard access not allowed or no image available.');
   }
 }
+
+async function upscaleArt() {
+  if (!art) {
+  	return;
+  }
+
+  var targetWidth = card.artBounds.width * card.width;
+  var targetHeight = card.artBounds.height * card.height;
+
+  if (art.width >= targetWidth && art.height >= targetHeight) {
+  	notify("Upscale not needed, art is already large enough!");
+  	return;
+  }
+
+  const artScaleX = targetWidth / art.width;
+  const artScaleY = targetHeight / art.height;
+
+  // Scale must satisfy BOTH dimensions
+  const scale = Math.max(artScaleX, artScaleY);
+
+  // Upscayl supports only whole-number scales (1–4)
+  const rounded = Math.ceil(scale);
+  const artScale = Math.min(Math.max(rounded, 1), 4);
+
+  const resultImg = document.getElementById("resultImg");
+
+  // 1. Fetch the image from the <img> element's src
+  const imgResponse = await fetch(art.src);
+  const imgBlob = await imgResponse.blob();
+
+  // 2. Build multipart/form-data for FastAPI
+  const formData = new FormData();
+  formData.append("image", imgBlob, "input.png");
+
+  // formData.append("model", "ultramix_balanced");
+  formData.append("scale", artScale);
+
+  // 3. Send to your local server
+  const upscaleResponse = await fetch("http://localhost:3119/upscayl", {
+    method: "POST",
+    body: formData
+  });
+
+  if (!upscaleResponse.ok) {
+    notify("Upscale failed!");
+    return;
+  } else {
+  	notify(`Upscaled art ${artScale}x successfullly!`);
+  }
+
+  // 4. Convert response to a blob
+  const upscaledBlob = await upscaleResponse.blob();
+
+  const url = URL.createObjectURL(upscaledBlob);
+  uploadArt(url, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");
+}
 function artEdited() {
 	card.artSource = art.src;
 	card.artX = document.querySelector('#art-x').value / card.width;
@@ -6140,8 +6196,8 @@ function parseStationCard(oracleText) {
     };
 }
 
-function changeCardIndex() {
-	let cardToImport = scryfallCard[document.querySelector('#import-index').value];
+async function changeCardIndex() {
+	var cardToImport = scryfallCard[document.querySelector('#import-index').value];
 	// Add debug logging for card Layout detection
 	console.log('Card layout:', cardToImport.layout);
 	console.log('Card version:', card.version);
@@ -7106,6 +7162,12 @@ async function imageLocal(event, destination, otherParams) {
 	}
 	await reader.readAsDataURL(event.target.files[0]);
 }
+function imageGatherer() {
+	// const url = `https://tts-magic-booster.fly.dev/gatherercrop?set=${card.infoSet}&number=${card.infoNumber}`;
+	const url = `http://localhost:3119/gatherer-crop-upscale?set=${card.infoSet}&number=${card.infoNumber}&target_width=${card.width*card.artBounds.width}&target_height=${card.height*card.artBounds.height}`;
+	uploadArt(url, "autoFit");
+}
+
 function loadScript(scriptPath) {
 	return new Promise((resolve, reject) => {
 	var script = document.createElement('script');
@@ -7216,6 +7278,26 @@ function fetchScryfallCardByID(scryfallID, callback = console.log) {
 	} catch {
 		console.log('Scryfall API search failed.')
 	}
+}
+
+async function fetchGathererDetails(set, code) {
+  try {
+    const response = await fetch(`https://tts-magic-booster.fly.dev/gatherer/${set}/${code}`);
+
+    if (response.status === 404) {
+      notify(`No card found from Gatherer for "${set}" "${code}".`, 5);
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (err) {
+    console.log("Gatherer search failed.", err);
+    return null;
+  }
 }
 
 function fetchScryfallCardByCodeNumber(code, number, callback = console.log) {
