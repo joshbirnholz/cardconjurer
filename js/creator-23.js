@@ -5538,7 +5538,7 @@ function downloadCard(alt = false, jpeg = false) {
 		var imageName = getCardName();
 		if (jpeg) {
 			imageDataURL = cardCanvas.toDataURL('image/jpeg', 0.8);
-			imageName = imageName + '.jpeg';
+			imageName = imageName + '.jpg';
 		} else {
 			imageDataURL = cardCanvas.toDataURL('image/png');
 			imageName = imageName + '.png';
@@ -6201,7 +6201,7 @@ function changeCardIndex() {
 	// Handle Multi Faced Card Layouts
 	const multiFacedVersions = ['flip', 'split', 'fuse', 'aftermath', 'adventure', 'omen', 'room', 'battle', 'transform', 'modal', 'prepare'];
 	const isMultiFacedVersion = multiFacedVersions.some(keyword => card.version.toLowerCase().includes(keyword));
-	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure'].includes(cardToImport.layout) && isMultiFacedVersion) {
+	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure', 'omen', 'prepare'].includes(cardToImport.layout) && isMultiFacedVersion) {
 		const flipData = parseMultiFacedCards(cardToImport);
 		if (!flipData) {
 			console.error('Failed to parse Multi Faced card data');
