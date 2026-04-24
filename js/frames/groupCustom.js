@@ -70,6 +70,11 @@ loadFramePacks([
 	{name:'StoneCutter MDFC Addons', value:'StoneCutterDeluxeDFC'},
 	{name:'StoneCutter Transform Addons', value:'StoneCutterDeluxeTransformAddons'},
 
+	{name:'Adventure Time Frames', value:'disabled'},
+	{name:'Adventure Time', value:'AdventureTimeRegular'},
+	{name:'Adventure Time Enchantments', value:'AdventureTimeEnchantments'},
+	{name:'Adventure Time Snow', value:'AdventureTimeSnow'},
+
 	{name:'Showcase Frame Varients', value:'disabled'},
 	{name:'Short Neon (NEO)', value:'NEONeonShort'},
 	{name:'Colored Golden Age (SNC)', value:'SNCGildedColored'},

@@ -24,7 +24,8 @@ loadFramePacks([
 	{name:'Invocation Margins', value:'MarginInvocation'},
 	{name:'Accurate Frame Margins', value:'MarginNew'},
 	{name:'Custom Margins', value:'disabled'},
-	{name:'Celid\'s Asap Margins', value:'CustomMarginCelidAsap'}
+	{name:'Celid\'s Asap Margins', value:'CustomMarginCelidAsap'},
+	{name:'Adventure Time Margins', value:'MarginAdventureTime'}
 ])
 
 //For multiple Margin packs
