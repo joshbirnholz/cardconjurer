@@ -188,6 +188,68 @@ var lastMaskClick = null;
 //for imports
 var scryfallArt;
 var scryfallCard;
+var defaultImportApiBaseUrl = 'https://api.scryfall.com/';
+
+function isImportApiBaseUrlEnabled() {
+	var importApiEnabledInput = document.querySelector('#import-api-base-url-enabled');
+	return importApiEnabledInput && importApiEnabledInput.checked;
+}
+
+function getImportApiBaseUrl() {
+	if (!isImportApiBaseUrlEnabled()) {
+		return defaultImportApiBaseUrl;
+	}
+
+	var importApiInput = document.querySelector('#import-api-base-url');
+	if (!importApiInput) {
+		return defaultImportApiBaseUrl;
+	}
+
+	var configuredBaseUrl = importApiInput.value.trim();
+	if (configuredBaseUrl == '') {
+		return defaultImportApiBaseUrl;
+	}
+
+	if (!configuredBaseUrl.endsWith('/')) {
+		configuredBaseUrl += '/';
+	}
+	return configuredBaseUrl;
+}
+
+function buildImportApiUrl(endpoint) {
+	var normalizedEndpoint = endpoint.replace(/^\/+/, '');
+	return new URL(normalizedEndpoint, getImportApiBaseUrl()).toString();
+}
+
+function saveImportApiBaseUrl() {
+	var importApiInput = document.querySelector('#import-api-base-url');
+	if (!importApiInput) {
+		return;
+	}
+	localStorage.setItem('importApiBaseUrl', importApiInput.value.trim());
+}
+
+function saveImportApiBaseUrlEnabled() {
+	var importApiEnabledInput = document.querySelector('#import-api-base-url-enabled');
+	if (!importApiEnabledInput) {
+		return;
+	}
+	localStorage.setItem('importApiBaseUrlEnabled', importApiEnabledInput.checked ? 'true' : 'false');
+}
+
+function updateImportApiBaseUrlState() {
+	var importApiInput = document.querySelector('#import-api-base-url');
+	if (!importApiInput) {
+		return;
+	}
+	importApiInput.disabled = !isImportApiBaseUrlEnabled();
+}
+
+function handleImportApiBaseUrlEnabledChange() {
+	saveImportApiBaseUrlEnabled();
+	updateImportApiBaseUrlState();
+	importChanged();
+}
 //for text
 var drawTextBetweenFrames = false;
 var redrawFrames = false;
@@ -4490,7 +4552,7 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 				}
 			}
 		}
-		setXhttp.open('GET', "https://api.scryfall.com/sets/" + cardToImport.set, true);
+		setXhttp.open('GET', buildImportApiUrl('sets/' + cardToImport.set), true);
 		try {
 			setXhttp.send();
 		} catch {
@@ -4899,7 +4961,7 @@ function fetchScryfallCardByID(scryfallID, callback = console.log) {
 			notify(`No card found for "${cardName}" in ${cardLanguageSelect.options[cardLanguageSelect.selectedIndex].text}.`, 5);
 		}
 	}
-	xhttp.open('GET', 'https://api.scryfall.com/cards/' + scryfallID, true);
+	xhttp.open('GET', buildImportApiUrl('cards/' + scryfallID), true);
 	try {
 		xhttp.send();
 	} catch {
@@ -4941,7 +5003,7 @@ function fetchScryfallCardByCodeNumber(code, number, callback = console.log) {
 			notify('No card found for ' + code + ' #' + number, 5);
 		}
 	}
-	xhttp.open('GET', 'https://api.scryfall.com/cards/' + code + '/' + number, true);
+	xhttp.open('GET', buildImportApiUrl('cards/' + code + '/' + number), true);
 	try {
 		xhttp.send();
 	} catch {
@@ -4970,7 +5032,7 @@ function fetchScryfallData(cardName, callback = console.log, unique = '') {
 	if (unique) {
 		uniqueArt = '&unique=' + unique;
 	}
-	var url = `https://api.scryfall.com/cards/search?order=released&include_extras=true${uniqueArt}&q=name%3D${cardName.replace(/ /g, '_')}%20${cardLanguage}`;
+	var url = `${buildImportApiUrl('cards/search')}?order=released&include_extras=true${uniqueArt}&q=name%3D${cardName.replace(/ /g, '_')}%20${cardLanguage}`;
 	xhttp.open('GET', url, true);
 	try {
 		xhttp.send();
@@ -5063,6 +5125,14 @@ if (!localStorage.getItem('autoFit')) {
 } else {
 	document.querySelector('#art-update-autofit').checked = localStorage.getItem('autoFit');
 }
+
+if (document.querySelector('#import-api-base-url')) {
+	document.querySelector('#import-api-base-url').value = localStorage.getItem('importApiBaseUrl') || '';
+}
+if (document.querySelector('#import-api-base-url-enabled')) {
+	document.querySelector('#import-api-base-url-enabled').checked = localStorage.getItem('importApiBaseUrlEnabled') == 'true';
+}
+updateImportApiBaseUrlState();
 
 // lock set symbol code (user defaults)
 if (!localStorage.getItem('lockSetSymbolCode')) {

@@ -668,6 +668,12 @@
 						<div class='readable-background margin-bottom padding'>
 							<h5 class='padding margin-bottom input-description'>Import a real card by name</h5>
 							<input id='import-name' class='input margin-bottom' type='text' onchange='importChanged();' placeholder='Enter Card Name'>
+							<label class='checkbox-container input margin-bottom'>Use alternate base API URL for imports
+								<input id='import-api-base-url-enabled' type='checkbox' onchange='handleImportApiBaseUrlEnabledChange();'>
+								<span class='checkmark'></span>
+							</label>
+							<h5 class='padding margin-bottom input-description'>Alternate base API URL</h5>
+							<input id='import-api-base-url' class='input margin-bottom' type='text' onchange='saveImportApiBaseUrl(); importChanged();' placeholder='https://api.scryfall.com/' aria-label='Alternate base API URL for imports'>
 							<label class='checkbox-container input margin-bottom'>Include all unique prints as options
 								<input id='importAllPrints' type='checkbox' onchange="importChanged();">
 								<span class='checkmark'></span>
