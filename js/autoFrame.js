@@ -1248,22 +1248,23 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 	// ----------------------------------------------------------------
 	// Determine which style variant to use (regular, Nyx, snow, etc.)
 	var style = 'regular';
+	const isNyxEnchantment = type_line.toLowerCase().includes('enchantment creature') || 
+		type_line.toLowerCase().includes('enchantment artifact') || 
+		(document.querySelector('#autoframe-always-nyx').checked && type_line.toLowerCase().includes('enchantment'));
 	
 	// Universes Beyond and UBNew have special Nyx handling
 	if (frameType === 'UB' || frameType === 'UBNew') {
 		style = false;
-		if (type_line.toLowerCase().includes('enchantment creature') || 
-			type_line.toLowerCase().includes('enchantment artifact') || 
-			(document.querySelector('#autoframe-always-nyx').checked && type_line.toLowerCase().includes('enchantment'))) {
+		if (isNyxEnchantment) {
 			style = 'Nyx';
 		}
+	} else if (frameType === '8th' && isNyxEnchantment) {
+		style = 'Nyx';
 	} else if (frameType !== 'Seventh' && frameType !== '8th' && frameType !== 'Borderless' && frameType !== 'BorderlessUB') {
 		// Standard frames can be snow or Nyx
 		if (type_line.toLowerCase().includes('snow')) {
 			style = 'snow';
-		} else if (type_line.toLowerCase().includes('enchantment creature') || 
-				   type_line.toLowerCase().includes('enchantment artifact') || 
-				   (document.querySelector('#autoframe-always-nyx').checked && type_line.toLowerCase().includes('enchantment'))) {
+		} else if (isNyxEnchantment) {
 			style = 'Nyx';
 		}
 	}
