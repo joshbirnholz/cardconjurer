@@ -235,6 +235,16 @@ function getFrameTypeConfig(frameType) {
 			supportsStamp: false,
 			filterFrames: (frame) => frame.name.includes('Extension')
 		},
+
+		// Adventure Time frame
+		'AdventureTime': {
+			group: 'Custom',
+			makeFrameFunction: makeAdventureTimeFrameByLetter,
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			filterFrames: (frame) => frame.name.includes('Extension')
+		},
 		
 		// Omen frame
 		'Omen': {
@@ -841,6 +851,52 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
+		'AdventureTime': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventuretime/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {x: 0, y: 0, width: 1, height: 521/2814},
+				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
+			},
+			crownMasks: [
+				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
+				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
+			],
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				let styleFolder = 'regular';
+				if (style === 'snow') styleFolder = 'snow';
+				else if (style === 'Nyx') styleFolder = 'enchantment';
+
+				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				// Enchantment and snow don't have land/artifact/vehicle variants - fall back to regular
+				const noSpecialVariant = ['l', 'a', 'v'].includes(colorLetter);
+				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
+				return `${baseFolder}/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'maskPinline.png',
+					'Title': 'title.png',
+					'Type': 'type.png',
+					'Rules': 'maskRules.png',
+					'Frame': 'maskFrame.png',
+					'Border': 'maskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (mask === 'PT' && letter === 'C') {
+					return 'L';
+				}
+				if (letter.includes('L') && letter.length > 1) {
+					return letter[0];
+				}
+				return letter;
+			}
+		},
 		'Omen': {
 			frameNames: standardFrameNames,
 			basePath: '/img/frames/omen/',
@@ -1018,6 +1074,9 @@ function makeFrameByLetterUnified(frameType, letter, mask = false, maskToRightHa
 			'masks': [],
 			'bounds': config.bounds.crown
 		};
+		if (config.crownMasks) {
+			frame.masks.push(...config.crownMasks);
+		}
 		if (maskToRightHalf) {
 			frame.masks.push({'src': '/img/frames/maskRightHalf.png', 'name': 'Right Half'});
 		}
@@ -1234,6 +1293,10 @@ function makeAdventureFrameByLetter(letter, mask = false, maskToRightHalf = fals
 	return makeFrameByLetterUnified('Adventure', letter, mask, maskToRightHalf, style);
 }
 
+function makeAdventureTimeFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('AdventureTime', letter, mask, maskToRightHalf, style);
+}
+
 function makeOmenFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
 	return makeFrameByLetterUnified('Omen', letter, mask, maskToRightHalf, style);
 }
@@ -1327,12 +1390,103 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 	}
 
 	// ----------------------------------------------------------------
+	// ADVENTURE TIME: COLORLESS FRAME OVERRIDE
+	// ----------------------------------------------------------------
+	// cardFrameProperties assigns 'L' to colorless non-artifact cards, but for Adventure Time:
+	// - Colorless non-land cards (including colorless enchantments) should use C frame
+	// - Only actual lands should use the L frame
+	if (frameType === 'AdventureTime' && colors.length === 0 && properties.frame === 'L' &&
+		!type_line.toLowerCase().includes('land')) {
+		properties.frame = 'C';
+		properties.rules = 'C';
+		properties.pinline = 'C';
+		properties.typeTitle = 'C';
+	}
+
+	// ----------------------------------------------------------------
 	// FRAME LAYER BUILDING
 	// ----------------------------------------------------------------
 	// Build frames in Z-order (bottom to top). Each layer is added to the frames array.
 	
 	// LEGENDARY CROWNS (if legendary creature/planeswalker)
 	if (config.supportsCrown && type_line.toLowerCase().includes('legendary')) {
+		if (frameType === 'AdventureTime') {
+			const isVehicleType = type_line.toLowerCase().includes('vehicle');
+			const isArtifactType = type_line.toLowerCase().includes('artifact');
+			const isLandType = type_line.toLowerCase().includes('land');
+			const isSpecialBaseCrownStyle = isVehicleType || isArtifactType || isLandType;
+			const baseCrownLetter = isVehicleType ? 'V' : (isArtifactType ? 'A' : (isLandType ? 'L' : properties.frame));
+
+			if (isSpecialBaseCrownStyle) {
+				// Colored artifact/vehicle/land crowns: color pinline crown(s) over base frame crown mask.
+				if (properties.pinlineRight) {
+					let rightPinlineCrown = config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style);
+					if (rightPinlineCrown) {
+						rightPinlineCrown.masks = rightPinlineCrown.masks.filter(mask => ['Pinline', 'Right Half'].includes(mask.name));
+						frames.push(rightPinlineCrown);
+					}
+
+					let leftPinlineCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
+					if (leftPinlineCrown) {
+						leftPinlineCrown.masks = leftPinlineCrown.masks.filter(mask => mask.name === 'Pinline');
+						frames.push(leftPinlineCrown);
+					}
+				} else {
+					let monoPinlineCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
+					if (monoPinlineCrown) {
+						monoPinlineCrown.masks = monoPinlineCrown.masks.filter(mask => mask.name === 'Pinline');
+						frames.push(monoPinlineCrown);
+					}
+				}
+
+				let frameMaskCrown = config.makeFrameFunction(baseCrownLetter, 'Crown', false, style);
+				if (frameMaskCrown) {
+					frameMaskCrown.masks = frameMaskCrown.masks.filter(mask => mask.name === 'Frame');
+					frames.push(frameMaskCrown);
+				}
+			} else if (properties.pinlineRight) {
+				if (properties.frameRight) {
+					// Hybrid non-artifact: split crowns only.
+					let rightCrown = config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style);
+					if (rightCrown) {
+						rightCrown.masks = rightCrown.masks.filter(mask => mask.name === 'Right Half');
+						frames.push(rightCrown);
+					}
+
+					let leftCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
+					if (leftCrown) {
+						leftCrown.masks = [];
+						frames.push(leftCrown);
+					}
+				} else {
+					// Gold non-artifact: split pinline crowns + multicolor crown frame mask layer.
+					let rightPinlineCrown = config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style);
+					if (rightPinlineCrown) {
+						rightPinlineCrown.masks = rightPinlineCrown.masks.filter(mask => ['Pinline', 'Right Half'].includes(mask.name));
+						frames.push(rightPinlineCrown);
+					}
+
+					let leftPinlineCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
+					if (leftPinlineCrown) {
+						leftPinlineCrown.masks = leftPinlineCrown.masks.filter(mask => mask.name === 'Pinline');
+						frames.push(leftPinlineCrown);
+					}
+
+					let frameMaskCrown = config.makeFrameFunction(properties.frame, 'Crown', false, style);
+					if (frameMaskCrown) {
+						frameMaskCrown.masks = frameMaskCrown.masks.filter(mask => mask.name === 'Frame');
+						frames.push(frameMaskCrown);
+					}
+				}
+			} else {
+				// Monocolor non-artifact: full crown layer.
+				let fullCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
+				if (fullCrown) {
+					fullCrown.masks = [];
+					frames.push(fullCrown);
+				}
+			}
+		} else {
 		// Add inner Nyx starfield crowns for enchantments
 		if (style === 'Nyx') {
 			if (properties.pinlineRight) {
@@ -1358,13 +1512,14 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 		}
 		
 		// Crown border cover hides the border under the crown (not used for Vault)
-		if (frameType !== 'Vault') {
+		if (frameType !== 'Vault' && frameType !== 'AdventureTime') {
 			let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
 			// Only Borderless uses erase blend mode to cut through layers below
 			if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
 				crownBorderCover.erase = true;
 			}
 			frames.push(crownBorderCover);
+		}
 		}
 	}
 	
@@ -1696,8 +1851,13 @@ function autoFrame() {
 		autoFrameUnified(frame, colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
 		
 		// Load the appropriate frame pack script if not already loaded
-		// BorderlessUB uses the Borderless pack
-		var packFrame = (frame == 'BorderlessUB') ? 'Borderless' : frame;
+		// BorderlessUB uses the Borderless pack; AdventureTime uses the regular AdventureTime pack.
+		var packFrame = frame;
+		if (frame == 'BorderlessUB') {
+			packFrame = 'Borderless';
+		} else if (frame == 'AdventureTime') {
+			packFrame = 'AdventureTimeRegular';
+		}
 		
 		if (autoFramePack != packFrame) {
 			loadScript('/js/frames/pack' + packFrame + '.js');
