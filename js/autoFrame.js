@@ -244,6 +244,16 @@ function getFrameTypeConfig(frameType) {
 			supportsPT: true,
 			supportsStamp: false,
 			filterFrames: (frame) => frame.name.includes('Extension')
+		},
+
+		// Prepare frame
+		'Prepare': {
+			group: 'Standard-3',
+			makeFrameFunction: makePrepareFrameByLetter,
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			filterFrames: (frame) => frame.name.includes('Extension')
 		}
 	};
 	
@@ -867,6 +877,7 @@ function getFrameLetterConfig(frameType) {
 					'Rules (Right Half)': 'regular/rulesRight.png',
 					'Omen': 'regular/omen.png',
 					'Omen (Right Half)': 'regular/omenRight.png',
+					'Omen Type/Title': 'regular/omenTypeTitle.png',
 					'Border': '../m15/regular/m15MaskBorder.png'
 				};
 				return maskMap[mask] || null;
@@ -877,6 +888,48 @@ function getFrameLetterConfig(frameType) {
 					return letter[0];
 				}
 				// For vehicles, use artifact
+				if (letter === 'V') return 'A';
+				return letter;
+			}
+		},
+		'Prepare': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/prepare/',
+			supportsCrown: true,
+			supportsPT: true,
+			supportsStamp: false,
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				pt: {x: 0.7573, y: 0.8848, width: 0.188, height: 0.0733}
+			},
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				if (mask === 'Crown') return `../m15/crowns/m15Crown${letter}.png`;  // Use M15 crowns
+				if (mask === 'PT') return `../m15/regular/m15PT${letter}.png`;  // Use M15 PT boxes
+				if (style === 'nyx') return `nyx/${colorLetter}.png`;
+				return `regular/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'regular/pinline.png',
+					'Title': '../m15/regular/m15MaskTitle.png',
+					'Type': '../m15/regular/m15MaskType.png',
+					'Rules': 'regular/rules.png',
+					'Frame': 'regular/frame.png',
+					'Rules (Right Half)': 'regular/rulesRight.png',
+					'Prepare Spell': 'regular/prepare.png',
+					'Prepare Spell (Right Half)': 'regular/prepareRight.png',
+					'Prepare Spell Pinline': 'regular/preparePinline.png',
+					'Prepare Spell Type/Title': 'regular/prepareTypeTitle.png',
+					'Border': '../m15/regular/m15MaskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (letter.includes('L') && letter.length > 1 && mask) {
+					return letter[0];
+				}
 				if (letter === 'V') return 'A';
 				return letter;
 			}
@@ -1185,6 +1238,10 @@ function makeOmenFrameByLetter(letter, mask = false, maskToRightHalf = false, st
 	return makeFrameByLetterUnified('Omen', letter, mask, maskToRightHalf, style);
 }
 
+function makePrepareFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('Prepare', letter, mask, maskToRightHalf, style);
+}
+
 
 // ============================================================================
 // SECTION 5: AUTO FRAME ORCHESTRATION
@@ -1418,15 +1475,15 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 		if (frameType === 'Omen') {
 			// Detect omen cost colors from card.text.mana2 (omen mana cost)
 			let omenColors = [];
+			let isHybridOmen = false;
 			if (card.text.mana2 && card.text.mana2.text) {
 				let manaText = card.text.mana2.text.toUpperCase();
+				isHybridOmen = manaText.includes('/');
 				
-				// For hybrid mana (contains /), only use the second color
+				// For hybrid mana (contains /), keep all detected colors from the hybrid symbols
 				if (manaText.includes('/')) {
-					// Extract all colors from hybrid symbols like {G/W}, then use the second one
 					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
-					if (colors.length >= 2) omenColors = [colors[1]];
-					else if (colors.length === 1) omenColors = [colors[0]]; // fallback
+					omenColors = [...new Set(colors)];
 				} else {
 					// For non-hybrid mana, extract all unique colors
 					omenColors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
@@ -1443,13 +1500,65 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 				// Single color omen: use Omen mask with that color
 				let omen = config.makeFrameFunction(omenColors[0], 'Omen', false, style);
 				if (omen) frames.push(omen);
+				if (isHybridOmen) {
+					let omenTypeTitle = config.makeFrameFunction('L', 'Omen Type/Title', false, style);
+					if (omenTypeTitle) frames.push(omenTypeTitle);
+				}
 			} else if (omenColors.length >= 2) {
 				// Multicolor omen: right half first, then base color on top
+				let omenTypeTitleColor = (isHybridOmen && omenColors.length === 2) ? 'L' : 'M';
+				let omenTypeTitle = config.makeFrameFunction(omenTypeTitleColor, 'Omen Type/Title', false, style);
+				if (omenTypeTitle) frames.push(omenTypeTitle);
+
 				let omenRight = config.makeFrameFunction(omenColors[1], 'Omen (Right Half)', false, style);
 				if (omenRight) frames.push(omenRight);
+				
 				let omen = config.makeFrameFunction(omenColors[0], 'Omen', false, style);
 				if (omen) frames.push(omen);
 			}
+		}
+
+		// PREPARE SPECIAL HANDLING - Prepare masks for prepare side
+		if (frameType === 'Prepare') {
+			let prepareColors = [];
+			let isHybridPrepare = false;
+			if (card.text.mana2 && card.text.mana2.text) {
+				let manaText = card.text.mana2.text.toUpperCase();
+				isHybridPrepare = manaText.includes('/');
+
+				if (manaText.includes('/')) {
+					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
+					prepareColors = [...new Set(colors)];
+				} else {
+					prepareColors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+				}
+			}
+
+			if (prepareColors.length === 0) {
+				prepareColors = ['A'];
+			}
+
+			if (prepareColors.length === 1) {
+				let prepare = config.makeFrameFunction(prepareColors[0], 'Prepare Spell', false, style);
+				if (prepare) frames.push(prepare);
+				if (isHybridPrepare) {
+					let prepareTypeTitle = config.makeFrameFunction('L', 'Prepare Spell Type/Title', false, style);
+					if (prepareTypeTitle) frames.push(prepareTypeTitle);
+				}
+			} else if (prepareColors.length >= 2) {
+				let prepareTypeTitleColor = (isHybridPrepare && prepareColors.length === 2) ? 'L' : 'M';
+				let prepareTypeTitle = config.makeFrameFunction(prepareTypeTitleColor, 'Prepare Spell Type/Title', false, style);
+				if (prepareTypeTitle) frames.push(prepareTypeTitle);
+
+				let prepareRight = config.makeFrameFunction(prepareColors[1], 'Prepare Spell (Right Half)', false, style);
+				if (prepareRight) frames.push(prepareRight);
+
+				let prepare = config.makeFrameFunction(prepareColors[0], 'Prepare Spell', false, style);
+				if (prepare) frames.push(prepare);
+			}
+
+			let preparePinline = config.makeFrameFunction(prepareColors[0], 'Prepare Spell Pinline', false, style);
+			if (preparePinline) frames.push(preparePinline);
 		}
 		
 		if (properties.pinlineRight) {
