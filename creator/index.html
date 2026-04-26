@@ -96,6 +96,16 @@
 		<div class='creator-grid margin-bottom-large'>
 			<canvas class='creator-canvas box-shadow' id='previewCanvas' width='1005' height='1407'></canvas>
 			<div class='creator-menu box-shadow'>
+				<div class="readable-background margin-bottom padding">
+					<h5 class="padding margin-bottom input-description">Manage Your Cards</h5>
+					<div class="split-grid" style="grid-template-columns: max-content 1fr max-content; align-items: center; gap: 5px;">
+						<button class="input" style="width: auto; padding: 0 5px;" onclick="saveCard();">Save Card</button>
+						<select id="load-card-options" class="input" style="width: 100%;" onchange="loadCard(this.value);">
+							<option selected="selected" disabled="">None selected</option>
+						</select>
+						<button class="input" style="width: auto; padding: 0 5px;" onclick="deleteCard();">Delete Card</button>
+					</div>
+				</div>				
 				<div id='creator-menu-tabs' class='creator-menu-tabs'>
 					<h3 class='selectable readable-background selected' onclick='toggleCreatorTabs(event, "frame")'>Frame</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "text")'>Text</h3>
@@ -661,14 +671,6 @@
 								<option value="zht">Traditional Chinese</option>
 								<option value="ph">Phyrexian</option>
 							</select>
-						</div>
-						<div class='readable-background margin-bottom padding'>
-							<h5 class='padding margin-bottom input-description'>Save your current card</h5>
-							<button class='input margin-bottom' onclick='saveCard();'>Save Card</button>
-							<h5 class='padding margin-bottom input-description'>Load a saved card</h5>
-							<select id='load-card-options' class='input margin-bottom' type='text' onchange='loadCard(this.value);'></select>
-							<h5 class='padding margin-bottom input-description'>Delete selected card</h5>
-							<button class='input' onclick='deleteCard();'>Delete Card</button>
 						</div>
 						<div class='readable-background padding margin-bottom'>
 							<h5 class='padding margin-bottom input-description'>Download all saved cards</h5>

@@ -3347,6 +3347,7 @@ function textboxEditor() {
 	document.querySelector('#textbox-editor-height').onchange = (event) => {selectedTextbox.height = (event.target.value / card.height); textEdited();}
 }
 function textEdited() {
+	console.log(selectedTextIndex)
 	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
 	drawTextBuffer();
 	autoFrameBuffer();
