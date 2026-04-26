@@ -1,7 +1,7 @@
 loadFramePacks([
+	{name:'Nyx Frames', value:'SagaNyx'},
 	{name:'Regular Frames', value:'SagaRegular'},
 	{name:'Universes Beyond Frames', value:'SagaUB'},
-	{name:'Nyx Frames', value:'SagaNyx'},
 	{name:'Showcase Frames', value:'disabled'},
 	{name:'Scrolls of Middle-earth (LTR)', value:'SagaLTR'},
 	{name:'Addons', value:'disabled'},

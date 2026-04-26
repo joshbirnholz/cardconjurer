@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 595.28 595.28">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Timeshifted_2-14);
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9, .cls-10, .cls-11, .cls-12, .cls-13, .cls-14, .cls-15, .cls-16 {
+        fill-rule: evenodd;
+      }
+
+      .cls-2 {
+        fill: url(#Timeshifted_2-13);
+      }
+
+      .cls-3 {
+        fill: url(#Timeshifted_2-9);
+      }
+
+      .cls-4 {
+        fill: url(#Timeshifted_2);
+      }
+
+      .cls-17 {
+        fill: #fff;
+      }
+
+      .cls-18 {
+        fill: none;
+      }
+
+      .cls-5 {
+        fill: url(#Timeshifted_2-12);
+      }
+
+      .cls-6 {
+        fill: url(#Timeshifted_2-3);
+      }
+
+      .cls-7 {
+        fill: url(#Timeshifted_2-6);
+      }
+
+      .cls-8 {
+        fill: url(#Timeshifted_2-5);
+      }
+
+      .cls-9 {
+        fill: url(#Timeshifted_2-2);
+      }
+
+      .cls-10 {
+        fill: url(#Timeshifted_2-8);
+      }
+
+      .cls-11 {
+        fill: url(#Timeshifted_2-15);
+      }
+
+      .cls-12 {
+        fill: url(#Timeshifted_2-11);
+      }
+
+      .cls-13 {
+        fill: url(#Timeshifted_2-4);
+      }
+
+      .cls-14 {
+        fill: url(#Timeshifted_2-10);
+      }
+
+      .cls-16 {
+        fill: url(#Timeshifted_2-7);
+      }
+    </style>
+    <linearGradient id="Timeshifted_2" data-name="Timeshifted 2" x1="0" y1="718.57" x2="1" y2="718.57" gradientTransform="translate(174899.77 -21353.47) rotate(-97.15) scale(244.83 -244.83)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#612c75"/>
+      <stop offset="0" stop-color="#653179"/>
+      <stop offset=".11" stop-color="#855693"/>
+      <stop offset=".21" stop-color="#9e73a8"/>
+      <stop offset=".31" stop-color="#b088b7"/>
+      <stop offset=".41" stop-color="#bb94c0"/>
+      <stop offset=".5" stop-color="#bf99c3"/>
+      <stop offset=".59" stop-color="#bb94c0"/>
+      <stop offset=".69" stop-color="#b088b7"/>
+      <stop offset=".79" stop-color="#9e73a8"/>
+      <stop offset=".89" stop-color="#855693"/>
+      <stop offset=".99" stop-color="#653179"/>
+      <stop offset="1" stop-color="#612c75"/>
+    </linearGradient>
+    <linearGradient id="Timeshifted_2-2" data-name="Timeshifted 2" x1="0" x2="1" gradientTransform="translate(-174301.72 -21353.47) rotate(-82.85) scale(244.83)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-3" data-name="Timeshifted 2" x1="0" y1="718.64" x2="1" y2="718.64" gradientTransform="translate(123184.69 13305.37) rotate(-83.92) scale(171.98 -171.98)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-4" data-name="Timeshifted 2" x1="0" y1="718.53" x2="1" y2="718.53" gradientTransform="translate(117481.45 51425.21) rotate(-66.4) scale(177.92 -177.92)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-5" data-name="Timeshifted 2" x1="0" y1="718.52" x2="1" y2="718.52" gradientTransform="translate(-110087.32 52409.84) rotate(-115.31) scale(169.89)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-6" data-name="Timeshifted 2" x1="0" y1="718.59" x2="1" y2="718.59" gradientTransform="translate(116647.12 137666.99) rotate(-40.26) scale(250.55 -250.55)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-7" data-name="Timeshifted 2" x1="0" y1="718.59" x2="1" y2="718.59" gradientTransform="translate(-116050.34 137666.99) rotate(-139.74) scale(250.55)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-8" data-name="Timeshifted 2" x1="0" y1="718.59" x2="1" y2="718.59" gradientTransform="translate(-69663.13 -146898.03) rotate(154.5) scale(226.79 -226.79)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-9" data-name="Timeshifted 2" x1="0" y1="718.59" x2="1" y2="718.59" gradientTransform="translate(70261.18 -146898.03) rotate(25.5) scale(226.79)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-10" data-name="Timeshifted 2" x1="0" y1="718.58" x2="1" y2="718.58" gradientTransform="translate(-1005.87 68406.22) rotate(1.16) scale(127.06 -94.83)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-11" data-name="Timeshifted 2" x1="0" y1="718.58" x2="1" y2="718.58" gradientTransform="translate(1603.89 68406.22) rotate(178.84) scale(127.06 94.83)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-12" data-name="Timeshifted 2" x1="0" y1="718.54" x2="1" y2="718.54" gradientTransform="translate(90634.49 -107787.16) rotate(-140.19) scale(195.96 -195.96)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-13" data-name="Timeshifted 2" x1="0" y1="718.54" x2="1" y2="718.54" gradientTransform="translate(-90036.57 -107787.16) rotate(-39.81) scale(195.96)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-14" data-name="Timeshifted 2" x1="0" y1="718.54" x2="1" y2="718.54" gradientTransform="translate(132170.61 -77384.81) rotate(-120.58) scale(212.96 -212.96)" xlink:href="#Timeshifted_2"/>
+    <linearGradient id="Timeshifted_2-15" data-name="Timeshifted 2" x1="0" y1="718.54" x2="1" y2="718.54" gradientTransform="translate(-119235.63 -63919.33) rotate(-61.67) scale(188.8)" xlink:href="#Timeshifted_2"/>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g id="M">
+      <rect class="cls-18" width="595.28" height="595.28"/>
+      <path class="cls-15" d="M297.79,533.76s-2.38,4.75-12.18,8.9c-9.79,4.16-16.32,17.26-16.62,41.87,0,0-61.74-37.63-59.07-102.42,0,0-24.63-5.73-58.17,23.36,0,0,4.45-37.1-2.37-59.36,0,0-5.64-9.5-5.94-17.51,0,0-3.86-16.03-2.08-22.26,0,0-18.6,1.48-59.07-24.64,0,0,20.68-16.03,20.08-23.15-.59-7.12,3.86-26.42,9.5-37.4,0,0-24.64-9.9-38.59-52.54,0,0,24.34-.79,30.57-26.31,0,0-21.07-28.2-27.6-52.54,0,0-.89-10.39,36.51-21.96,0,0-25.82-50.16-24.64-71.83,0,0,26.12-17.81,75.09-7.72,0,0-1.19-22.85,17.51-69.45,0,0,40.66,21.37,70.05,64.7,0,0,24.84-64.13,47.89-82.02,0,0,25.39,23.78,47.77,82.89,0,0,17.43-33.28,69.4-65.04,0,0,16.53,35.14,17.1,68.17,0,0,42.25-9.96,76.22,8.62,0,0-.9,28.65-24.45,71.31,0,0,26.96,8.19,37.54,20.82,0,0-8.53,35.32-28.67,52.56,0,0,2.05,25.09,31.4,27.82,0,0-12.63,40.95-39.59,51.87,0,0,7.17,11.6,8.19,27.64,0,0-2.6,14.49,7.46,20.57l15.08,13.09s-33.3,24.1-58.61,24.1c0,0,.83,6.64-3.32,23.23,0,0-6.22,17.01-6.22,22.4,0,0-8.71,31.95-1.24,54.35,0,0-42.32-31.53-59.33-23.23,0,0,8.3,56.36-58.08,101.86,0,0-3.19-37.04-21.12-43.86,0,0-2.71.98-10.42-6.92Z"/>
+      <g>
+        <path class="cls-4" d="M304.7,377.56s12.47-.72,23.98-7.91c0,0,46.05,64.51,42.21,115.84-3.84,51.32-29.74,65.47-29.74,65.47,0,0-7.19-16.79-24.7-26.14,0,0-7.43-2.4-11.75-17.75v-129.51Z"/>
+        <path class="cls-9" d="M293.35,377.56s-12.47-.72-23.98-7.91c0,0-46.05,64.51-42.21,115.84,3.84,51.32,29.74,65.47,29.74,65.47,0,0,7.19-16.79,24.7-26.14,0,0,7.43-2.4,11.75-17.75v-129.51Z"/>
+        <path class="cls-6" d="M272.59,165.87s-3.23-36.23-10.76-43.76c0,0,6.23-57.39,36.83-92.9,0,0,31.32,37.3,35.98,92.54,0,0-11.84,28.7-9.68,44.12,0,0-26.9-9.33-52.37,0Z"/>
+        <path class="cls-13" d="M362.25,200.38s-10.73-16.28-27.6-28.3c0,0,4.87-79.38,71.97-126.34,0,0,40.13,110.75-44.36,154.65Z"/>
+        <path class="cls-8" d="M235.18,200.38s10.73-16.28,27.6-28.3c0,0-4.87-79.38-71.97-126.34,0,0-40.13,110.75,44.36,154.65Z"/>
+        <path class="cls-7" d="M375.39,232.89s1.92-4.16-8.2-22.01c0,0,62.46-26.87,60.68-102.62,0,0,32.12-13.29,61.57-.2,0,0-9.19,89.93-114.05,124.83"/>
+        <path class="cls-16" d="M221.39,232.89s-1.92-4.16,8.2-22.01c0,0-62.46-26.87-60.68-102.62,0,0-32.12-13.29-61.57-.2,0,0,9.19,89.93,114.05,124.83"/>
+        <path class="cls-10" d="M381.45,265.88s.19-16.99-3.17-21.84c0,0,56.29-11.98,89.18-61.61,0,0,21.83.28,34.88,12.76,0,0-27.68,80.41-120.89,70.69Z"/>
+        <path class="cls-3" d="M216.61,265.88s-.19-16.99,3.17-21.84c0,0-56.29-11.98-89.18-61.61,0,0-21.83.28-34.88,12.76,0,0,27.68,80.41,120.89,70.69Z"/>
+        <path class="cls-14" d="M421.08,275.6s33.19-3.15,56.64-27.75c0,0,7.75,25.46,24.61,31.75,0,0-14.03,26.32-32.05,28.89,0,0-8.87-13.45-49.21-32.9Z"/>
+        <path class="cls-12" d="M176.95,275.6s-33.19-3.15-56.64-27.75c0,0-7.75,25.46-24.61,31.75,0,0,14.03,26.32,32.05,28.89,0,0,8.87-13.45,49.21-32.9Z"/>
+        <path class="cls-5" d="M486.96,378.29s-17.27,12.59-38.94,10.25c0,0-5.59-41.28-80.83-62.95,0,0,10.43-8.78,11.08-49.19,0,0,79.41,12,94.63,59.44,0,0,4.39,10.83,3.22,21.96,0,0,1.17,16.69,10.83,20.5Z"/>
+        <path class="cls-2" d="M110.96,378.29s17.27,12.59,38.94,10.25c0,0,5.59-41.28,80.83-62.95,0,0-10.43-8.78-11.08-49.19,0,0-79.41,12-94.63,59.44,0,0-4.39,10.83-3.22,21.96,0,0-1.17,16.69-10.83,20.5Z"/>
+        <path class="cls-1" d="M427.08,472.96s-19.81-12.98-46.45-7.13c0,0-3.23-50.67-42.17-102.56,0,0,19.34-13.97,22.65-26.95,0,0,65.15,17.31,73.04,49.88,0,0,9.42,17.31,1.02,49.12,0,0-7.26,6.6-8.09,37.64Z"/>
+        <path class="cls-11" d="M171.01,472.96s19.81-12.98,46.45-7.13c0,0,3.23-50.67,42.17-102.56,0,0-19.34-13.97-22.65-26.95,0,0-65.15,17.31-73.04,49.88,0,0-9.42,17.31-1.02,49.12,0,0,7.26,6.6,8.09,37.64Z"/>
+      </g>
+      <ellipse cx="298.28" cy="268.74" rx="84.38" ry="110.51"/>
+      <ellipse class="cls-17" cx="297.84" cy="268.96" rx="67.14" ry="93.05"/>
+    </g>
+  </g>
+</svg>

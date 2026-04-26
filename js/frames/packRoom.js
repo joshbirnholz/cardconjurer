@@ -2,6 +2,17 @@
 var masks = [{src:'/img/frames/m15/room/maskRight.png', name:'Right Half'}];
 //defines available frames
 availableFrames = [
+	{name:'White Nyx Frame', src:'/img/frames/m15/room/nyx/w.png', masks:masks},
+	{name:'Blue Nyx Frame', src:'/img/frames/m15/room/nyx/u.png', masks:masks},
+	{name:'Black Nyx Frame', src:'/img/frames/m15/room/nyx/b.png', masks:masks},
+	{name:'Red Nyx Frame', src:'/img/frames/m15/room/nyx/r.png', masks:masks},
+	{name:'Green Nyx Frame', src:'/img/frames/m15/room/nyx/g.png', masks:masks},
+	{name:'Multicolored Nyx Frame', src:'/img/frames/m15/room/nyx/m.png', masks:masks},
+	{name:'Artifact Nyx Frame', src:'/img/frames/m15/room/nyx/a.png', masks:masks},
+
+	{name:'Holo Stamp', src: '/img/frames/m15/room/stamp.png', bounds:{x:883/2010, y:2558/2814, width:240/2010, height:107/2814}},
+
+	
 	{name:'White Frame', src:'/img/frames/m15/room/w.png', masks:masks},
 	{name:'Blue Frame', src:'/img/frames/m15/room/u.png', masks:masks},
 	{name:'Black Frame', src:'/img/frames/m15/room/b.png', masks:masks},
@@ -10,16 +21,6 @@ availableFrames = [
 	{name:'Multicolored Frame', src:'/img/frames/m15/room/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/room/a.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/room/l.png', masks:masks},
-
-	{name:'Holo Stamp', src: '/img/frames/m15/room/stamp.png', bounds:{x:883/2010, y:2558/2814, width:240/2010, height:107/2814}},
-
-	{name:'White Nyx Frame', src:'/img/frames/m15/room/nyx/w.png', masks:masks},
-	{name:'Blue Nyx Frame', src:'/img/frames/m15/room/nyx/u.png', masks:masks},
-	{name:'Black Nyx Frame', src:'/img/frames/m15/room/nyx/b.png', masks:masks},
-	{name:'Red Nyx Frame', src:'/img/frames/m15/room/nyx/r.png', masks:masks},
-	{name:'Green Nyx Frame', src:'/img/frames/m15/room/nyx/g.png', masks:masks},
-	{name:'Multicolored Nyx Frame', src:'/img/frames/m15/room/nyx/m.png', masks:masks},
-	{name:'Artifact Nyx Frame', src:'/img/frames/m15/room/nyx/a.png', masks:masks},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;

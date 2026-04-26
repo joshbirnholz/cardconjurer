@@ -18,7 +18,15 @@ availableFrames = [
 	{name:'Green Power/Toughness', src:'/img/frames/m15/regular/m15PTG.png', bounds:bounds},
 	{name:'Multicolored Power/Toughness', src:'/img/frames/m15/regular/m15PTM.png', bounds:bounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/m15/regular/m15PTA.png', bounds:bounds},
-	{name:'Land Power/Toughness', src:'/img/frames/m15/regular/m15PTC.png', bounds:bounds}
+	{name:'Land Power/Toughness', src:'/img/frames/m15/regular/m15PTC.png', bounds:bounds},
+
+	{name:'White Enchantment Frame', src:'/img/frames/adventure/nyx/w.png', masks:masks},
+	{name:'Blue Enchantment Frame', src:'/img/frames/adventure/nyx/u.png', masks:masks},
+	{name:'Black Enchantment Frame', src:'/img/frames/adventure/nyx/b.png', masks:masks},
+	{name:'Red Enchantment Frame', src:'/img/frames/adventure/nyx/r.png', masks:masks},
+	{name:'Green Enchantment Frame', src:'/img/frames/adventure/nyx/g.png', masks:masks},
+	{name:'Multicolored Enchantment Frame', src:'/img/frames/adventure/nyx/m.png', masks:masks},
+	{name:'Artifact Enchantment Frame', src:'/img/frames/adventure/nyx/a.png', masks:masks},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;

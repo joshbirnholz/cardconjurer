@@ -2,9 +2,9 @@
 if (!loadedVersions.includes('/js/frames/versionQRCode.js')) {
 	loadedVersions.push('/js/frames/versionQRCode.js');
 	card.qrCode = {
-		x:0.35,
-		y:0.7224,
-		size:0.2143,
+		x:0.36,
+		y:0.73,
+		size:0.20,
 		fgColor:'#fff',
 		fgAlpha:1,
 		bgColor:'#000',

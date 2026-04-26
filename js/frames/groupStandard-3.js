@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Regular Frames', value:'M15Regular-1'},
+	{name:'Enchantment Frames (Nyx)', value:'M15Nyx'},
 	{name:'Addons', value:'disabled'},
 	{name:'Legend Crowns', value:'M15LegendCrowns'},
 	{name:'Floating Legend Crowns', value:'M15LegendCrownsFloating'},
@@ -13,6 +14,7 @@ loadFramePacks([
 	{name:'"The List" Stamp', value:'TheList'},
 	{name:'Other Frames', value:'disabled'},
 	{name:'Lands', value:'M15Lands'},
+	{name:'Omens (Tarkir Dragonstorm)', value:'Omen'},
 	{name:'Rooms (Duskmourn)', value:'Room'},
 	{name:'Spree (Outlaws of Thunder Junction)', value:'Spree'},
 	{name:'Cases (Murders at Karlov Manor)', value:'Case'},
@@ -23,7 +25,6 @@ loadFramePacks([
 	{name:'Class (D&D)', value:'Class'},
 	{name:'Snow (Kaldheim)', value:'M15Snow'},
 	{name:'Mutate (Ikoria)', value:'M15Mutate'},
-	{name:'Nyx (Theros)', value:'M15Nyx'},
 	{name:'Adventures (Eldraine)', value:'Adventure'},
 	{name:'Devoid (Zendikar)', value:'M15Devoid'},
 	{name:'Aftermath (Amonkhet)', value:'Aftermath'},

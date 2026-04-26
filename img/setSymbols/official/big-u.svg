@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 595.28 595.28">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-2 {
+        fill: none;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient-3);
+      }
+
+      .cls-3, .cls-4, .cls-5, .cls-6, .cls-7, .cls-8, .cls-9 {
+        fill-rule: evenodd;
+      }
+
+      .cls-4 {
+        fill: url(#linear-gradient-5);
+      }
+
+      .cls-10 {
+        fill: url(#linear-gradient-8);
+      }
+
+      .cls-5 {
+        fill: url(#linear-gradient-6);
+      }
+
+      .cls-6 {
+        fill: url(#linear-gradient-4);
+      }
+
+      .cls-8 {
+        fill: url(#linear-gradient-7);
+      }
+
+      .cls-9 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="0" y1="718.59" x2="1" y2="718.59" gradientTransform="translate(-228665.4 344794.26) rotate(33.56) scale(646.09 -575.66)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#626e77"/>
+      <stop offset=".04" stop-color="#697780"/>
+      <stop offset=".11" stop-color="#7d8e98"/>
+      <stop offset=".2" stop-color="#9eb4c0"/>
+      <stop offset=".2" stop-color="#a1b7c3"/>
+      <stop offset=".29" stop-color="#adc6d4"/>
+      <stop offset=".38" stop-color="#b5cede"/>
+      <stop offset=".5" stop-color="#b7d1e1"/>
+      <stop offset=".62" stop-color="#b5cede"/>
+      <stop offset=".71" stop-color="#adc6d4"/>
+      <stop offset=".8" stop-color="#a1b7c3"/>
+      <stop offset=".8" stop-color="#a0b6c2"/>
+      <stop offset=".85" stop-color="#8b9da8"/>
+      <stop offset=".91" stop-color="#74838d"/>
+      <stop offset=".96" stop-color="#67747d"/>
+      <stop offset="1" stop-color="#626e77"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" y1="718.59" y2="718.59" gradientTransform="translate(-228665.83 344794.42) rotate(33.56) scale(646.09 -575.66)" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-3" y1="718.44" y2="718.44" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-4" y1="718.74" y2="718.74" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-5" y1="718.43" y2="718.43" gradientTransform="translate(-228665.41 344794.26) rotate(33.56) scale(646.09 -575.66)" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-6" x1="-63.2" y1="294.14" x2="647.37" y2="294.14" gradientTransform="matrix(1,0,0,1,0,0)" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-7" y1="718.69" y2="718.69" gradientTransform="translate(-228665.41 344794.27) rotate(33.56) scale(646.09 -575.66)" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-8" y1="718.59" y2="718.59" gradientTransform="translate(-228664.78 344793.11) rotate(33.56) scale(646.09 -575.65)" xlink:href="#linear-gradient"/>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer_1">
+    <g id="U">
+      <rect class="cls-2" width="595.28" height="595.28"/>
+      <ellipse cx="317.85" cy="294.82" rx="276.36" ry="277.64"/>
+      <path class="cls-9" d="M317.66,42.78c138.45,0,250.86,112.4,250.86,250.86s-112.41,250.86-250.86,250.86-250.86-112.4-250.86-250.86S179.21,42.78,317.66,42.78ZM318.03,71.2c-123.38,0-223.55,100-223.55,223.18s100.17,223.18,223.55,223.18,223.55-100,223.55-223.18-100.17-223.18-223.55-223.18Z"/>
+      <ellipse class="cls-1" cx="318.03" cy="294.73" rx="211.48" ry="211.49"/>
+      <path class="cls-7" d="M37.53,134.65h246.81v320.22H37.01s-23.42-43.37-32.1-83.94h47.36s-11.31-32.15-10.53-80.56c.79-48.41,11.31-72.36,11.31-72.36H4.38s13.42-52.79,33.15-83.36ZM79.23,217.73c-27.42,91.02.28,153.73.28,153.73h64.84c7.27-1.7,8.62-10.49,8.62-10.49v-32.33s-16.17-7.37-17.87-33.52c-1.7-26.14,17.02-33.42,17.02-33.42v-35.74c-2.27-5.67-7.77-8.23-7.77-8.23h-65.13Z"/>
+      <path class="cls-3" d="M224.28,257.64s14.57-41.25,56.95-57.39c0,0-3.85-31.08-3.65-48.02H49.62s-18.13,33.87-20.72,47.82h115.47s19.64-.42,26.61,24.11v141.12s-3.64,22.71-25.05,25.23H28.77s7.35,26.1,20.5,46.37h229.22s-3.34-22.01,4.34-47.56c0,0-39.44-11.2-58.79-58.06-19.35-46.86.23-73.62.23-73.62Z"/>
+      <path class="cls-7" d="M281.22,201.47s.09.83-4.15-49.12c0,0,1-40.26,41.22-42.08,40.21-1.82,40.51,44.19,40.51,44.19,0,0-2.12,34.51-4.84,45.41-2.72,10.9-5.75,19.68-5.75,19.68l-16.65,38.75h-32.36s-17.47-46.15-17.98-56.83Z"/>
+      <path class="cls-7" d="M281.22,387.83s.09-.83-4.15,49.12c0,0,1,40.26,41.22,42.08,40.21,1.82,40.51-44.19,40.51-44.19,0,0-2.12-34.51-4.84-45.41-2.72-10.9-5.75-19.68-5.75-19.68l-16.65-38.75h-32.36s-17.47,46.15-17.98,56.83Z"/>
+      <path class="cls-7" d="M411.23,258.01s-.83.09,49.12-4.15c0,0,40.26,1,42.08,41.22,1.82,40.21-44.19,40.51-44.19,40.51,0,0-34.51-2.12-45.41-4.84-10.9-2.72-19.68-5.75-19.68-5.75l-38.75-16.65v-32.36s46.15-17.47,56.83-17.98Z"/>
+      <path class="cls-7" d="M225.09,258.4s.83.09-49.12-4.15c0,0-40.26,1-42.08,41.22-1.82,40.21,44.19,40.51,44.19,40.51,0,0,34.51-2.12,45.41-4.84,10.9-2.72,19.68-5.75,19.68-5.75l38.75-16.65v-32.36s-46.15-17.47-56.83-17.98Z"/>
+      <ellipse cx="318.21" cy="295.11" rx="101.4" ry="100.27"/>
+      <path class="cls-6" d="M328.55,240.3s9.38-43.82,11.24-78.89c1.86-35.07-21.7-31.97-21.7-31.97,0,0-23.47-3.09-22.03,31.56,1.44,34.66,10.76,73.46,11.57,79.43,0,0,9.48-4.17,20.92-.13Z"/>
+      <path class="cls-4" d="M328.89,348.55s9.38,43.82,11.24,78.89c1.86,35.07-21.7,31.97-21.7,31.97,0,0-23.47,3.09-22.03-31.56,1.44-34.66,10.76-73.46,11.57-79.43,0,0,9.48,4.17,20.92.13Z"/>
+      <path class="cls-5" d="M263.95,283.84s-45.26-10-80.33-11.86c-35.07-1.86-31.97,21.7-31.97,21.7,0,0-1.79,13.71,12.85,19.53,4.63,2.16,11.09,3.5,20.16,3.12,34.66-1.44,73.46-10.76,79.43-11.57,0,0-4.17-9.48-.13-20.92Z"/>
+      <path class="cls-8" d="M372.58,283.84s43.82-9.38,78.89-11.24c35.07-1.86,31.97,21.7,31.97,21.7,0,0,3.09,23.47-31.56,22.03-34.66-1.44-73.46-10.76-79.43-11.57,0,0,4.17-9.48.13-20.92Z"/>
+      <circle cx="318.29" cy="294.73" r="55.64" transform="translate(-1.69 587.63) rotate(-85.27)"/>
+      <ellipse class="cls-10" cx="317.96" cy="294.44" rx="36.74" ry="36.81"/>
+    </g>
+  </g>
+</svg>

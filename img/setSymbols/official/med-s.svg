@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="Layer_2"
+   data-name="Layer 2"
+   viewBox="0 0 1061.16 600.21999"
+   version="1.1"
+   width="1061.16"
+   height="600.21997"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs19">
+    <style
+       id="style1">
+      .cls-1 {
+        fill: url(#linear-gradient);
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4 {
+        stroke-width: 0px;
+      }
+
+      .cls-3 {
+        fill: url(#New_Gradient_Swatch_13);
+      }
+
+      .cls-4 {
+        fill: url(#New_Gradient_Swatch_13-2);
+      }
+    </style>
+    <linearGradient
+       id="linear-gradient"
+       x1="511.37"
+       y1="147.95"
+       x2="1078.04"
+       y2="147.95"
+       gradientTransform="matrix(1,0,0,-1,-264.12,448.07)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#612c75"
+         id="stop1" />
+      <stop
+         offset=".1"
+         stop-color="#7b498b"
+         id="stop2" />
+      <stop
+         offset=".18"
+         stop-color="#8c5c99"
+         id="stop3" />
+      <stop
+         offset=".22"
+         stop-color="#9567a1"
+         id="stop4" />
+      <stop
+         offset=".33"
+         stop-color="#ac82b3"
+         id="stop5" />
+      <stop
+         offset=".43"
+         stop-color="#ba93bf"
+         id="stop6" />
+      <stop
+         offset=".5"
+         stop-color="#bf99c3"
+         id="stop7" />
+      <stop
+         offset=".57"
+         stop-color="#ba93bf"
+         id="stop8" />
+      <stop
+         offset=".67"
+         stop-color="#ac82b3"
+         id="stop9" />
+      <stop
+         offset=".78"
+         stop-color="#9567a1"
+         id="stop10" />
+      <stop
+         offset=".82"
+         stop-color="#8c5c99"
+         id="stop11" />
+      <stop
+         offset=".9"
+         stop-color="#7b498b"
+         id="stop12" />
+      <stop
+         offset="1"
+         stop-color="#612c75"
+         id="stop13" />
+    </linearGradient>
+    <linearGradient
+       id="New_Gradient_Swatch_13"
+       data-name="New Gradient Swatch 13"
+       x1="312.62"
+       y1="170.62"
+       x2="637.07001"
+       y2="170.62"
+       gradientTransform="matrix(1,0,0,-1,-264.12,448.07)"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#612c75"
+         id="stop14" />
+      <stop
+         offset=".09"
+         stop-color="#6f3c80"
+         id="stop15" />
+      <stop
+         offset=".34"
+         stop-color="#91649d"
+         id="stop16" />
+      <stop
+         offset=".57"
+         stop-color="#aa81b1"
+         id="stop17" />
+      <stop
+         offset=".76"
+         stop-color="#b992be"
+         id="stop18" />
+      <stop
+         offset=".91"
+         stop-color="#bf99c3"
+         id="stop19" />
+    </linearGradient>
+    <linearGradient
+       id="New_Gradient_Swatch_13-2"
+       data-name="New Gradient Swatch 13"
+       x1="-13361.63"
+       x2="-13037.18"
+       gradientTransform="rotate(180,-6174.48,224.035)"
+       xlink:href="#New_Gradient_Swatch_13" />
+    <linearGradient
+       xlink:href="#New_Gradient_Swatch_13"
+       id="linearGradient19"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1,0,0,-1,-264.12,448.07)"
+       x1="312.62"
+       y1="170.62"
+       x2="637.07001"
+       y2="170.62" />
+  </defs>
+  <g
+     id="Layer_1-2"
+     data-name="Layer 1">
+    <g
+       id="g19">
+      <path
+         id="p1"
+         class="cls-2"
+         d="M 390.09,0 372.23,33.48 H 20.48 c 0,0 -3.84,11.65 18.91,32.13 L 146.48,162.01 0,394.57 h 113.29 l 319.77,163.73 39.53,41.92 H 588.57 L 628.1,558.3 947.87,394.57 h 113.29 L 914.69,162.01 1021.78,65.61 c 22.74,-20.48 18.91,-32.13 18.91,-32.13 H 688.94 L 671.07,0 Z" />
+      <path
+         id="p2"
+         class="cls-1"
+         d="M 406.53,23.91 249.6,313.11 c -3.52,6.49 -2.97,11.66 0.9,15.77 l 233.16,247.43 h 93.86 L 810.68,328.88 c 3.87,-4.1 4.42,-9.28 0.9,-15.77 L 654.63,23.91 Z m 124.05,23.17 c 6.99,0 2.15,116.28 30.04,234.73 6.98,0.48 13.92,1.06 20.77,1.87 19.48,-65.79 19.15,-178.3 25.71,-178.3 6.56,0 2.69,121.63 34.6,190.04 4.17,1.14 8.31,2.33 12.41,3.59 24.69,-42.35 23.82,-132.2 29.52,-132.2 6.05,0 10.48,113.26 21.52,174.19 C 627.89,362.59 553.69,437.57 530.58,547.33 507.47,437.57 433.27,362.6 356.01,341 c 11.04,-60.93 15.47,-174.19 21.52,-174.19 5.7,0 4.83,89.84 29.52,132.2 4.09,-1.26 8.24,-2.45 12.41,-3.59 31.91,-68.4 27.99,-190.04 34.6,-190.04 6.61,0 6.22,112.51 25.71,178.3 6.85,-0.81 13.8,-1.39 20.77,-1.87 27.89,-118.45 23.05,-234.73 30.04,-234.73 z"
+         style="fill:url(#linear-gradient)" />
+      <path
+         id="p3"
+         class="cls-3"
+         d="m 76.3,57.39 c -5.6,0 -2.36,5.69 -1.79,6.2 l 104.7,93.64 -128.62,205.21 c -3.62,5.77 -2.7,8.22 3.89,8.22 h 66.88 l 245.11,125.62 c 4.5,2.31 9.65,1.63 3.96,-4.41 L 215.52,327.61 359.52,57.39 Z"
+         style="fill:url(#linearGradient19)" />
+      <g
+         id="u1">
+        <path
+           id="p3-2"
+           data-name="p3"
+           class="cls-4"
+           d="m 984.86,57.39 c 5.6,0 2.36,5.69 1.79,6.2 l -104.7,93.64 128.61,205.21 c 3.62,5.77 2.7,8.22 -3.89,8.22 H 939.79 L 694.68,496.28 c -4.5,2.31 -9.65,1.63 -3.96,-4.41 L 845.63,327.61 701.64,57.39 h 283.23 z"
+           style="fill:url(#New_Gradient_Swatch_13-2)" />
+      </g>
+    </g>
+  </g>
+</svg>

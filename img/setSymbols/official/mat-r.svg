@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Generator: Adobe Illustrator 15.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg
+   version="1.1"
+   id="Layer_1"
+   x="0px"
+   y="0px"
+   width="149.99899"
+   height="150"
+   viewBox="0 0 149.99899 150"
+   enable-background="new 0 0 155 155"
+   xml:space="preserve"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs16" />
+<g
+   id="Layer_1_1_"
+   transform="translate(-2.7265,-2.83375)">
+</g>
+<g
+   id="Layer_3"
+   display="none"
+   transform="translate(-2.7265,-2.83375)">
+</g>
+<g
+   id="g16"
+   transform="translate(-2.7265,-2.83375)">
+	
+		<rect
+   x="71.433998"
+   y="71.542"
+   transform="matrix(0.7071,0.7071,-0.7071,0.7071,77.8016,-32.1627)"
+   fill="none"
+   width="12.582"
+   height="12.582"
+   id="rect1" />
+	<path
+   d="M 39.341,90.492 17.257,122.219 C -2.117,95.892 -2.117,59.777 17.257,33.45 L 39.34,65.176 26.683,77.834 Z M 77.725,26.79 90.383,39.448 122.11,17.365 C 95.784,-2.01 59.669,-2.01 33.343,17.365 l 31.726,22.083 z m 0,102.086 -12.657,-12.656 -31.726,22.084 c 26.325,19.373 62.44,19.373 88.767,0 L 90.38,116.219 Z m 60.47,-95.426 -22.084,31.727 12.656,12.656 -12.656,12.657 22.084,31.727 c 19.373,-26.325 19.375,-62.441 0,-88.767 z M 151.139,151.248 108.369,89.802 120.34,77.833 108.371,65.865 151.141,4.419 89.695,47.189 77.725,35.22 65.756,47.188 4.313,4.42 47.08,65.865 35.112,77.834 l 11.97,11.97 -42.77,61.444 61.444,-42.769 11.969,11.967 11.969,-11.969 z M 77.725,86.73 l -8.896,-8.896 8.896,-8.897 8.898,8.896 z"
+   id="path1" />
+	<linearGradient
+   id="SVGID_1_"
+   gradientUnits="userSpaceOnUse"
+   x1="28.2061"
+   y1="127.3545"
+   x2="127.2471"
+   y2="28.313499">
+		<stop
+   offset="0"
+   style="stop-color:#8D742F"
+   id="stop1" />
+		<stop
+   offset="0.0465"
+   style="stop-color:#937A35"
+   id="stop2" />
+		<stop
+   offset="0.1072"
+   style="stop-color:#A38A45"
+   id="stop3" />
+		<stop
+   offset="0.15"
+   style="stop-color:#B39A54"
+   id="stop4" />
+		<stop
+   offset="0.1754"
+   style="stop-color:#B9A059"
+   id="stop5" />
+		<stop
+   offset="0.2692"
+   style="stop-color:#CAB068"
+   id="stop6" />
+		<stop
+   offset="0.372"
+   style="stop-color:#D4BA71"
+   id="stop7" />
+		<stop
+   offset="0.5"
+   style="stop-color:#D7BD74"
+   id="stop8" />
+		<stop
+   offset="0.628"
+   style="stop-color:#D4BA71"
+   id="stop9" />
+		<stop
+   offset="0.7308"
+   style="stop-color:#CAB068"
+   id="stop10" />
+		<stop
+   offset="0.8246"
+   style="stop-color:#B9A059"
+   id="stop11" />
+		<stop
+   offset="0.85"
+   style="stop-color:#B39A54"
+   id="stop12" />
+		<stop
+   offset="0.8516"
+   style="stop-color:#B29953"
+   id="stop13" />
+		<stop
+   offset="0.9021"
+   style="stop-color:#9E853F"
+   id="stop14" />
+		<stop
+   offset="0.9519"
+   style="stop-color:#917833"
+   id="stop15" />
+		<stop
+   offset="1"
+   style="stop-color:#8D742F"
+   id="stop16" />
+	</linearGradient>
+	<path
+   fill="url(#SVGID_1_)"
+   d="M 31.6,91.18 17.462,111.492 C 5.829,90.646 5.83,65.021 17.46,44.177 L 31.599,64.489 18.253,77.834 Z m 106.392,-47.002 -14.139,20.311 13.344,13.345 -13.346,13.345 14.141,20.313 c 11.629,-20.846 11.629,-46.471 0,-67.314 z M 77.725,18.361 91.073,31.708 111.384,17.568 C 90.538,5.936 64.915,5.936 44.07,17.568 l 20.313,14.139 z m 0,118.944 L 64.381,123.961 44.068,138.1 c 20.846,11.63 46.469,11.63 67.314,0 L 91.07,123.96 Z m 34.185,-59.472 -11.281,11.281 26.617,38.24 -38.24,-26.617 -11.281,11.28 L 66.446,100.738 28.207,127.354 54.823,89.115 43.541,77.834 54.82,66.553 28.206,28.313 66.443,54.93 77.724,43.649 89.007,54.931 127.245,28.313 100.63,66.553 Z M 77.725,60.507 60.398,77.834 77.725,95.16 95.051,77.833 Z"
+   id="path16"
+   style="fill:url(#SVGID_1_)" />
+</g>
+</svg>

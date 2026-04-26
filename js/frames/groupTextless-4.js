@@ -7,6 +7,7 @@ loadFramePacks([
 	{name:'Fullart Basics (THB)', value:'TextlessBasics'},
 	{name:'Fullart Basics (ZEN)', value:'ZendikarBasic-1'},
 	{name:'Fullart Snow Basics', value:'FullartBasicRoundBottom'},
+	{name:'Unfinity Basics (UNF)', value:'Unfinity'},
 	{name:'Unstable Basics (UST)', value:'Unstable'},
 	{name:'Unhinged Basics (UNH)', value:'Unhinged'},
 	{name:'Other', value:'disabled'},
