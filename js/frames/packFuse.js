@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/m15/split/fuse/top.png', name:'Top Half'}, {src:'/img/frames/m15/split/fuse/bottom.png', name:'Bottom Half'}];
+var masks = [{src:'/img/frames/m15/split/fuse/top.png', name:'Top Half'}, {src:'/img/frames/m15/split/fuse/bottom.png', name:'Bottom Half'}, {src:'/img/frames/m15/split/maskTopRight.png', name:'Top Right'}, {src:'/img/frames/m15/split/maskBottomLeft.png', name:'Bottom Left'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/m15/split/fuse/w.png', masks:masks},
