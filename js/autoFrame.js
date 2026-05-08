@@ -804,14 +804,16 @@ function getFrameLetterConfig(frameType) {
 			bounds: {
 				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
 				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
 				pt: {x: 0.7573, y: 0.8848, width: 0.188, height: 0.0733}
 			},
 			pathBuilder: (letter, mask, style) => {
 				const colorLetter = letter.toLowerCase();
 				if (mask === 'Crown') return `../m15/crowns/m15Crown${letter}.png`;  // Use M15 crowns
+				if (mask === 'Inner Crown') return `../m15/innerCrowns/m15InnerCrown${letter}${style}.png`;  // Use M15 inner crowns
 				if (mask === 'PT') return `../m15/regular/m15PT${letter}.png`;  // Use M15 PT boxes
-				// Handle Nyx style
-				if (style === 'Nyx') return `nyx/${colorLetter}.png`;
+				// Handle Nyx style - Land has no Nyx variant, fall back to regular
+				if (style === 'Nyx' && letter !== 'L') return `nyx/${colorLetter}.png`;
 				// Main frame
 				return `regular/${colorLetter}.png`;
 			},
