@@ -1316,7 +1316,7 @@ function makePrepareFrameByLetter(letter, mask = false, maskToRightHalf = false,
 // correct order. Handles special cases for different frame types.
 
 /**
- * Computes and the frame layers for a given set of card attributes.
+ * Computes the frame layers for a given set of card attributes.
  * @param {string} frameType - The frame type identifier
  * @param {Array} colors - Array of color letters detected from the card
  * @param {string} mana_cost - The mana cost string
@@ -1486,39 +1486,39 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 				}
 			}
 		} else {
-		// Add inner Nyx starfield crowns for enchantments
-		if (style === 'Nyx') {
+			// Add inner Nyx starfield crowns for enchantments
+			if (style === 'Nyx') {
+				if (properties.pinlineRight) {
+					frames.push(config.makeFrameFunction(properties.pinlineRight, 'Inner Crown', true, style));
+				}
+				frames.push(config.makeFrameFunction(properties.pinline, 'Inner Crown', false, style));
+			}
+
+			// Add the main legendary crowns (multicolor gets split left/right)
 			if (properties.pinlineRight) {
-				frames.push(config.makeFrameFunction(properties.pinlineRight, 'Inner Crown', true, style));
+				frames.push(config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style));
 			}
-			frames.push(config.makeFrameFunction(properties.pinline, 'Inner Crown', false, style));
-		}
+			frames.push(config.makeFrameFunction(properties.pinline, "Crown", false, style));
 
-		// Add the main legendary crowns (multicolor gets split left/right)
-		if (properties.pinlineRight) {
-			frames.push(config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style));
-		}
-		frames.push(config.makeFrameFunction(properties.pinline, "Crown", false, style));
-
-		// Borderless and Extended Art frames need a special crown outline layer
-		if (frameType === 'Borderless' || frameType === 'BorderlessUB' || frameType === 'M15BoxTopper' || frameType === 'M15ExtendedArtShort') {
-			frames.push({
-				'name': 'Legend Crown Outline',
-				'src': '/img/frames/m15/crowns/m15CrownFloatingOutline.png',
-				'masks': [],
-				'bounds': {x:0.028, y:0.0172, width:0.944, height:0.1062}
-			});
-		}
-
-		// Crown border cover hides the border under the crown (not used for Vault)
-		if (frameType !== 'Vault' && frameType !== 'AdventureTime') {
-			let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
-			// Only Borderless uses erase blend mode to cut through layers below
-			if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
-				crownBorderCover.erase = true;
+			// Borderless and Extended Art frames need a special crown outline layer
+			if (frameType === 'Borderless' || frameType === 'BorderlessUB' || frameType === 'M15BoxTopper' || frameType === 'M15ExtendedArtShort') {
+				frames.push({
+					'name': 'Legend Crown Outline',
+					'src': '/img/frames/m15/crowns/m15CrownFloatingOutline.png',
+					'masks': [],
+					'bounds': {x:0.028, y:0.0172, width:0.944, height:0.1062}
+				});
 			}
-			frames.push(crownBorderCover);
-		}
+
+			// Crown border cover hides the border under the crown (not used for Vault)
+			if (frameType !== 'Vault' && frameType !== 'AdventureTime') {
+				let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
+				// Only Borderless uses erase blend mode to cut through layers below
+				if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
+					crownBorderCover.erase = true;
+				}
+				frames.push(crownBorderCover);
+			}
 		}
 	}
 
