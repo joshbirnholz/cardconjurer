@@ -1450,11 +1450,21 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 				if (manaText.includes('/')) {
 					// Extract all colors from hybrid symbols like {G/W}, then use the second one
 					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
-					if (colors.length >= 2) adventureColors = [colors[1]];
-					else if (colors.length === 1) adventureColors = [colors[0]]; // fallback
+					if (colors.length > 2) {
+						adventureColors = ['M'];
+					} else if (colors.length === 1) {
+						adventureColors = [colors[0]];
+					} else {
+						adventureColors = ['L'];
+					}
 				} else {
 					// For non-hybrid mana, extract all unique colors
-					adventureColors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+					let colors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+					if (colors.length > 2) {
+						adventureColors = ['M'];
+					} else {
+						adventureColors = colors;
+					}
 				}
 			}
 			
