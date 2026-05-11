@@ -2521,7 +2521,7 @@ function artEdited() {
 	drawCard();
 }
 function autoFitArt() {
-	if (document.querySelector("#art-lock-position")?.checked) return;
+	if (document.querySelector("#art-preserve-position")?.checked) return;
 	document.querySelector('#art-rotate').value = 0;
 	if (art.width / art.height > scaleWidth(card.artBounds.width) / scaleHeight(card.artBounds.height)) {
 		document.querySelector('#art-y').value = Math.round(scaleY(card.artBounds.y) - scaleHeight(card.marginY));
@@ -2954,8 +2954,8 @@ function setAutoFrame() {
 function setAutofit() {
 	localStorage.setItem('autoFit', document.querySelector('#art-update-autofit').checked);
 }
-function setLockArtPosition() {
-  localStorage.setItem("lockArtPosition", document.querySelector("#art-lock-position").checked);
+function setPreserveArtPosition() {
+	localStorage.setItem('preserveArtPosition', document.querySelector('#art-preserve-position').checked);
 }
 function removeDefaultCollector() {
 	defaultCollector = {}; //{number: year, rarity:'P', setCode:'MTG', lang:'EN', starDot:false};
