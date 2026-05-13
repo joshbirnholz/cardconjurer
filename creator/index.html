@@ -104,6 +104,7 @@
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "watermark")'>Watermark</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "bottomInfo")'>Collector</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "import")'>Import/Save</h3>
+					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "bulk")'>Bulk</h3>
 					<h3 class='selectable readable-background' onclick='toggleCreatorTabs(event, "tutorial"); loadTutorialVideo();'>Tutorial</h3>
 				</div>
 				<div id='creator-menu-sections' class='margin-bottom'>
@@ -724,7 +725,33 @@
 							</div>
 						</div>
 					</div>
-					<div id='creator-menu-tutorial' class='hidden'>
+					<div id='creator-menu-bulk' class='hidden'>
+					<div class='readable-background padding margin-bottom'>
+						<h3 class='padding margin-bottom'>Bulk Card Rendering (Experimental)</h3>
+						<h5 class='padding margin-bottom input-description'>Select a frame</h5>
+						<div class='padding input-grid margin-bottom'>
+							<select id='scryfall-bulk-autoframe' class='input' aria-label='Automatically update frame'></select>
+						</div>
+						<h5 class='padding margin-bottom input-description'>Enter up to 75 cards, one card per line. CardConjurer will create all of your cards in the selected frame and download them as a zip file. This may take a long time, especially if you are rendering a lot of cards.</h5>
+						<textarea id='scryfall-bulk-list' class='input margin-bottom' placeholder='Lightning Bolt&#10;Black Lotus (LEA)&#10;Brainstorm (ICE) 76' style='min-height:12rem;'></textarea>
+						<div class='padding input-grid margin-bottom'>
+							<label class='checkbox-container input'>Use Nyx frame for all Enchantments (where applicable)
+								<input id='scryfall-bulk-nyx' type='checkbox' onchange='localStorage.setItem("bulk-nyx", this.checked);'>
+								<span class='checkmark'></span>
+							</label>
+						</div>
+						<div class='padding input-grid margin-bottom'>
+							<label class='checkbox-container input'>Avoid rules text overlap with Power/Toughness box
+								<input id='scryfall-bulk-avoid-overlap' type='checkbox' onchange='localStorage.setItem("bulk-avoid-overlap", this.checked);'>
+								<span class='checkmark'></span>
+							</label>
+						</div>
+						<div class='input-grid'>
+							<button class='input' onclick='startScryfallBulkDownload();'>Download All</button>
+						</div>
+					</div>
+				</div>
+				<div id='creator-menu-tutorial' class='hidden'>
 						<!-- <div class='padding readable-background margin-bottom'>
 							<h5 class='padding input-description'>This video is currently outdated, but still reflects the general process for making cards</h5>
 						</div> -->
@@ -739,41 +766,10 @@
 						</div>
 					</div>
 				</div>
-				<div class='readable-background padding margin-bottom'>
+				<div id='main-autoframe-section' class='readable-background padding margin-bottom'>
 					<h5 class='padding input-description'>Automatically update frame</h5>
 					<div class='padding input-grid'>
-						<select id="autoFrame" class="input" onchange="setAutoFrame()" aria-label="Automatically update frame">
-							<option value="false">Disabled</option>
-							<option value="M15Regular-1">Regular</option>
-							<option value="M15BoxTopper">Extended Art</option>
-							<option value="M15ExtendedArtShort">Extended Art (Shorter Textbox)</option>
-							<option value="UB">Universes Beyond</option>
-							<option value="Etched">Etched</option>
-							<option value="Borderless">Borderless (Alt)</option>
-							<option value="BorderlessUB">Borderless (Alt) (Universes Beyond)</option>
-							<option value="Praetors">Phyrexian</option>
-							<option value="8th">Eighth Edition</option>
-							<option value="Seventh">Seventh Edition</option>
-
-							<option disabled>Showcase frames</option>
-							<option value="JapanShowcase">Japan Showcase</option>
-							<option value="Vault">Vault (BIG)</option>
-							
-							<option disabled>Alternative Layouts</option>
-							<option value="Adventure">Adventure</option>
-							<option value="Omen">Omen</option>
-							<option value="Prepare">Prepare</option>
-
-							<option disabled>Redone frames</option>
-							<option value="M15RegularNew">Regular (Accurate)</option>
-							<option value="FullArtNew">Full art (Accurate)</option>
-							<option value="UBNew">Universes Beyond (Accurate)</option>
-
-							<option disabled>Custom frames</option>
-							<option value="Circuit">Circuit</option>
-							<option value="M15Eighth">M15-Eighth</option>
-							<option value="M15EighthUB">M15-Eighth Universes Beyond</option>
-						</select>
+						<select id="autoFrame" class="input" onchange="setAutoFrame()" aria-label="Automatically update frame"></select>
 
 						
 						<!-- <button class='input' onclick='autoFrame("M15");'>M15</button>
@@ -785,8 +781,14 @@
 							<span class='checkmark'></span>
 						</label>
 					</div>
+					<div class='padding input-grid'>
+						<label class='checkbox-container input'>Avoid rules text overlap with Power/Toughness box
+							<input id='autoframe-avoid-overlap' type='checkbox' onchange='setAutoframeAvoidOverlap(this.checked);'>
+							<span class='checkmark'></span>
+						</label>
+					</div>
 				</div>
-				<div class='readable-background padding'>
+				<div id='main-download-section' class='readable-background padding'>
 					<h3 class='download padding' onclick='downloadCard();'>Download your card</h3>
 					<h5 onclick='downloadCard(false, true);' id='downloadJpg' href='' target='_blank' class='padding download input-description'>Click here to download as JPEG</h5>
 					<h5 onclick='downloadCard(true);' id='downloadAlt' href='' target='_blank' class='padding download input-description'>Click here for an alternative download</h5>
@@ -978,4 +980,5 @@
 	<script defer src='/js/autoFrame.js'></script>
 	<script defer src='/js/creator-23.js'></script>
 	<script defer src='/js/frameSearch.js'></script>
+
 <!-- END OF CONTENT -->
