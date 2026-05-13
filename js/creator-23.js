@@ -396,6 +396,9 @@ function toggleCreatorTabs(event, target) {
 	Array.from(document.querySelector('#creator-menu-sections').children).forEach(element => element.classList.add('hidden'));
 	document.querySelector('#creator-menu-' + target).classList.remove('hidden');
 	selectSelectable(event);
+	const isBulk = target === 'bulk';
+	document.querySelector('#main-autoframe-section').classList.toggle('hidden', isBulk);
+	document.querySelector('#main-download-section').classList.toggle('hidden', isBulk);
 }
 function selectSelectable(event) {
 	var eventTarget = event.target.closest('.selectable');
@@ -921,6 +924,216 @@ function setAutoframeNyx(value) {
 	localStorage.setItem('autoframe-always-nyx', document.querySelector('#autoframe-always-nyx').checked);
 	setAutoFrame();
 }
+function setAutoframeAvoidOverlap(value) {
+	localStorage.setItem('autoframe-avoid-overlap', value);
+	drawText();
+}
+// Scans PT frame pixels once to find the topmost non-transparent row AND leftmost non-transparent
+// column, caching both. Returns {top, left} in normalized card coordinates, or null.
+function getPTBoxEdges() {
+	if (!card.frames) return null;
+	const ptFrame = card.frames.find(f =>
+		f.bounds && f.name && f.name.includes('Power/Toughness')
+	);
+	if (!ptFrame) return null;
+
+	if (ptFrame._ptEdgesCache && ptFrame._ptEdgesCache.src === ptFrame.src) {
+		return ptFrame._ptEdgesCache.edges;
+	}
+
+	const img = ptFrame.image;
+	if (!img || !img.complete || img.naturalWidth === 0) {
+		const edges = { top: ptFrame.bounds.y, left: ptFrame.bounds.x };
+		ptFrame._ptEdgesCache = { src: ptFrame.src, edges };
+		return edges;
+	}
+
+	const offscreen = document.createElement('canvas');
+	offscreen.width = img.naturalWidth;
+	offscreen.height = img.naturalHeight;
+	const ctx = offscreen.getContext('2d');
+	ctx.drawImage(img, 0, 0);
+	const pixels = ctx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+	const W = offscreen.width, H = offscreen.height;
+
+	let topmostRow = -1;
+	outerTop: for (let y = 0; y < H; y++) {
+		for (let x = 0; x < W; x++) {
+			if (pixels[(y * W + x) * 4 + 3] > 10) { topmostRow = y; break outerTop; }
+		}
+	}
+
+	let leftmostCol = -1;
+	outerLeft: for (let x = 0; x < W; x++) {
+		for (let y = 0; y < H; y++) {
+			if (pixels[(y * W + x) * 4 + 3] > 10) { leftmostCol = x; break outerLeft; }
+		}
+	}
+
+	const edges = {
+		top:  topmostRow < 0 ? ptFrame.bounds.y : ptFrame.bounds.y + (topmostRow / H) * ptFrame.bounds.height,
+		left: leftmostCol < 0 ? ptFrame.bounds.x : ptFrame.bounds.x + (leftmostCol / W) * ptFrame.bounds.width,
+	};
+	ptFrame._ptEdgesCache = { src: ptFrame.src, edges };
+	return edges;
+}
+function getPTBoxTop() {
+	const e = getPTBoxEdges();
+	return e ? e.top : null;
+}
+
+// Split rules text into tokens with character positions for layout simulation.
+function _tokenizeRulesText(text) {
+	const tokens = [];
+	let i = 0;
+	while (i < text.length) {
+		if (text[i] === '\n') {
+			tokens.push({ type: 'newline', charStart: i, charEnd: i + 1 });
+			i++;
+		} else if (text[i] === '{') {
+			const end = text.indexOf('}', i);
+			if (end >= 0) {
+				tokens.push({ type: 'code', text: text.slice(i, end + 1), charStart: i, charEnd: end + 1 });
+				i = end + 1;
+			} else {
+				tokens.push({ type: 'word', text: '{', charStart: i, charEnd: i + 1 });
+				i++;
+			}
+		} else if (text[i] === ' ') {
+			tokens.push({ type: 'space', charStart: i, charEnd: i + 1 });
+			i++;
+		} else {
+			const start = i;
+			while (i < text.length && text[i] !== ' ' && text[i] !== '\n' && text[i] !== '{') i++;
+			tokens.push({ type: 'word', text: text.slice(start, i), charStart: start, charEnd: i });
+		}
+	}
+	return tokens;
+}
+
+// Simulate writeText() line-wrap layout; returns {positions:[{token,x,xEnd,y,visible}], totalY}.
+// x/y are in canvas pixels relative to the paragraph content origin (0,0 = first line start).
+// xEnd is the right edge of the token. visible=true means the token renders actual glyphs.
+function _simulateTextLayout(tokens, textWidth, textSize, lineSpacing, ctx) {
+	let currentX = 0, currentY = 0;
+	let currentNLS = lineSpacing * textSize; // newLineSpacing
+	const EXTRA = textSize * 0.35; // {line} adds extra gap
+	const manaW = textSize * 0.90;
+
+	// Codes that produce NO rendered glyph (styling/position only)
+	const skipPrefixes = ['i','bold','left','center','right','indent','fixtextalign','font',
+		'up','down','shadow','ruby','elemid','outline','kerning','permashift','ptshift',
+		'arcradius','arcstart','rotate','roll','rollcolor','manacolor','fontcolor',
+		'fontsize','planechase','savex','loadx','conditionalcolor','linecap','linejoin','-'];
+
+	const positions = [];
+
+	for (const token of tokens) {
+		if (token.type === 'newline') {
+			positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+			currentX = 0; currentY += textSize + EXTRA; currentNLS = lineSpacing * textSize;
+			continue;
+		}
+		if (token.type === 'code') {
+			const code = token.text.toLowerCase().slice(1, -1);
+			if (code === 'line') {
+				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+				currentX = 0; currentY += textSize + EXTRA; currentNLS = lineSpacing * textSize;
+			} else if (code === 'lns' || code === 'linenospace') {
+				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+				currentX = 0; currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+			} else if (code === 'flavor' || code === 'oldflavor' || code === 'divider') {
+				// writeText() expands these to two line-break advances:
+				// {flavor}/{divider} → {lns}{bar}{lns}, {oldflavor} → {lns}{lns}
+				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+				currentX = 0;
+				currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+				currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+			} else if (code === 'bar') {
+				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+				currentX = 0; currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+			} else if (skipPrefixes.some(p => code.startsWith(p))) {
+				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
+			} else {
+				// Mana symbol — renders a glyph
+				if (currentX + manaW >= textWidth) {
+					currentX = 0; currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+				}
+				positions.push({ token, x: currentX, xEnd: currentX + manaW, y: currentY, visible: true });
+				currentX += manaW;
+			}
+			continue;
+		}
+		// space or word
+		if (token.type === 'space') {
+			if (currentX === 0) { positions.push({ token, x: 0, xEnd: 0, y: currentY, visible: false }); continue; }
+			const sw = ctx.measureText(' ').width;
+			positions.push({ token, x: currentX, xEnd: currentX + sw, y: currentY, visible: false });
+			currentX += sw;
+			continue;
+		}
+		const ww = ctx.measureText(token.text).width;
+		if (ww + currentX >= textWidth) {
+			currentX = 0; currentY += textSize + currentNLS; currentNLS = lineSpacing * textSize;
+		}
+		positions.push({ token, x: currentX, xEnd: currentX + ww, y: currentY, visible: true });
+		currentX += ww;
+	}
+	// Add the height of the last line so totalY matches writeText()'s currentY at the
+	// point it computes verticalAdjust (writeText flushes one extra time via its '' sentinel).
+	return { positions, totalY: currentY + textSize + currentNLS };
+}
+
+// Returns the character index in textData.text before which to insert '{lns}' to prevent the first
+// word that lands at (y >= ptTop, x >= ptLeft) from overlapping the PT box.
+// Returns null if no overlap is detected.
+function findPTOverlapInsertionIndex(textData, ptTop, ptLeft) {
+	if (!textData.text) return null;
+	const textX = scaleX(textData.x)          || scaleX(0);
+	const textY = scaleY(textData.y)          || scaleY(0);
+	const textW = scaleWidth(textData.width)   || scaleWidth(1);
+	const textH = scaleHeight(textData.height) || scaleHeight(1);
+	const lineSpacing = textData.lineSpacing || 0;
+	const fontStyle = textData.fontStyle || '';
+	const fontName  = textData.font || 'mplantin';
+
+	const savedFont = lineContext.font;
+	const tokens = _tokenizeRulesText(textData.text);
+
+	// Mirror writeText()'s outerloop: reduce font size by 1px until layout fits textH.
+	let textSize = Math.max(1, (scaleHeight(textData.size) || scaleHeight(0.038)) + parseInt(textData.fontSize || '0'));
+	while (textSize > 1) {
+		lineContext.font = fontStyle + textSize + 'px ' + fontName;
+		const { totalY } = _simulateTextLayout(tokens, textW, textSize, lineSpacing, lineContext);
+		if (totalY <= textH) break;
+		textSize--;
+	}
+	lineContext.font = fontStyle + textSize + 'px ' + fontName;
+
+	// Pass 1 – measure total layout height at the resolved font size to derive vertical centering offset.
+	const { totalY: totalY1 } = _simulateTextLayout(tokens, textW, textSize, lineSpacing, lineContext);
+	const vAdj = textData.noVerticalCenter ? 0 : Math.max(0, (textH - totalY1 + textSize * 0.15) / 2);
+
+	// Convert PT edges to pixel coords relative to the paragraph content origin.
+	const ptTopRel  = ptTop  * card.height - textY - vAdj;
+	const ptLeftRel = ptLeft * card.width  - textX;
+
+	if (ptTopRel <= 0 || ptLeftRel <= 0) { lineContext.font = savedFont; return null; }
+
+	// Pass 2 – find the first token positioned inside the PT box region.
+	const { positions } = _simulateTextLayout(tokens, textW, textSize, lineSpacing, lineContext);
+	lineContext.font = savedFont;
+
+	// A visible token overlaps the PT box when:
+	//   - the line's bottom edge crosses the PT box top:  y + textSize > ptTopRel
+	//   - the token's right edge crosses the PT box left: xEnd > ptLeftRel
+	const yThreshold = ptTopRel - textSize;
+	for (const { token, x, xEnd, y, visible } of positions) {
+		if (!visible) continue;
+		if (y > yThreshold && xEnd > ptLeftRel) return token.charStart;
+	}
+	return null;
+}
 
 var autoFramePack;
 
@@ -1302,13 +1515,105 @@ function autoFrameBuffer() {
 	clearTimeout(autoFrameTimer);
 	autoFrameTimer = setTimeout(autoFrame, 500);
 }
+function _bottomTextRow(ctx, textData) {
+	const x = Math.floor(scaleX(textData.x || 0));
+	const y = Math.floor(scaleY(textData.y || 0));
+	const w = Math.ceil(scaleWidth(textData.width || 1));
+	const h = Math.ceil(scaleHeight(textData.height || 1));
+	if (w <= 0 || h <= 0) return y;
+	const d = ctx.getImageData(x, y, w, h).data;
+	for (let r = h - 1; r >= 0; r--)
+		for (let c = 0; c < w; c++)
+			if (d[(r * w + c) * 4 + 3] > 10) return y + r;
+	return y;
+}
 async function drawText() {
 	textContext.clearRect(0, 0, textCanvas.width, textCanvas.height);
 	prePTContext.clearRect(0, 0, prePTCanvas.width, prePTCanvas.height);
 	drawTextBetweenFrames = false;
+	const avoidOverlap = document.querySelector('#autoframe-avoid-overlap')?.checked;
+	const ptEdges = avoidOverlap ? getPTBoxEdges() : null;
+	const ptPX = ptEdges ? Math.floor(scaleX(ptEdges.left)) : -1;
+	const ptPY = ptEdges ? Math.floor(scaleY(ptEdges.top))  : -1;
+	const ptCW = ptEdges ? Math.max(1, textCanvas.width  - ptPX) : 0;
+	const ptCH = ptEdges ? Math.max(1, textCanvas.height - ptPY) : 0;
+	function overlapsPT(ctx) {
+		if (!ptEdges || ptPX < 0 || ptPY < 0) return false;
+		const px = ctx.getImageData(ptPX, ptPY, ptCW, ptCH).data;
+		for (let i = 3; i < px.length; i += 4) { if (px[i] > 10) return true; }
+		return false;
+	}
+	function newOff() {
+		const c = document.createElement('canvas');
+		c.width = textCanvas.width; c.height = textCanvas.height;
+		return c.getContext('2d');
+	}
 	for (var textObject of Object.entries(card.text)) {
-		await writeText(textObject[1], textContext);
-		continue;
+		let textData = textObject[1];
+		if (textObject[0] === 'rules' && ptEdges !== null && textData.height > 0) {
+			const maxHeight = ptEdges.top - textData.y;
+			if (maxHeight > 0 && textData.height > maxHeight) {
+				// Render at full height to check for actual pixel overlap with PT box
+				const ctx0 = newOff();
+				writeText(textData, ctx0);
+				if (!overlapsPT(ctx0)) {
+					// No actual overlap — use this render directly
+					textContext.drawImage(ctx0.canvas, 0, 0);
+					continue;
+				}
+				// Step 1: insert one {lns} break — only when two lines overlap the PT box.
+				// A single overlapping line would just produce an orphan word on a new last line.
+				const ptRgn = ctx0.getImageData(ptPX, ptPY, ptCW, ptCH).data;
+				let ptBands = 0, inBand = false;
+				for (let y = 0; y < ptCH && ptBands < 2; y++) {
+					let rowHit = false;
+					for (let x = 0; x < ptCW; x++) {
+						if (ptRgn[(y * ptCW + x) * 4 + 3] > 10) { rowHit = true; break; }
+					}
+					if (rowHit && !inBand) { ptBands++; inBand = true; }
+					else if (!rowHit) { inBand = false; }
+				}
+				const insertIdx = ptBands >= 2 ? findPTOverlapInsertionIndex(textData, ptEdges.top, ptEdges.left) : null;
+				if (insertIdx !== null && insertIdx > 0) {
+					const lbData = Object.assign({}, textData, {
+						text: textData.text.slice(0, insertIdx) + '{lns}' + textData.text.slice(insertIdx)
+					});
+					const ctx1 = newOff();
+					writeText(lbData, ctx1);
+					if (!overlapsPT(ctx1)) {
+						const lineH = scaleHeight(textData.size || 0.038);
+						if (_bottomTextRow(ctx1, textData) <= _bottomTextRow(ctx0, textData) + lineH * 1.2) {
+							textContext.drawImage(ctx1.canvas, 0, 0);
+							continue;
+						}
+					}
+				}
+				// Step 2: shift text to top of rules box (remove vertical centering)
+				if (!textData.noVerticalCenter) {
+					const ctx2 = newOff();
+					writeText(Object.assign({}, textData, { noVerticalCenter: true }), ctx2);
+					if (!overlapsPT(ctx2)) {
+						textContext.drawImage(ctx2.canvas, 0, 0);
+						continue;
+					}
+				}
+				// Step 3: reduce font size 1pt at a time until no overlap
+				const baseFS = parseInt(textData.fontSize || '0');
+				let done3 = false;
+				for (let n = 1; n <= 20 && !done3; n++) {
+					const ctx3 = newOff();
+					writeText(Object.assign({}, textData, { fontSize: String(baseFS - n) }), ctx3);
+					if (!overlapsPT(ctx3)) {
+						textContext.drawImage(ctx3.canvas, 0, 0);
+						done3 = true;
+					}
+				}
+				if (done3) continue;
+				// Fallback: hard height cap
+				textData = Object.assign({}, textData, { height: maxHeight });
+			}
+		}
+		writeText(textData, textContext);
 	}
 	if (drawTextBetweenFrames || redrawFrames) {
 		drawFrames();
@@ -3429,6 +3734,249 @@ async function bulkDownloadZip() {
     localStorage.removeItem(tempKey);
     console.log('Bulk download process finished. User state restored.');
 }
+
+
+
+function parseScryfallBulkIdentifiers(text) {
+    const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const identifiers = [];
+    for (const line of lines) {
+        const match = line.match(/^(.+?)(?:\s+\((\w+)\)(?:\s+(\S+))?)?$/);
+        if (!match) continue;
+        const name = match[1].trim();
+        const set = match[2] ? match[2].toLowerCase() : null;
+        const number = match[3] || null;
+        if (set && number) {
+            identifiers.push({ set, collector_number: number });
+        } else if (set) {
+            identifiers.push({ name, set });
+        } else {
+            // For name-only lookups, split cards must be identified by their front half only
+            const frontName = name.includes(' // ') ? name.split(' // ')[0].trim() : name;
+            identifiers.push({ name: frontName });
+        }
+    }
+    return identifiers;
+}
+
+async function startScryfallBulkDownload() {
+    const cardListText = document.querySelector('#scryfall-bulk-list').value;
+    const frameType = document.querySelector('#scryfall-bulk-autoframe').value;
+    const useNyx = document.querySelector('#scryfall-bulk-nyx').checked;
+
+    const identifiers = parseScryfallBulkIdentifiers(cardListText);
+    if (identifiers.length === 0) {
+        notify('No cards entered.', 3);
+        return;
+    }
+    if (identifiers.length > 75) {
+        notify('Maximum 75 cards at a time. Please split your list into batches.', 5);
+        return;
+    }
+    if (typeof JSZip === 'undefined') {
+        notify('Required library (JSZip) has not loaded yet. Please wait a moment and try again.', 5);
+        return;
+    }
+
+    // Trigger file picker immediately to capture the user gesture
+    let fileHandle = null;
+    let useStreaming = false;
+    if (window.showSaveFilePicker) {
+        try {
+            notify('Please choose a location to save your ZIP file.', 15);
+            fileHandle = await window.showSaveFilePicker({
+                suggestedName: 'CardConjurer_Scryfall.zip',
+                types: [{ description: 'ZIP file', accept: { 'application/zip': ['.zip'] } }],
+            });
+            useStreaming = true;
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                notify('Save operation cancelled.', 3);
+                return;
+            }
+            console.error('Could not get file handle, falling back to in-memory method:', err);
+        }
+    }
+
+    // Fetch cards from Scryfall /cards/collection
+    notify('Fetching cards from Scryfall...', 10);
+    let scryfallResponse;
+    try {
+        const res = await fetch(buildImportApiUrl('cards/collection'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifiers }),
+        });
+        scryfallResponse = await res.json();
+    } catch (e) {
+        notify('Failed to fetch cards from Scryfall. Check your connection and try again.', 5);
+        console.error(e);
+        return;
+    }
+
+    const cards = scryfallResponse.data;
+    if (scryfallResponse.not_found && scryfallResponse.not_found.length > 0) {
+        const notFoundList = scryfallResponse.not_found.map(id =>
+            id.name || (id.set && id.collector_number ? `${id.set.toUpperCase()} #${id.collector_number}` : JSON.stringify(id))
+        ).join('\n');
+        if (!cards || cards.length === 0) {
+            notify('No cards could be found on Scryfall.', 3);
+            return;
+        }
+        const proceed = confirm(`The following cards could not be found on Scryfall:\n\n${notFoundList}\n\nContinue with the ${cards.length} card${cards.length === 1 ? '' : 's'} that were found?`);
+        if (!proceed) return;
+    } else if (!cards || cards.length === 0) {
+        notify('No cards found.', 3);
+        return;
+    }
+
+    // Save current card state so it can be restored after batch download
+    const zip = new JSZip();
+    const tempKey = '__temp_scryfall_bulk__';
+    const savedCardState = JSON.parse(JSON.stringify(card));
+    savedCardState.frames.forEach(frame => {
+        delete frame.image;
+        frame.masks.forEach(mask => delete mask.image);
+    });
+    localStorage.setItem(tempKey, JSON.stringify(savedCardState));
+
+    // Temporarily mirror bulk tab selections onto the main-page DOM elements that
+    // autoFrame(), buildAutoFrames(), and drawText() read directly.
+    const autoFrameSelect = document.querySelector('#autoFrame');
+    const savedAutoFrameValue = autoFrameSelect.value;
+    const nyxCheckbox = document.querySelector('#autoframe-always-nyx');
+    const savedNyxValue = nyxCheckbox.checked;
+    const avoidOverlapCheckbox = document.querySelector('#autoframe-avoid-overlap');
+    const savedAvoidOverlapValue = avoidOverlapCheckbox.checked;
+    autoFrameSelect.value = frameType;
+    nyxCheckbox.checked = useNyx;
+    avoidOverlapCheckbox.checked = document.querySelector('#scryfall-bulk-avoid-overlap').checked;
+
+    notify(`Preparing to process ${cards.length} cards...`, 10);
+
+    // Suppress the async art search that changeCardIndex() triggers via fetchScryfallData().
+    // That search resolves ~300ms later and calls uploadArt() again, which would race with
+    // the next card's art load and produce stale art in the downloaded images.
+    const origFetchScryfallData = window.fetchScryfallData;
+    window.fetchScryfallData = function(cardName, callback, unique) {
+        if (unique === 'art') return;
+        return origFetchScryfallData.apply(this, arguments);
+    };
+
+    for (const [index, cardObj] of cards.entries()) {
+        try {
+            notify(`Processing card ${index + 1} of ${cards.length}: ${cardObj.name}`, 1);
+
+            ImageLoadTracker.start();
+            FontLoadTracker.start();
+
+            // Import card text and metadata via importCard(), which populates
+            // the #import-index select before calling changeCardIndex().
+            // The art search it would normally trigger is suppressed above.
+            importCard([cardObj]);
+
+            // Cancel debounced draw/autoframe callbacks triggered by changeCardIndex
+            clearTimeout(writingText);
+            clearTimeout(autoFrameTimer);
+
+            // Explicitly await the art element loading the correct URL.
+            // ImageLoadTracker.track() creates a separate Image for tracking and does not
+            // guarantee that the `art` element (what drawCard() actually uses) has loaded.
+            const artUrl = cardObj.image_uris?.art_crop || cardObj.card_faces?.[0]?.image_uris?.art_crop;
+            if (artUrl) {
+                await new Promise((resolve) => {
+                    art.onload = function() {
+                        autoFitArt();
+                        art.onload = artEdited;
+                        resolve();
+                    };
+                    art.onerror = resolve;
+                    art.src = artUrl;
+                });
+            }
+            const artist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
+            if (artist) artistEdited(artist);
+
+            // Apply autoframe if selected
+            if (frameType !== 'false') {
+                autoFrame();
+            }
+
+            // First draw: runs through every text field so all fonts get registered with
+            // FontLoadTracker. Canvas can't repaint when fonts load later, so this pass
+            // may render some text with fallback fonts — that's expected and corrected below.
+            await drawText();
+
+            // Wait for frame images, set symbol, and all tracked fonts to finish loading.
+            await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+
+            // Second draw: all fonts are now loaded, so this produces the correct output.
+            await drawText();
+
+            await new Promise(resolve => setTimeout(resolve, 50));
+            drawCard();
+
+            const cardTitle = getCardName();
+            const setCode = cardObj.set ? cardObj.set.toUpperCase() : '';
+            const collectorNum = cardObj.collector_number || '';
+            const imageName = (cardTitle
+                + (setCode ? ` (${setCode})` : '')
+                + (collectorNum ? ` ${collectorNum}` : ''))
+                .replace(/[<>:"/\\|?*]/g, '_') + '.png';
+            const imageData = cardCanvas.toDataURL('image/png').split(',')[1];
+            zip.file(imageName, imageData, { base64: true });
+            console.log(`Zipped: ${imageName}`);
+
+        } catch (error) {
+            console.error(`Failed to process card "${cardObj.name}":`, error);
+            notify(`Skipping "${cardObj.name}" due to an error.`, 3);
+        } finally {
+            ImageLoadTracker.stop();
+            FontLoadTracker.stop();
+        }
+    }
+
+    // Restore suppressed fetchScryfallData and DOM state
+    window.fetchScryfallData = origFetchScryfallData;
+    autoFrameSelect.value = savedAutoFrameValue;
+    nyxCheckbox.checked = savedNyxValue;
+    avoidOverlapCheckbox.checked = savedAvoidOverlapValue;
+
+    // Generate and save the ZIP
+    try {
+        if (useStreaming && fileHandle) {
+            notify('Saving ZIP file to disk...', 10);
+            const writable = await fileHandle.createWritable();
+            await new Promise((resolve, reject) => {
+                const stream = zip.generateInternalStream({ type: 'uint8array', streamFiles: true });
+                stream
+                    .on('data', (chunk) => { writable.write(chunk).catch(reject); })
+                    .on('end', () => { writable.close().then(resolve).catch(reject); })
+                    .on('error', (err) => { reject(err); })
+                    .resume();
+            });
+            notify('ZIP file saved successfully!', 5);
+        } else {
+            notify('Building ZIP in memory... This may be slow for large batches.', 10);
+            const content = await zip.generateAsync({ type: 'blob' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(content);
+            a.download = 'CardConjurer_Scryfall.zip';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    } catch (err) {
+        console.error('Failed to generate or save ZIP file:', err);
+        notify('An error occurred while saving the ZIP file.', 5);
+    }
+
+    // Restore original card state
+    await loadCard(tempKey);
+    localStorage.removeItem(tempKey);
+    console.log('Scryfall bulk download complete. Card state restored.');
+}
+
 //IMPORT/SAVE TAB
 function importCard(cardObject) {
 	console.log('Import card called with:', cardObject); // Log initial import data
@@ -5111,15 +5659,13 @@ if (!localStorage.getItem('enableCollectorInfo')) {
 } else {
 	document.querySelector('#enableCollectorInfo').checked = (localStorage.getItem('enableCollectorInfo') == 'true');
 }
-if (!localStorage.getItem('autoFrame')) {
-	localStorage.setItem('autoFrame', 'false');
-} else {
-	document.querySelector('#autoFrame').value = localStorage.getItem('autoFrame');
-}
 if (!localStorage.getItem('autoframe-always-nyx')) {
 	localStorage.setItem('autoframe-always-nyx', 'false');
 }
 document.querySelector('#autoframe-always-nyx').checked = localStorage.getItem('autoframe-always-nyx');
+document.querySelector('#autoframe-avoid-overlap').checked = localStorage.getItem('autoframe-avoid-overlap') === 'true';
+document.querySelector('#scryfall-bulk-nyx').checked = localStorage.getItem('bulk-nyx') === 'true';
+document.querySelector('#scryfall-bulk-avoid-overlap').checked = localStorage.getItem('bulk-avoid-overlap') === 'true';
 if (!localStorage.getItem('autoFit')) {
 	localStorage.setItem('autoFit', 'true');
 } else {

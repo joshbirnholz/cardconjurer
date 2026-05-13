@@ -34,240 +34,145 @@
  * @param {string} frameType - The frame type identifier (e.g., 'M15Regular-1', 'UB', 'Borderless')
  * @returns {Object} Configuration object with makeFrameFunction, support flags, and filters
  */
+// Entries are declared in dropdown display order (menuGroup changes trigger a separator).
+// Add label + menuGroup here to register a new frame in both autoframe dropdowns.
+const frameTypeConfigs = {
+	'M15Regular-1': {
+		label: 'Regular', menuGroup: null,
+		group: 'Standard-3', makeFrameFunction: makeM15FrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15BoxTopper': {
+		label: 'Extended Art', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, false),
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15ExtendedArtShort': {
+		label: 'Extended Art (Shorter Textbox)', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, true),
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'UB': {
+		label: 'Universes Beyond', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: makeUBFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
+	},
+	'Etched': {
+		label: 'Etched', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: makeEtchedFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Borderless': {
+		label: 'Borderless (Alt)', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: makeBorderlessFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'BorderlessUB': {
+		label: 'Borderless (Alt) (Universes Beyond)', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeBorderlessFrameByLetter(letter, mask, maskToRightHalf, style, true),
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
+	},
+	'Praetors': {
+		label: 'Phyrexian', menuGroup: null,
+		group: 'Showcase-5', makeFrameFunction: makePhyrexianFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'8th': {
+		label: 'Eighth Edition', menuGroup: null,
+		group: 'Misc-2', makeFrameFunction: make8thEditionFrameByLetter,
+		supportsCrown: false, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Seventh': {
+		label: 'Seventh Edition', menuGroup: null,
+		group: 'Misc-2', makeFrameFunction: makeSeventhEditionFrameByLetter,
+		supportsCrown: false, supportsPT: false, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('DCI Star')
+	},
+	'JapanShowcase': {
+		label: 'Japan Showcase', menuGroup: 'Showcase frames',
+		group: 'Showcase-5', makeFrameFunction: makeJapanShowcaseFrameByLetter,
+		supportsCrown: false, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Vault': {
+		label: 'Vault (BIG)', menuGroup: 'Showcase frames',
+		group: 'Showcase-5', makeFrameFunction: makeVaultFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Adventure': {
+		label: 'Adventure', menuGroup: 'Alternative Layouts',
+		group: 'Showcase-5', makeFrameFunction: makeAdventureFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Omen': {
+		label: 'Omen', menuGroup: 'Alternative Layouts',
+		group: 'Showcase-5', makeFrameFunction: makeOmenFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'Prepare': {
+		label: 'Prepare', menuGroup: 'Alternative Layouts',
+		group: 'Standard-3', makeFrameFunction: makePrepareFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15RegularNew': {
+		label: 'Regular (Accurate)', menuGroup: 'Redone frames',
+		group: 'Accurate', makeFrameFunction: makeM15NewFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'FullArtNew': {
+		label: 'Full art (Accurate)', menuGroup: 'Redone frames',
+		group: 'Accurate', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeM15NewFrameByLetter(letter, mask, maskToRightHalf, 'fullart'),
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'UBNew': {
+		label: 'Universes Beyond (Accurate)', menuGroup: 'Redone frames',
+		group: 'Accurate', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeM15NewFrameByLetter(letter, mask, maskToRightHalf, 'ub'),
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
+	},
+	'Circuit': {
+		label: 'Circuit', menuGroup: 'Custom frames',
+		group: 'Custom', makeFrameFunction: makeCircuitFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15Eighth': {
+		label: 'M15-Eighth', menuGroup: 'Custom frames',
+		group: 'Custom', makeFrameFunction: makeM15EighthFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15EighthUB': {
+		label: 'M15-Eighth Universes Beyond', menuGroup: 'Custom frames',
+		group: 'Custom', makeFrameFunction: makeM15EighthUBFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
+	},
+	'AdventureTime': {
+		label: 'Adventure Time', menuGroup: 'Custom frames',
+		group: 'Custom', makeFrameFunction: makeAdventureTimeFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+};
+
 function getFrameTypeConfig(frameType) {
-	const configs = {
-		// Standard M15 frame
-		'M15Regular-1': {
-			group: 'Standard-3',
-			makeFrameFunction: makeM15FrameByLetter,
-			supportsCrown: true,      // Legendary crowns
-			supportsPT: true,         // Power/Toughness boxes
-			supportsStamp: false,     // Holo stamps
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Accurate M15 frame
-		'M15RegularNew': {
-			group: 'Accurate',
-			makeFrameFunction: makeM15NewFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// M15 with 8th Edition style elements
-		'M15Eighth': {
-			group: 'Custom',
-			makeFrameFunction: makeM15EighthFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Universes Beyond frame
-		'UB': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeUBFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: true,
-			filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
-		},
-		
-		// Universes Beyond (accurate version)
-		'UBNew': {
-			group: 'Accurate',
-			makeFrameFunction: (letter, mask, maskToRightHalf, style) => {
-				return makeM15NewFrameByLetter(letter, mask, maskToRightHalf, 'ub');
-			},
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: true,
-			filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
-		},
-		
-		// Circuit frame
-		'Circuit': {
-			group: 'Custom',
-			makeFrameFunction: makeCircuitFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Etched foil frame
-		'Etched': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeEtchedFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: true,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Phyrexian/Praetors frame
-		'Praetors': {
-			group: 'Showcase-5',
-			makeFrameFunction: makePhyrexianFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// 7th Edition frame
-		'Seventh': {
-			group: 'Misc-2',
-			makeFrameFunction: makeSeventhEditionFrameByLetter,
-			supportsCrown: false,
-			supportsPT: false,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('DCI Star')
-		},
-		
-		// M15 Box Topper / Extended Art
-		'M15BoxTopper': {
-			group: 'Showcase-5',
-			makeFrameFunction: (letter, mask, maskToRightHalf, style) => {
-				return makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, false);
-			},
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// M15 Extended Art (shorter variant)
-		'M15ExtendedArtShort': {
-			group: 'Showcase-5',
-			makeFrameFunction: (letter, mask, maskToRightHalf, style) => {
-				return makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, true);
-			},
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// 8th Edition frame
-		'8th': {
-			group: 'Misc-2',
-			makeFrameFunction: make8thEditionFrameByLetter,
-			supportsCrown: false,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Borderless (Alt) frame
-		'Borderless': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeBorderlessFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Borderless (Alt) Universes Beyond Frame
-		'BorderlessUB': {
-			group: 'Showcase-5',
-			makeFrameFunction: (letter, mask, maskToRightHalf, style) => {
-				return makeBorderlessFrameByLetter(letter, mask, maskToRightHalf, style, true);
-			},
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
-		},
-		
-		// M15 Eighth Edition Universes Beyond (custom hybrid)
-		'M15EighthUB': {
-			group: 'Custom',
-			makeFrameFunction: makeM15EighthUBFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: true,  // Uses special multicolor stamp handling
-			filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
-		},
-		
-		// Full Art (accurate version)
-		'FullArtNew': {
-			group: 'Accurate',
-			makeFrameFunction: (letter, mask, maskToRightHalf, style) => {
-				return makeM15NewFrameByLetter(letter, mask, maskToRightHalf, 'fullart');
-			},
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Japan Showcase frame
-		'JapanShowcase': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeJapanShowcaseFrameByLetter,
-			supportsCrown: false,
-			supportsPT: true,
-			supportsStamp: true,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Vault (BIG) frame
-		'Vault': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeVaultFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: true,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Adventure frame
-		'Adventure': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeAdventureFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-
-		// Adventure Time frame
-		'AdventureTime': {
-			group: 'Custom',
-			makeFrameFunction: makeAdventureTimeFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-		
-		// Omen frame
-		'Omen': {
-			group: 'Showcase-5',
-			makeFrameFunction: makeOmenFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		},
-
-		// Prepare frame
-		'Prepare': {
-			group: 'Standard-3',
-			makeFrameFunction: makePrepareFrameByLetter,
-			supportsCrown: true,
-			supportsPT: true,
-			supportsStamp: false,
-			filterFrames: (frame) => frame.name.includes('Extension')
-		}
-	};
-	
-	return configs[frameType];
+	return frameTypeConfigs[frameType];
 }
 
 
@@ -853,52 +758,6 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
-		'AdventureTime': {
-			frameNames: standardFrameNames,
-			basePath: '/img/frames/adventuretime/',
-			bounds: {
-				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
-				crown: {x: 0, y: 0, width: 1, height: 521/2814},
-				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
-			},
-			crownMasks: [
-				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
-				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
-			],
-			pathBuilder: (letter, mask, style) => {
-				const colorLetter = letter.toLowerCase();
-				let styleFolder = 'regular';
-				if (style === 'snow') styleFolder = 'snow';
-				else if (style === 'Nyx') styleFolder = 'enchantment';
-
-				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
-				if (mask === 'PT') return `pt/${colorLetter}.png`;
-				// Enchantment and snow don't have land/artifact/vehicle variants - fall back to regular
-				const noSpecialVariant = ['l', 'a', 'v'].includes(colorLetter);
-				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
-				return `${baseFolder}/${colorLetter}.png`;
-			},
-			maskPath: (mask) => {
-				const maskMap = {
-					'Pinline': 'maskPinline.png',
-					'Title': 'title.png',
-					'Type': 'type.png',
-					'Rules': 'maskRules.png',
-					'Frame': 'maskFrame.png',
-					'Border': 'maskBorder.png'
-				};
-				return maskMap[mask] || null;
-			},
-			letterTransform: (letter, mask) => {
-				if (mask === 'PT' && letter === 'C') {
-					return 'L';
-				}
-				if (letter.includes('L') && letter.length > 1) {
-					return letter[0];
-				}
-				return letter;
-			}
-		},
 		'Omen': {
 			frameNames: standardFrameNames,
 			basePath: '/img/frames/omen/',
@@ -991,7 +850,53 @@ function getFrameLetterConfig(frameType) {
 				if (letter === 'V') return 'A';
 				return letter;
 			}
-		}
+		},
+		'AdventureTime': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventuretime/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {x: 0, y: 0, width: 1, height: 521/2814},
+				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
+			},
+			crownMasks: [
+				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
+				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
+			],
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				let styleFolder = 'regular';
+				if (style === 'snow') styleFolder = 'snow';
+				else if (style === 'Nyx') styleFolder = 'enchantment';
+
+				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				// Enchantment and snow don't have land/artifact/vehicle variants - fall back to regular
+				const noSpecialVariant = ['l', 'a', 'v'].includes(colorLetter);
+				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
+				return `${baseFolder}/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'maskPinline.png',
+					'Title': 'title.png',
+					'Type': 'type.png',
+					'Rules': 'maskRules.png',
+					'Frame': 'maskFrame.png',
+					'Border': 'maskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (mask === 'PT' && letter === 'C') {
+					return 'L';
+				}
+				if (letter.includes('L') && letter.length > 1) {
+					return letter[0];
+				}
+				return letter;
+			}
+		},
 	};
 
 	return configs[frameType];
@@ -1295,16 +1200,16 @@ function makeAdventureFrameByLetter(letter, mask = false, maskToRightHalf = fals
 	return makeFrameByLetterUnified('Adventure', letter, mask, maskToRightHalf, style);
 }
 
-function makeAdventureTimeFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
-	return makeFrameByLetterUnified('AdventureTime', letter, mask, maskToRightHalf, style);
-}
-
 function makeOmenFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
 	return makeFrameByLetterUnified('Omen', letter, mask, maskToRightHalf, style);
 }
 
 function makePrepareFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
 	return makeFrameByLetterUnified('Prepare', letter, mask, maskToRightHalf, style);
+}
+
+function makeAdventureTimeFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('AdventureTime', letter, mask, maskToRightHalf, style);
 }
 
 
@@ -1316,7 +1221,7 @@ function makePrepareFrameByLetter(letter, mask = false, maskToRightHalf = false,
 // correct order. Handles special cases for different frame types.
 
 /**
- * Computes the frame layers for a given set of card attributes.
+ * Computes and the frame layers for a given set of card attributes.
  * @param {string} frameType - The frame type identifier
  * @param {Array} colors - Array of color letters detected from the card
  * @param {string} mana_cost - The mana cost string
@@ -1391,9 +1296,8 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 	// ----------------------------------------------------------------
 	// ADVENTURE TIME: COLORLESS FRAME OVERRIDE
 	// ----------------------------------------------------------------
-	// cardFrameProperties assigns 'L' to colorless non-artifact cards, but for Adventure Time:
-	// - Colorless non-land cards (including colorless enchantments) should use C frame
-	// - Only actual lands should use the L frame
+	// cardFrameProperties assigns 'L' to colorless non-artifact cards, but for Adventure Time
+	// colorless non-land cards should use the C frame instead.
 	if (frameType === 'AdventureTime' && colors.length === 0 && properties.frame === 'L' &&
 		!type_line.toLowerCase().includes('land')) {
 		properties.frame = 'C';
@@ -1417,14 +1321,13 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 			const baseCrownLetter = isVehicleType ? 'V' : (isArtifactType ? 'A' : (isLandType ? 'L' : properties.frame));
 
 			if (isSpecialBaseCrownStyle) {
-				// Colored artifact/vehicle/land crowns: color pinline crown(s) over base frame crown mask.
+				// Colored artifact/vehicle/land crowns: pinline crown(s) over base frame crown mask.
 				if (properties.pinlineRight) {
 					let rightPinlineCrown = config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style);
 					if (rightPinlineCrown) {
 						rightPinlineCrown.masks = rightPinlineCrown.masks.filter(mask => ['Pinline', 'Right Half'].includes(mask.name));
 						frames.push(rightPinlineCrown);
 					}
-
 					let leftPinlineCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
 					if (leftPinlineCrown) {
 						leftPinlineCrown.masks = leftPinlineCrown.masks.filter(mask => mask.name === 'Pinline');
@@ -1437,7 +1340,6 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 						frames.push(monoPinlineCrown);
 					}
 				}
-
 				let frameMaskCrown = config.makeFrameFunction(baseCrownLetter, 'Crown', false, style);
 				if (frameMaskCrown) {
 					frameMaskCrown.masks = frameMaskCrown.masks.filter(mask => mask.name === 'Frame');
@@ -1451,26 +1353,23 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 						rightCrown.masks = rightCrown.masks.filter(mask => mask.name === 'Right Half');
 						frames.push(rightCrown);
 					}
-
 					let leftCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
 					if (leftCrown) {
 						leftCrown.masks = [];
 						frames.push(leftCrown);
 					}
 				} else {
-					// Gold non-artifact: split pinline crowns + multicolor crown frame mask layer.
+					// Gold non-artifact: split pinline crowns + multicolor crown frame mask.
 					let rightPinlineCrown = config.makeFrameFunction(properties.pinlineRight, 'Crown', true, style);
 					if (rightPinlineCrown) {
 						rightPinlineCrown.masks = rightPinlineCrown.masks.filter(mask => ['Pinline', 'Right Half'].includes(mask.name));
 						frames.push(rightPinlineCrown);
 					}
-
 					let leftPinlineCrown = config.makeFrameFunction(properties.pinline, 'Crown', false, style);
 					if (leftPinlineCrown) {
 						leftPinlineCrown.masks = leftPinlineCrown.masks.filter(mask => mask.name === 'Pinline');
 						frames.push(leftPinlineCrown);
 					}
-
 					let frameMaskCrown = config.makeFrameFunction(properties.frame, 'Crown', false, style);
 					if (frameMaskCrown) {
 						frameMaskCrown.masks = frameMaskCrown.masks.filter(mask => mask.name === 'Frame');
@@ -1510,7 +1409,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 				});
 			}
 
-			// Crown border cover hides the border under the crown (not used for Vault)
+			// Crown border cover hides the border under the crown (not used for Vault or AdventureTime)
 			if (frameType !== 'Vault' && frameType !== 'AdventureTime') {
 				let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
 				// Only Borderless uses erase blend mode to cut through layers below
@@ -1885,13 +1784,10 @@ function autoFrame() {
 		autoFrameUnified(frame, colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
 		
 		// Load the appropriate frame pack script if not already loaded
-		// BorderlessUB uses the Borderless pack; AdventureTime uses the regular AdventureTime pack.
+		// BorderlessUB uses the Borderless pack; AdventureTime uses the AdventureTimeRegular pack
 		var packFrame = frame;
-		if (frame == 'BorderlessUB') {
-			packFrame = 'Borderless';
-		} else if (frame == 'AdventureTime') {
-			packFrame = 'AdventureTimeRegular';
-		}
+		if (frame == 'BorderlessUB') packFrame = 'Borderless';
+		else if (frame == 'AdventureTime') packFrame = 'AdventureTimeRegular';
 		
 		if (autoFramePack != packFrame) {
 			loadScript('/js/frames/pack' + packFrame + '.js');
@@ -1899,3 +1795,40 @@ function autoFrame() {
 		}
 	}
 }
+
+
+// ============================================================================
+// SECTION 7: AUTOFRAME SELECT POPULATION
+// ============================================================================
+// Populates an autoframe <select> from frameTypeConfigs.
+// Group separators are inserted automatically when menuGroup changes between entries.
+// To add a new frame to the dropdowns, add it to frameTypeConfigs with a label and menuGroup.
+function populateAutoFrameSelect(selectEl, includeDisabled) {
+	if (includeDisabled) {
+		const disabledOpt = document.createElement('option');
+		disabledOpt.value = 'false';
+		disabledOpt.textContent = 'Disabled';
+		selectEl.appendChild(disabledOpt);
+	}
+	let lastMenuGroup;
+	for (const [value, config] of Object.entries(frameTypeConfigs)) {
+		if (config.menuGroup !== lastMenuGroup) {
+			if (config.menuGroup) {
+				const sep = document.createElement('option');
+				sep.disabled = true;
+				sep.textContent = config.menuGroup;
+				selectEl.appendChild(sep);
+			}
+			lastMenuGroup = config.menuGroup;
+		}
+		const el = document.createElement('option');
+		el.value = value;
+		el.textContent = config.label;
+		selectEl.appendChild(el);
+	}
+}
+
+if (!localStorage.getItem('autoFrame')) localStorage.setItem('autoFrame', 'false');
+populateAutoFrameSelect(document.querySelector('#autoFrame'), true);
+populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), false);
+document.querySelector('#autoFrame').value = localStorage.getItem('autoFrame');
