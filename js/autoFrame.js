@@ -1508,8 +1508,13 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 		return;
 	}
 
-	// Preserve existing extension frames and stamps that shouldn't be rebuilt
-	var preservedFrames = card.frames.filter(config.filterFrames);
+	// Preserve existing extension frames and stamps that shouldn't be rebuilt.
+	// Exclude margin frames when the margins checkbox is on — applyAutoFrameMargins will rebuild them.
+	const marginsEnabled = document.querySelector('#autoframe-margins')?.checked;
+	var preservedFrames = card.frames.filter(frame => {
+		if (frame.isMarginFrame && marginsEnabled) return false;
+		return config.filterFrames(frame);
+	});
 
 	// Compute new frame layers without touching the card
 	var mana2Text = card.text.mana2 ? card.text.mana2.text : '';
@@ -1542,7 +1547,7 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
  * Main auto frame function triggered by UI
  * Detects card colors and builds appropriate frame
  */
-function autoFrame() {
+async function autoFrame() {
 	var frame = document.querySelector('#autoFrame').value;
 	if (frame == 'false') { autoFramePack = null; return; }
 
@@ -1636,15 +1641,19 @@ function autoFrame() {
 	const config = getFrameTypeConfig(frame);
 	if (config) {
 		// Build the frame with detected colors
-		autoFrameUnified(frame, colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-		
+		await autoFrameUnified(frame, colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+
 		// Load the appropriate frame pack script if not already loaded
 		// BorderlessUB uses the Borderless pack
 		var packFrame = (frame == 'BorderlessUB') ? 'Borderless' : frame;
-		
+
 		if (autoFramePack != packFrame) {
 			loadScript('/js/frames/pack' + packFrame + '.js');
 			autoFramePack = packFrame;
+		}
+
+		if (document.querySelector('#autoframe-margins')?.checked) {
+			await applyAutoFrameMargins(frame, colors);
 		}
 	}
 }
