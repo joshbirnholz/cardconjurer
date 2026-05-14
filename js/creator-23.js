@@ -928,6 +928,117 @@ function setAutoframeAvoidOverlap(value) {
 	localStorage.setItem('autoframe-avoid-overlap', value);
 	drawText();
 }
+function setAutoframeMargins(value) {
+	localStorage.setItem('autoframe-margins', value);
+	setAutoFrame();
+}
+function buildMarginFrames(frameType, colors) {
+	const genericBounds = {x:-0.044, y:-1/35, width:1.088, height:37/35};
+	const coloredBounds = {x:-88/2010, y:-80/2817, width:2187/2010, height:2978/2817};
+	const ogBounds = {x:0, y:0, width:1, height:1};
+
+	const typeLine = (card.text.type.text || '').toLowerCase();
+	const isLand = typeLine.includes('land');
+
+	// Determine which border color letter(s) to use, mirroring buildAutoFrames exactly.
+	function getPinlineLetters() {
+		if (isLand) return ['l'];
+
+		const props = cardFrameProperties(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+
+		// Mirror buildAutoFrames per-type overrides
+		if (frameType === 'Vault' && colors.length === 2) {
+			props.frame = colors[0].toUpperCase();
+			props.frameRight = colors[1].toUpperCase();
+		}
+		if (frameType === 'AdventureTime' && colors.length === 0 && props.frame === 'L') {
+			props.frame = 'C';
+		}
+
+		// Map uppercase property letters to lowercase file letters.
+		// Japan Showcase and Vault have no v.png, so vehicles fall back to artifact.
+		function toLetter(f) {
+			f = (f || 'A').toUpperCase();
+			if (f === 'V') return frameType === 'AdventureTime' ? 'v' : 'a';
+			return f.toLowerCase();
+		}
+
+		const left = toLetter(props.frame);
+		const right = props.frameRight ? toLetter(props.frameRight) : null;
+		return right ? [left, right] : [left];
+	}
+
+	// Colored extensions: Japan Showcase, Vault, AdventureTime
+	if (frameType === 'JapanShowcase' || frameType === 'Vault' || frameType === 'AdventureTime') {
+		let basePath;
+		if (frameType === 'JapanShowcase') {
+			basePath = '/img/frames/m15/japanShowcase/margin/';
+		} else if (frameType === 'Vault') {
+			basePath = '/img/frames/vault/margin/';
+		} else {
+			// AdventureTime: pick style subfolder to match the main frame style
+			const isNyx = typeLine.includes('enchantment creature') || typeLine.includes('enchantment artifact') ||
+				(document.querySelector('#autoframe-always-nyx')?.checked && typeLine.includes('enchantment'));
+			const style = typeLine.includes('snow') ? 'snow' : (isNyx ? 'enchantment' : 'regular');
+			basePath = `/img/frames/adventureTime/margins/${style}/`;
+		}
+
+		// Japan Showcase land file uses capital L; others lowercase
+		const toFileLetter = (l) => (frameType === 'JapanShowcase' && l === 'l') ? 'L' : l;
+
+		// Japan Showcase uses a border mask to clip the extension to the border area
+		const defaultMasks = frameType === 'JapanShowcase'
+			? [{src:'/img/frames/m15/japanShowcase/margin/masks/maskBorder.png', name:'Border'}]
+			: [];
+
+		const letters = getPinlineLetters();
+		const makeFrame = (letter, maskRight = false) => ({
+			name: letter.toUpperCase() + ' Extension',
+			src: basePath + toFileLetter(letter) + '.png',
+			bounds: coloredBounds,
+			ogBounds,
+			masks: [
+				...defaultMasks.map(m => ({...m})),
+				...(maskRight ? [{src:'/img/frames/maskRightHalf.png', name:'Right Half'}] : [])
+			],
+			isMarginFrame: true
+		});
+		const frames = [makeFrame(letters[0])];
+		if (letters[1]) frames.push(makeFrame(letters[1], true));
+		return frames;
+	}
+
+	// Generic extension frames
+	const genericFrame = (src, name) => ({name, src:'/img/frames/margins/' + src, bounds:genericBounds, masks:[], isMarginFrame:true});
+	if (frameType === 'M15BoxTopper') return [genericFrame('boxTopperBorderExtension.png', 'Box Topper Extension')];
+	if (frameType === 'M15ExtendedArtShort') return [genericFrame('boxTopperShortBorderExtension.png', 'Box Topper Extension (Short)')];
+	if (frameType === 'Borderless' || frameType === 'BorderlessUB') return [genericFrame('borderlessBorderExtension.png', 'Borderless Extension')];
+	return [genericFrame('blackBorderExtension.png', 'Black Extension')];
+}
+
+async function applyAutoFrameMargins(frameType, colors) {
+	await resetCardIrregularities({canvas:[getStandardWidth(), getStandardHeight(), 0.044, 1/35], resetOthers:false});
+	card.margins = true;
+	var changedArtBounds = false;
+	if (card.artBounds.width == 1) { card.artBounds.width += 0.044; changedArtBounds = true; }
+	if (card.artBounds.x == 0) { card.artBounds.x = -0.044; card.artBounds.width += 0.044; changedArtBounds = true; }
+	if (card.artBounds.height == 1) { card.artBounds.height += 1/35; changedArtBounds = true; }
+	if (card.artBounds.y == 0) { card.artBounds.y = -1/35; card.artBounds.height += 1/35; changedArtBounds = true; }
+	if (changedArtBounds) autoFitArt();
+	const marginFrames = buildMarginFrames(frameType, colors);
+	for (const frame of marginFrames) {
+		card.frames.unshift(frame);
+		await addFrame([], frame);
+	}
+	if (card.version.includes('planeswalker')) planeswalkerEdited();
+	if (card.version.includes('saga')) sagaEdited();
+	if (card.version.includes('class') && !card.version.includes('classic')) classEdited();
+	if (card.version.includes('station')) stationEdited();
+	drawTextBuffer();
+	bottomInfoEdited();
+	watermarkEdited();
+	drawNewGuidelines();
+}
 // Scans PT frame pixels once to find the topmost non-transparent row AND leftmost non-transparent
 // column, caching both. Returns {top, left} in normalized card coordinates, or null.
 function getPTBoxEdges() {
@@ -3679,9 +3790,9 @@ async function bulkDownloadZip() {
             await new Promise(resolve => setTimeout(resolve, 50));
             drawCard();
             
-            const imageName = getCardName() + '.png';
-            const imageData = cardCanvas.toDataURL('image/png').split(',')[1];
-            
+            const imageName = getCardName() + '.' + imageExt;
+            const imageData = cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1];
+
             zip.file(imageName, imageData, { base64: true });
             console.log(`Zipped: ${imageName}`);
 
@@ -3763,19 +3874,25 @@ async function startScryfallBulkDownload() {
     const cardListText = document.querySelector('#scryfall-bulk-list').value;
     const frameType = document.querySelector('#scryfall-bulk-autoframe').value;
     const useNyx = document.querySelector('#scryfall-bulk-nyx').checked;
+    const useJpeg = document.querySelector('#scryfall-bulk-format').value === 'jpg';
+    const imageExt = useJpeg ? 'jpg' : 'png';
+    const imageMime = useJpeg ? 'image/jpeg' : 'image/png';
+    const imageQuality = useJpeg ? 0.8 : undefined;
 
     const identifiers = parseScryfallBulkIdentifiers(cardListText);
     if (identifiers.length === 0) {
         notify('No cards entered.', 3);
         return;
     }
-    if (identifiers.length > 75) {
-        notify('Maximum 75 cards at a time. Please split your list into batches.', 5);
-        return;
-    }
     if (typeof JSZip === 'undefined') {
         notify('Required library (JSZip) has not loaded yet. Please wait a moment and try again.', 5);
         return;
+    }
+
+    const BATCH_SIZE = 75;
+    const batches = [];
+    for (let i = 0; i < identifiers.length; i += BATCH_SIZE) {
+        batches.push(identifiers.slice(i, i + BATCH_SIZE));
     }
 
     // Trigger file picker immediately to capture the user gesture
@@ -3798,39 +3915,7 @@ async function startScryfallBulkDownload() {
         }
     }
 
-    // Fetch cards from Scryfall /cards/collection
-    notify('Fetching cards from Scryfall...', 10);
-    let scryfallResponse;
-    try {
-        const res = await fetch(buildImportApiUrl('cards/collection'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ identifiers }),
-        });
-        scryfallResponse = await res.json();
-    } catch (e) {
-        notify('Failed to fetch cards from Scryfall. Check your connection and try again.', 5);
-        console.error(e);
-        return;
-    }
-
-    const cards = scryfallResponse.data;
-    if (scryfallResponse.not_found && scryfallResponse.not_found.length > 0) {
-        const notFoundList = scryfallResponse.not_found.map(id =>
-            id.name || (id.set && id.collector_number ? `${id.set.toUpperCase()} #${id.collector_number}` : JSON.stringify(id))
-        ).join('\n');
-        if (!cards || cards.length === 0) {
-            notify('No cards could be found on Scryfall.', 3);
-            return;
-        }
-        const proceed = confirm(`The following cards could not be found on Scryfall:\n\n${notFoundList}\n\nContinue with the ${cards.length} card${cards.length === 1 ? '' : 's'} that were found?`);
-        if (!proceed) return;
-    } else if (!cards || cards.length === 0) {
-        notify('No cards found.', 3);
-        return;
-    }
-
-    // Save current card state so it can be restored after batch download
+    // Save current card state so it can be restored after all batches
     const zip = new JSZip();
     const tempKey = '__temp_scryfall_bulk__';
     const savedCardState = JSON.parse(JSON.stringify(card));
@@ -3848,24 +3933,61 @@ async function startScryfallBulkDownload() {
     const savedNyxValue = nyxCheckbox.checked;
     const avoidOverlapCheckbox = document.querySelector('#autoframe-avoid-overlap');
     const savedAvoidOverlapValue = avoidOverlapCheckbox.checked;
+    const marginsCheckbox = document.querySelector('#autoframe-margins');
+    const savedMarginsValue = marginsCheckbox.checked;
     autoFrameSelect.value = frameType;
     nyxCheckbox.checked = useNyx;
     avoidOverlapCheckbox.checked = document.querySelector('#scryfall-bulk-avoid-overlap').checked;
-
-    notify(`Preparing to process ${cards.length} cards...`, 10);
+    marginsCheckbox.checked = document.querySelector('#scryfall-bulk-margins').checked;
 
     // Suppress the async art search that changeCardIndex() triggers via fetchScryfallData().
-    // That search resolves ~300ms later and calls uploadArt() again, which would race with
-    // the next card's art load and produce stale art in the downloaded images.
     const origFetchScryfallData = window.fetchScryfallData;
     window.fetchScryfallData = function(cardName, callback, unique) {
         if (unique === 'art') return;
         return origFetchScryfallData.apply(this, arguments);
     };
 
-    for (const [index, cardObj] of cards.entries()) {
+    let totalRendered = 0;
+    const totalRequested = identifiers.length;
+    const skippedCards = [];
+
+    for (const [batchIndex, batchIdentifiers] of batches.entries()) {
+        notify(`Fetching batch ${batchIndex + 1} of ${batches.length} from Scryfall...`, 10);
+
+        let scryfallResponse;
         try {
-            notify(`Processing card ${index + 1} of ${cards.length}: ${cardObj.name}`, 1);
+            const res = await fetch(buildImportApiUrl('cards/collection'), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ identifiers: batchIdentifiers }),
+            });
+            scryfallResponse = await res.json();
+        } catch (e) {
+            notify(`Failed to fetch batch ${batchIndex + 1} from Scryfall. Skipping.`, 5);
+            console.error(e);
+            continue;
+        }
+
+        const cards = scryfallResponse.data;
+        if (scryfallResponse.not_found && scryfallResponse.not_found.length > 0) {
+            const notFoundList = scryfallResponse.not_found.map(id =>
+                id.name || (id.set && id.collector_number ? `${id.set.toUpperCase()} #${id.collector_number}` : JSON.stringify(id))
+            ).join('\n');
+            if (!cards || cards.length === 0) {
+                notify(`No cards in batch ${batchIndex + 1} could be found on Scryfall.`, 3);
+                continue;
+            }
+            const proceed = confirm(`The following cards could not be found on Scryfall:\n\n${notFoundList}\n\nContinue with the ${cards.length} card${cards.length === 1 ? '' : 's'} that were found?`);
+            if (!proceed) continue;
+        } else if (!cards || cards.length === 0) {
+            notify(`No cards found in batch ${batchIndex + 1}.`, 3);
+            continue;
+        }
+
+        for (const [index, cardObj] of cards.entries()) {
+            totalRendered++;
+            try {
+            notify(`Processing card ${totalRendered} of ${totalRequested}: ${cardObj.name}`, 1);
 
             ImageLoadTracker.start();
             FontLoadTracker.start();
@@ -3873,7 +3995,7 @@ async function startScryfallBulkDownload() {
             // Import card text and metadata via importCard(), which populates
             // the #import-index select before calling changeCardIndex().
             // The art search it would normally trigger is suppressed above.
-            importCard([cardObj]);
+            await importCard([cardObj]);
 
             // Cancel debounced draw/autoframe callbacks triggered by changeCardIndex
             clearTimeout(writingText);
@@ -3899,7 +4021,7 @@ async function startScryfallBulkDownload() {
 
             // Apply autoframe if selected
             if (frameType !== 'false') {
-                autoFrame();
+                await autoFrame();
             }
 
             // First draw: runs through every text field so all fonts get registered with
@@ -3922,17 +4044,18 @@ async function startScryfallBulkDownload() {
             const imageName = (cardTitle
                 + (setCode ? ` (${setCode})` : '')
                 + (collectorNum ? ` ${collectorNum}` : ''))
-                .replace(/[<>:"/\\|?*]/g, '_') + '.png';
-            const imageData = cardCanvas.toDataURL('image/png').split(',')[1];
+                .replace(/[<>:"/\\|?*]/g, '_') + '.' + imageExt;
+            const imageData = cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1];
             zip.file(imageName, imageData, { base64: true });
             console.log(`Zipped: ${imageName}`);
 
         } catch (error) {
             console.error(`Failed to process card "${cardObj.name}":`, error);
-            notify(`Skipping "${cardObj.name}" due to an error.`, 3);
+            skippedCards.push(cardObj.name);
         } finally {
             ImageLoadTracker.stop();
             FontLoadTracker.stop();
+        }
         }
     }
 
@@ -3941,6 +4064,7 @@ async function startScryfallBulkDownload() {
     autoFrameSelect.value = savedAutoFrameValue;
     nyxCheckbox.checked = savedNyxValue;
     avoidOverlapCheckbox.checked = savedAvoidOverlapValue;
+    marginsCheckbox.checked = savedMarginsValue;
 
     // Generate and save the ZIP
     try {
@@ -3975,6 +4099,10 @@ async function startScryfallBulkDownload() {
     await loadCard(tempKey);
     localStorage.removeItem(tempKey);
     console.log('Scryfall bulk download complete. Card state restored.');
+
+    if (skippedCards.length > 0) {
+        alert(`The following ${skippedCards.length} card${skippedCards.length === 1 ? '' : 's'} could not be rendered and were skipped:\n\n${skippedCards.join('\n')}`);
+    }
 }
 
 //IMPORT/SAVE TAB
@@ -4005,7 +4133,7 @@ function importCard(cardObject) {
 		}
 		optionIndex ++;
 	});
-	changeCardIndex();
+	return changeCardIndex();
 }
 
 async function pasteCardText() {
@@ -5664,8 +5792,11 @@ if (!localStorage.getItem('autoframe-always-nyx')) {
 }
 document.querySelector('#autoframe-always-nyx').checked = localStorage.getItem('autoframe-always-nyx');
 document.querySelector('#autoframe-avoid-overlap').checked = localStorage.getItem('autoframe-avoid-overlap') === 'true';
+document.querySelector('#autoframe-margins').checked = localStorage.getItem('autoframe-margins') === 'true';
 document.querySelector('#scryfall-bulk-nyx').checked = localStorage.getItem('bulk-nyx') === 'true';
 document.querySelector('#scryfall-bulk-avoid-overlap').checked = localStorage.getItem('bulk-avoid-overlap') === 'true';
+document.querySelector('#scryfall-bulk-margins').checked = localStorage.getItem('bulk-margins') === 'true';
+document.querySelector('#scryfall-bulk-format').value = localStorage.getItem('bulk-format') || 'png';
 if (!localStorage.getItem('autoFit')) {
 	localStorage.setItem('autoFit', 'true');
 } else {

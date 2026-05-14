@@ -738,7 +738,7 @@
 						<div class='padding input-grid margin-bottom'>
 							<select id='scryfall-bulk-autoframe' class='input' aria-label='Automatically update frame'></select>
 						</div>
-						<h5 class='padding margin-bottom input-description'>Enter up to 75 cards, one card per line. CardConjurer will create all of your cards in the selected frame and download them as a zip file. This may take a long time, especially if you are rendering a lot of cards.</h5>
+						<h5 class='padding margin-bottom input-description'>Enter one card per line. CardConjurer will create all of your cards in the selected frame and download them as a zip file. This may take a long time, especially if you are rendering a lot of cards.</h5>
 						<textarea id='scryfall-bulk-list' class='input margin-bottom' placeholder='Lightning Bolt&#10;Black Lotus (LEA)&#10;Brainstorm (ICE) 76' style='min-height:12rem;'></textarea>
 						<div class='padding input-grid margin-bottom'>
 							<label class='checkbox-container input'>Use Nyx frame for all Enchantments (where applicable)
@@ -751,6 +751,19 @@
 								<input id='scryfall-bulk-avoid-overlap' type='checkbox' onchange='localStorage.setItem("bulk-avoid-overlap", this.checked);'>
 								<span class='checkmark'></span>
 							</label>
+						</div>
+						<div class='padding input-grid margin-bottom'>
+							<label class='checkbox-container input'>Include 1/8" bleed margins
+								<input id='scryfall-bulk-margins' type='checkbox' onchange='localStorage.setItem("bulk-margins", this.checked);'>
+								<span class='checkmark'></span>
+							</label>
+						</div>
+						<div class='padding margin-bottom'>
+							<h5 class='padding margin-bottom input-description'>Image format</h5>
+							<select id='scryfall-bulk-format' class='input' onchange='localStorage.setItem("bulk-format", this.value);'>
+								<option value='png'>PNG</option>
+								<option value='jpg'>JPEG</option>
+							</select>
 						</div>
 						<div class='input-grid'>
 							<button class='input' onclick='startScryfallBulkDownload();'>Download All</button>
@@ -790,6 +803,12 @@
 					<div class='padding input-grid'>
 						<label class='checkbox-container input'>Avoid rules text overlap with Power/Toughness box
 							<input id='autoframe-avoid-overlap' type='checkbox' onchange='setAutoframeAvoidOverlap(this.checked);'>
+							<span class='checkmark'></span>
+						</label>
+					</div>
+					<div class='padding input-grid'>
+						<label class='checkbox-container input'>Include 1/8" bleed margins
+							<input id='autoframe-margins' type='checkbox' onchange='setAutoframeMargins(this.checked);'>
 							<span class='checkmark'></span>
 						</label>
 					</div>
