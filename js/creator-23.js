@@ -4931,6 +4931,21 @@ function toggleHighRes() {
 	drawCard();
 }
 
+function keepCardInView() {	
+	document.onscroll = () => {
+		if (window.innerHeight > previewCanvas.offsetHeight && window.innerWidth >= 1250) {
+			previewCanvas.style.marginTop = `${Math.max(window.scrollY - 141, 0)}px`;
+		}		
+	}
+	
+	window.onresize = () => {
+		if (window.innerWidth < 1250) {
+			previewCanvas.style.marginTop = 0;
+		}
+	}
+}
+	
+
 // INITIALIZATION
 
 // auto load frame version (user defaults)
@@ -5015,3 +5030,5 @@ loadScript('/js/frames/groupStandard-3.js');
 loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
 loadAvailableCards();
 initDraggableArt();
+keepCardInView();
+
