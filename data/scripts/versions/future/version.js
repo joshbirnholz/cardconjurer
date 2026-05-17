@@ -63,8 +63,6 @@ function bottomInfoFuture() {
 	}
 	writeText(
 		[
-			{text: '{right}{oldartistbrush}' + document.getElementById('inputInfoArtist').value, x: 141/1500, y: 1938/2100, width: 1216/1500 + ptBoxShift, height: 52/2100, font: 'matrixb', fontSize: 52/2100, fontColor: copyrightFillColor, otherParameters: ['oneLine=true']},
-			{text: '{right}\u2122 & \u00a9 ' + date.getFullYear() + ' Wizards of the Coast', x: 141/1500, y: 1980/2100, width: 1216/1500 + ptBoxShift, height: 36/2100, font: 'mplantin', fontSize: 36/2100, fontColor: copyrightFillColor, otherParameters: ['oneLine=true']},
-			{text: '{right}NOT FOR SALE   CardConjurer.com', x: 141/1500, y: 2012/2100, width: 1216/1500 + ptBoxShift, height: 28/2100, font: 'mplantin', fontSize: 28/2100, fontColor: copyrightFillColor, otherParameters: ['oneLine=true']}
+			{text: '{right}{oldartistbrush}' + document.getElementById('inputInfoArtist').value, x: 141/1500, y: 1938/2100, width: 1216/1500 + ptBoxShift, height: 52/2100, font: 'matrixb', fontSize: 52/2100, fontColor: copyrightFillColor, otherParameters: ['oneLine=true']}
 		], bottomInfoContext)
 }

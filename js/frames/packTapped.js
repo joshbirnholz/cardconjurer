@@ -46,9 +46,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	await loadBottomInfo({
 		midLeft: {text:'{elemidinfo-set}*{elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{elemidinfo-artist}', x:0.0462, y:0.9367, width:0.9077, height:0.024, oneLine:true, font:'gothammedium', size:0.024, color:'white', outlineWidth:0.003},
 		topLeft: {text:'{elemidinfo-number}  {loadx}{elemidinfo-rarity}', x:0.0462, y:0.9127, width:0.9077, height:0.024, oneLine:true, font:'gothammedium', size:0.024, color:'white', outlineWidth:0.003},
-		bottomLeft: {text:'NOT FOR SALE', x:0.0462, y:0.9607, width:0.9077, height:0.02, oneLine:true, font:'gothammedium', size:0.02, color:'white', outlineWidth:0.003},
-		wizards: {name:'wizards', text:'\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast', x:0.0462, y:0.9607, width:0.9077, height:0.0227, oneLine:true, font:'mplantin', size:0.0227, color:'white', align:'right', outlineWidth:0.003},
-		bottomRight: {text:'CardConjurer.com', x:227/2100, y:0.9607, width:0.9077, height:0.02, oneLine:true, font:'mplantin', size:0.02, color:'white', align:'center', outlineWidth:0.003}
+		credit: {name:'wizards', text:'Designed by {elemidinfo-credit}', x:0.0462, y:0.9607, width:0.9077, height:0.0227, oneLine:true, font:'mplantin', size:0.0227, color:'white', align:'right', outlineWidth:0.003}
 	});
 	//runs other necessary functions
 	drawFrames();

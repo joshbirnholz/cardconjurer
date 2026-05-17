@@ -66,9 +66,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		top: {text:'{conditionalcolor:Black_Frame*Frame*!Right_Half,Land_Frame*Frame*!Right_Half,Black_Nyx_Frame*Frame*!Right_Half,Colorless_Frame:white}{brush} {elemidinfo-artist}', x:150/2010, y:1938/2100, width:0.8107, height:0.0248, oneLine:true, font:'matrixb', size:0.0248, color:'black'},
-		wizards: {name:'wizards', text:'{conditionalcolor:Black_Frame*Frame*!Right_Half,Land_Frame*Frame*!Right_Half,Black_Nyx_Frame*Frame*!Right_Half,Colorless_Frame:white}\u2122 & \u00a9 1993-{elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:150/2010, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'black'},
-		bottom: {text:'{conditionalcolor:Black_Frame*Frame*!Right_Half,Land_Frame*Frame*!Right_Half,Black_Nyx_Frame*Frame*!Right_Half,Colorless_Frame:white}NOT FOR SALE   CardConjurer.com', x:150/2010, y:1994/2100, width:0.8107, height:0.0134, oneLine:true, font:'mplantin', size:0.0134, color:'black'}
+		top: {text:'{conditionalcolor:Black_Frame*Frame*!Right_Half,Land_Frame*Frame*!Right_Half,Black_Nyx_Frame*Frame*!Right_Half,Colorless_Frame:white}{brush} {elemidinfo-artist}', x:150/2010, y:1938/2100, width:0.8107, height:0.0248, oneLine:true, font:'matrixb', size:0.0248, color:'black'}
 	});
 }
 //loads available frames

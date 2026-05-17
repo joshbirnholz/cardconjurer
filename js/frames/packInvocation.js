@@ -55,9 +55,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	await loadBottomInfo({
 		info: {text:'{elemidinfo-number} {elemidinfo-set}*{elemidinfo-language} {elemidinfo-rarity}', x:0.0787, y:0.912, width:0.29, height:0.0162, oneLine:true, font:'gothammedium', size:0.0162, color:'#24150E'},
 		artist: {text:`\uFFEE{fontsize-${scaleHeight(0.002)}}{fontinvocation-text}{elemidinfo-artist}`, x:0.0787, y:0.93, width:0.29, height:0.0181, oneLine:true, font:'belerenbsc', size:0.0181, color:'#24150E'},
-		nfs: {text:'NOT FOR SALE', x:0.2534, y:0.9667, width:0.8707, height:0.0134, oneLine:true, font:'invocation-text', size:0.0134, color:'#24150E'},
-		wizards: {name:'wizards', text:'\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast', x:0.0647, y:0.9453, width:0.86, height:0.0134, oneLine:true, font:'invocation-text', size:0.0134, color:'#24150E', align:'right'},
-		cc: {text:'CardConjurer.com', x:0.0647, y:0.9677, width:0.7467, height:0.0134, oneLine:true, font:'invocation-text', size:0.0134, color:'#24150E', align:'right'}
+		credit: {name:'wizards', text:'Designed by {elemidinfo-credit}', x:0.0647, y:0.9453, width:0.86, height:0.0134, oneLine:true, font:'invocation-text', size:0.0134, color:'#24150E', align:'right'}
 	});
 }
 //loads available frames

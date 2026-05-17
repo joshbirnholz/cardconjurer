@@ -30,9 +30,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		midLeft: {text:'{elemidinfo-set} \u2022 {elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:'white', outlineWidth:0.003},
 		topLeft: {text:'{elemidinfo-number}  {loadx}{elemidinfo-rarity}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:'white', outlineWidth:0.003},
 		note: {text:'{loadx2}{elemidinfo-note}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:'white', outlineWidth:0.003},
-		bottomLeft: {text:'NOT FOR SALE', x:0.0647, y:0.9719, width:0.8707, height:0.0143, oneLine:true, font:'gothammedium', size:0.0143, color:'white', outlineWidth:0.003},
-		bottomRight: {text:'CardConjurer.com', x:0.0647, y:0.972, width:0.8707, height:0.0143, oneLine:true, font:'mplantin', size:0.0143, color:'white', align:'right', outlineWidth:0.003},
-		wizards: {name:'wizards', text:'{ptshift0,0.0172}\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast. Illus. {elemidinfo-artist}', x:0.91, y:0.9762, width:1.3014, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'white', align:'right', rotation:270}
+		credit: {name:'wizards', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.91, y:0.9762, width:1.3014, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'white', align:'right', rotation:270}
 	});
 }
 //loads available frames

@@ -38,8 +38,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	await loadBottomInfo({
 		topLeft: {text:'Art: {elemidinfo-artist}', x:0.01, y:0.9572, width:0.98, height:0.0177, oneLine:true, font:'Acme-Regular', size:0.0177, color:'white', outlineWidth:0.003},
 		bottomLeft: {text:'Sheepwave.com', x:0.03, y:0.9767, width:0.94, height:0.0177, oneLine:true, font:'Acme-Regular', size:0.0177, color:'white', outlineWidth:0.003},
-		topRight: {text:'*NOT FOR SALE*', x:0.01, y:0.9572, width:0.98, height:0.0177, oneLine:true, font:'Acme-Regular', size:0.0177, color:'white', outlineWidth:0.003, align:'right'},
-		wizards: {name:'wizards', text:'{ptshift0,0.0172}\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast', x:0.03, y:0.9767, width:0.94, height:0.0177, oneLine:true, font:'Acme-Regular', size:0.0177, color:'white', align:'right', outlineWidth:0.003},
+		credit: {name:'wizards', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.03, y:0.9767, width:0.94, height:0.0177, oneLine:true, font:'Acme-Regular', size:0.0177, color:'white', align:'right', outlineWidth:0.003}
 	});
 	setTimeout(bottomInfoEdited, 250);
 }

@@ -38,7 +38,6 @@ var LoadFABVersion = async () => {
 	});
 	//bottom info
 	await loadBottomInfo({
-		regular: {text:'{kerning-2}{elemidinfo-rarity} {elemidinfo-set}{elemidinfo-number} {elemidinfo-artist} \u00a9 {elemidinfo-year} Legend Story Studios', x:0.25, y:1987/2100, width:0.5, height:0.0143, oneLine:true, font:'gothammedium', size:0.0143, color:'white', align:'center'},
-		extra: {text:'UNOFFICIAL - NOT FOR SALE   CardConjurer.com', y:2020/2100, height:0.0134, oneLine:true, font:'gothammedium', size:0.0134, color:'white', align:'center'},
+		regular: {text:'{kerning-2}{elemidinfo-rarity} {elemidinfo-set}{elemidinfo-number} {elemidinfo-artist} \u00a9 {elemidinfo-year} Legend Story Studios', x:0.25, y:1987/2100, width:0.5, height:0.0143, oneLine:true, font:'gothammedium', size:0.0143, color:'white', align:'center'}
 	});
 }

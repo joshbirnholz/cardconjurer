@@ -57,8 +57,7 @@ function bottomInfoPlanechase() {
 	}
 	writeText(
 		[//{artistbrush}{fontbelerenbsc}' + document.getElementById('inputInfoArtist').value
-			{text: '{center}' + document.getElementById('inputInfoNumber').value + ' ' + document.getElementById('inputInfoSet').value + '{star}' + document.getElementById('inputInfoLanguage').value + '{right' + scaleX(0.01) + '}{fontmplantin}{fontsize-1}\u2122 & \u00a9 ' + date.getFullYear() + ' Wizards of the Coast', x: 670/2100, y: 2044/2100, width: 760/2100, height: 36/2100, font: 'gothammedium', fontSize: 36/2100, fontColor: 'white', otherParameters: ['oneLine=true', 'outline=true', 'outlineThickness=8']},
+			{text: '{center}' + document.getElementById('inputInfoNumber').value + ' ' + document.getElementById('inputInfoSet').value + '{star}' + document.getElementById('inputInfoLanguage').value, x: 670/2100, y: 2044/2100, width: 760/2100, height: 36/2100, font: 'gothammedium', fontSize: 36/2100, fontColor: 'white', otherParameters: ['oneLine=true', 'outline=true', 'outlineThickness=8']},
 			{text: '{center}{artistbrush}{fontbelerenbsc}' + document.getElementById('inputInfoArtist').value, x: 670/2100, y: 2008/2100, width: 760/2100, height: 36/2100, font: 'belerenbsc', fontSize: 36/2100, fontColor: 'white', otherParameters: ['oneLine=true', 'outline=true', 'outlineThickness=8']},
-			{text: '{center}NOT FOR SALE{right' + scaleX(0.01) + '}{fontmplantin}CardConjurer.com', x: 670/2100, y: 2078/2100, width: 760/2100, height: 30/2100, font: 'gothammedium', fontSize: 30/2100, fontColor: 'white', otherParameters: ['oneLine=true', 'outline=true', 'outlineThickness=8']},
 		], bottomInfoContext)
 }

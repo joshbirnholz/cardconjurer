@@ -47,9 +47,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//bottom info
 	await loadBottomInfo({
 		midLeft: {text:'\uFFEE{elemidinfo-artist}', x:0.1, y:0.9391, width:0.8, height:0.0181, oneLine:true, font:'belerenbsc', size:0.0181},
-		bottomLeft: {text:'NOT FOR SALE', x:0.1, y:0.9562, width:0.8, height:0.0143, oneLine:true, font:'gothammedium', size:0.0143},
-		wizards: {name:'wizards', text:'\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast', x:0.1, y:0.9391, width:0.8, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, align:'right', outlineWidth:0.0005},
-		bottomRight: {text:'CardConjurer.com', x:0.1, y:0.9562, width:0.8, height:0.0143, oneLine:true, font:'mplantin', size:0.0143, align:'right', outlineWidth:0.0005}
+		credit: {name:'wizards', text:'Designed by {elemidinfo-credit}', x:0.1, y:0.9391, width:0.8, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, align:'right', outlineWidth:0.0005}
 	});
 }
 //loads available frames

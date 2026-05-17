@@ -44,8 +44,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//bottom info
 		await loadBottomInfo({
 			top: {text:'\uFFEE{elemidinfo-artist}', x:0.0647, y:0.9434, width:0.8707, height:0.0174, oneLine:true, font:'belerenbsc', size:0.0174, color:'white', outlineWidth:0.003, align:'center'},
-			wizards: {name:'wizards', text:'{elemidinfo-number} {elemidinfo-set} * {elemidinfo-language}   {fontmplantin}\u2122 & \u00a9 {elemidinfo-year} Wizards of the Coast', x:0.0647, y:0.9614, width:0.8707, height:0.0167, oneLine:true, font:'gothammedium', size:0.0162, color:'white', align:'center', outlineWidth:0.003},
-			bottom: {text:'NOT FOR SALE   {fontmplantin}CardConjurer.com', x:0.0647, y:0.98, width:0.8707, height:0.0143, oneLine:true, font:'gothammedium', size:0.0143, color:'white', align:'center', outlineWidth:0.003}
+			credit: {name:'wizards', text:'Designed by {elemidinfo-credit}', x:0.0647, y:0.9614, width:0.8707, height:0.0167, oneLine:true, font:'gothammedium', size:0.0162, color:'white', align:'center', outlineWidth:0.003}
 		});
 	//runs other necessary functions
 	drawFrames();

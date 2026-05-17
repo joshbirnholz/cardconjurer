@@ -44,7 +44,5 @@ function bottomInfoSeventh() {
 	writeText(
 		[
 			{text: '{center}Illus: ' + document.getElementById('inputInfoArtist').value, x: 92/1500, y: 1929/2100, width: 1316/1500, height: 59/2100, font: 'mplantin', fontSize: 59/2100, fontColor: 'white', otherParameters: ['oneLine=true','shadow=' + scaleY(4/2100)]},
-			{text: '{center}\u2122 & \u00a9 ' + date.getFullYear() + ' Wizards of the Coast', x: 92/1500, y: 1972/2100, width: 1316/1500, height: 36/2100, font: 'mplantin', fontSize: 36/2100, fontColor: 'white', otherParameters: ['oneLine=true','shadow=' + scaleY(4/2100)]},
-			{text: '{center}NOT FOR SALE   CardConjurer.com', x: 92/1500, y: 2005/2100, width: 1316/1500, height: 30/2100, font: 'mplantin', fontSize: 30/2100, fontColor: 'white', otherParameters: ['oneLine=true','shadow=' + scaleY(4/2100)]},
 		], bottomInfoContext)
 }

@@ -51,7 +51,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//bottom info
 	loadBottomInfo({
 		top: {text:'\uFFEE {elemidinfo-artist}', x:0.0647, y:1973/2100, width:0.8107, height:0.0248, oneLine:true, font:'belerenbsc', size:0.02095, color:'white'},
-		wizards: {name:'wizards', text:'\u2122 & \u00a9 1993-{elemidinfo-year} Wizards of the Coast, Inc. {elemidinfo-number}', x:0.0647, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'white', shadowX:0.0007, shadowY:0.0005},
+		credit: {name:'wizards', text:'Designed by {elemidinfo-credit}', x:0.0647, y:1958/2100, width:0.8107, height:0.0153, oneLine:true, font:'mplantin', size:0.0153, color:'white', shadowX:0.0007, shadowY:0.0005}
 	});
 }
 //loads available frames

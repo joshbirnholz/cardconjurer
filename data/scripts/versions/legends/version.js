@@ -45,7 +45,5 @@ function bottomInfoLegends() {
 	writeText(
 		[
 			{text: 'Illus: ' + document.getElementById('inputInfoArtist').value, x: 150/1500, y: 1932/2100, width: 1200/1500, height: 60/2100, font: 'mplantin', fontSize: 60/2100, fontColor: '#eee', otherParameters: ['oneLine=true','shadow=' + scaleY(3/2100)]},
-			{text: '\u2122 & \u00a9 ' + date.getFullYear() + ' Wizards of the Coast', x: 150/1500, y: 1976/2100, width: 1200/1500, height: 36/2100, font: 'mplantin', fontSize: 36/2100, fontColor: '#eee', otherParameters: ['oneLine=true','shadow=' + scaleY(3/2100)]},
-			{text: 'NOT FOR SALE   CardConjurer.com', x: 150/1500, y: 2008/2100, width: 1200/1500, height: 30/2100, font: 'mplantin', fontSize: 30/2100, fontColor: '#eee', otherParameters: ['oneLine=true','shadow=' + scaleY(3/2100)]},
 		], bottomInfoContext)
 }

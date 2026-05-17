@@ -49,8 +49,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	});
 	//bottom info
 	loadBottomInfo({
-		artist: {text:'Illus. {elemidinfo-artist}', x:0.1, y:0.9, width:0.7334, height:0.0334, oneLine:true, size:0.0334, align:'left', shadowX:0.0027, shadowY:0.002, color:'#ababab'},
-		cc: {text:'NOT FOR SALE   CardConjurer.com', x:0.0614, y:0.9791, width:0.8774, height:0.0124, oneLine:true, size:0.0124, align:'center', color:'#ababab', outlineWidth:0.003}
+		artist: {text:'Illus. {elemidinfo-artist}', x:0.1, y:0.9, width:0.7334, height:0.0334, oneLine:true, size:0.0334, align:'left', shadowX:0.0027, shadowY:0.002, color:'#ababab'}
 	});
 }
 //loads available frames
