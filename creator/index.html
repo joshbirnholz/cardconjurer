@@ -754,6 +754,12 @@
 								<span class='checkmark'></span>
 							</label>
 						</div>
+						<div class='padding input-grid margin-bottom'>
+							<label class='checkbox-container input'>Import art from Gatherer (requires local server)
+								<input id='scryfall-bulk-gatherer' type='checkbox' onchange='localStorage.setItem("bulk-gatherer", this.checked);'>
+								<span class='checkmark'></span>
+							</label>
+						</div>
 						<div class='padding margin-bottom'>
 							<h5 class='padding margin-bottom input-description'>Image format</h5>
 							<select id='scryfall-bulk-format' class='input' onchange='localStorage.setItem("bulk-format", this.value);'>
