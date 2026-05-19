@@ -325,7 +325,7 @@ function getFrameLetterConfig(frameType) {
 				if (mask === 'Crown') return `crowns/m15Crown${letter}.png`;
 				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}.png`;
 				if (mask === 'PT') return `regular/m15PT${letter}.png`;
-				
+
 				// Main frame
 				let path = `${style.toLowerCase()}/m15Frame${letter}.png`;
 				if (style === 'snow') {
@@ -340,8 +340,10 @@ function getFrameLetterConfig(frameType) {
 			},
 			maskPath: (mask) => `regular/m15Mask${mask}.png`,
 			letterTransform: (letter, mask, style) => {
-				// Strip land indicator 'L' for all masks and main frame
-				if (letter.includes('L') && letter.length > 1) {
+				// Crown and Inner Crown have no land-colored variants — strip the 'L' indicator.
+				// For all other layers (Rules, Frame, Type, Title, Pinline, Border) the pathBuilder
+				// already maps 'WL' → 'lw.png' etc., so preserve the full letter.
+				if ((mask === 'Crown' || mask === 'Inner Crown') && letter.includes('L') && letter.length > 1) {
 					return letter[0];
 				}
 				if (letter === 'L' && style === 'Nyx') {
@@ -417,8 +419,9 @@ function getFrameLetterConfig(frameType) {
 				return `m15/regular/m15Mask${mask}.png`;
 			},
 			letterTransform: (letter, mask, style) => {
-				// Strip land indicator 'L' for all masks and main frame
-				if (letter.includes('L') && letter.length > 1) {
+				// Crown and Inner Crown have no land-colored variants — strip the 'L' indicator.
+				// The pathBuilder handles 'WL' → 'wl.png' etc. for all other layers.
+				if ((mask === 'Crown' || mask === 'Inner Crown') && letter.includes('L') && letter.length > 1) {
 					return letter[0];
 				}
 				if (letter === 'L' && style === 'Nyx') {
