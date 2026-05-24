@@ -74,6 +74,7 @@ loadFramePacks([
 	{name:'Adventure Time', value:'AdventureTimeRegular'},
 	{name:'Adventure Time Enchantments', value:'AdventureTimeEnchantments'},
 	{name:'Adventure Time Snow', value:'AdventureTimeSnow'},
+	{name:'Adventure Time Adventures', value:'AdventureTimeAdventures'},
 
 	{name:'Showcase Frame Varients', value:'disabled'},
 	{name:'Short Neon (NEO)', value:'NEONeonShort'},
