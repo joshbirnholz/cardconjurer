@@ -875,7 +875,7 @@ function getFrameLetterConfig(frameType) {
 				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
 				if (mask === 'PT') return `pt/${colorLetter}.png`;
 				// Enchantment and snow don't have land/artifact/vehicle variants - fall back to regular
-				const noSpecialVariant = ['l', 'a', 'v'].includes(colorLetter);
+				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
 				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
 				return `${baseFolder}/${colorLetter}.png`;
 			},
@@ -894,7 +894,7 @@ function getFrameLetterConfig(frameType) {
 				if (mask === 'PT' && letter === 'C') {
 					return 'L';
 				}
-				if (letter.includes('L') && letter.length > 1) {
+				if ((mask === 'Crown' || mask === 'PT') && letter.includes('L') && letter.length > 1) {
 					return letter[0];
 				}
 				return letter;

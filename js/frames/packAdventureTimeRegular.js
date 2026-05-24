@@ -16,6 +16,13 @@ availableFrames = [
 	{name:'Colorless Frame', src:'/img/frames/adventuretime/regular/c.png', masks:masks},
 	{name:'Vehicle Frame', src:'/img/frames/adventuretime/regular/v.png', masks:masks},
 
+	{name:'White Land Frame', src:'/img/frames/adventuretime/regular/wl.png', masks:masks},
+	{name:'Blue Land Frame', src:'/img/frames/adventuretime/regular/ul.png', masks:masks},
+	{name:'Black Land Frame', src:'/img/frames/adventuretime/regular/bl.png', masks:masks},
+	{name:'Red Land Frame', src:'/img/frames/adventuretime/regular/rl.png', masks:masks},
+	{name:'Green Land Frame', src:'/img/frames/adventuretime/regular/gl.png', masks:masks},
+	{name:'Multicolored Land Frame', src:'/img/frames/adventuretime/regular/ml.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/adventuretime/pt/w.png', bounds:ptBounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/adventuretime/pt/u.png', bounds:ptBounds},
 	{name:'Black Power/Toughness', src:'/img/frames/adventuretime/pt/b.png', bounds:ptBounds},
