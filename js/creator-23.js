@@ -924,113 +924,6 @@ function setAutoframeMargins(value) {
 	localStorage.setItem('autoframe-margins', value);
 	setAutoFrame();
 }
-function buildMarginFrames(frameType, colors) {
-	const genericBounds = {x:-0.044, y:-1/35, width:1.088, height:37/35};
-	const coloredBounds = {x:-88/2010, y:-80/2817, width:2187/2010, height:2978/2817};
-	const ogBounds = {x:0, y:0, width:1, height:1};
-
-	const typeLine = (card.text.type.text || '').toLowerCase();
-	const isLand = typeLine.includes('land');
-
-	// Determine which border color letter(s) to use, mirroring buildAutoFrames exactly.
-	function getPinlineLetters() {
-		if (isLand) return ['l'];
-
-		const props = cardFrameProperties(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
-
-		// Mirror buildAutoFrames per-type overrides
-		if (frameType === 'Vault' && colors.length === 2) {
-			props.frame = colors[0].toUpperCase();
-			props.frameRight = colors[1].toUpperCase();
-		}
-		if (frameType === 'AdventureTime' && colors.length === 0 && props.frame === 'L') {
-			props.frame = 'C';
-		}
-
-		// Map uppercase property letters to lowercase file letters.
-		// Japan Showcase and Vault have no v.png, so vehicles fall back to artifact.
-		function toLetter(f) {
-			f = (f || 'A').toUpperCase();
-			if (f === 'V') return frameType === 'AdventureTime' ? 'v' : 'a';
-			return f.toLowerCase();
-		}
-
-		const left = toLetter(props.frame);
-		const right = props.frameRight ? toLetter(props.frameRight) : null;
-		return right ? [left, right] : [left];
-	}
-
-	// Colored extensions: Japan Showcase, Vault, AdventureTime
-	if (frameType === 'JapanShowcase' || frameType === 'Vault' || frameType === 'AdventureTime') {
-		let basePath;
-		if (frameType === 'JapanShowcase') {
-			basePath = '/img/frames/m15/japanShowcase/margin/';
-		} else if (frameType === 'Vault') {
-			basePath = '/img/frames/vault/margin/';
-		} else {
-			// AdventureTime: pick style subfolder to match the main frame style
-			const isNyx = typeLine.includes('enchantment creature') || typeLine.includes('enchantment artifact') ||
-				(document.querySelector('#autoframe-always-nyx')?.checked && typeLine.includes('enchantment'));
-			const style = typeLine.includes('snow') ? 'snow' : (isNyx ? 'enchantment' : 'regular');
-			basePath = `/img/frames/adventureTime/margins/${style}/`;
-		}
-
-		// Japan Showcase land file uses capital L; others lowercase
-		const toFileLetter = (l) => (frameType === 'JapanShowcase' && l === 'l') ? 'L' : l;
-
-		// Japan Showcase uses a border mask to clip the extension to the border area
-		const defaultMasks = frameType === 'JapanShowcase'
-			? [{src:'/img/frames/m15/japanShowcase/margin/masks/maskBorder.png', name:'Border'}]
-			: [];
-
-		const letters = getPinlineLetters();
-		const makeFrame = (letter, maskRight = false) => ({
-			name: letter.toUpperCase() + ' Extension',
-			src: basePath + toFileLetter(letter) + '.png',
-			bounds: coloredBounds,
-			ogBounds,
-			masks: [
-				...defaultMasks.map(m => ({...m})),
-				...(maskRight ? [{src:'/img/frames/maskRightHalf.png', name:'Right Half'}] : [])
-			],
-			isMarginFrame: true
-		});
-		const frames = [makeFrame(letters[0])];
-		if (letters[1]) frames.push(makeFrame(letters[1], true));
-		return frames;
-	}
-
-	// Generic extension frames
-	const genericFrame = (src, name) => ({name, src:'/img/frames/margins/' + src, bounds:genericBounds, masks:[], isMarginFrame:true});
-	if (frameType === 'M15BoxTopper') return [genericFrame('boxTopperBorderExtension.png', 'Box Topper Extension')];
-	if (frameType === 'M15ExtendedArtShort') return [genericFrame('boxTopperShortBorderExtension.png', 'Box Topper Extension (Short)')];
-	if (frameType === 'Borderless' || frameType === 'BorderlessUB') return [genericFrame('borderlessBorderExtension.png', 'Borderless Extension')];
-	return [genericFrame('blackBorderExtension.png', 'Black Extension')];
-}
-
-async function applyAutoFrameMargins(frameType, colors) {
-	await resetCardIrregularities({canvas:[getStandardWidth(), getStandardHeight(), 0.044, 1/35], resetOthers:false});
-	card.margins = true;
-	var changedArtBounds = false;
-	if (card.artBounds.width == 1) { card.artBounds.width += 0.044; changedArtBounds = true; }
-	if (card.artBounds.x == 0) { card.artBounds.x = -0.044; card.artBounds.width += 0.044; changedArtBounds = true; }
-	if (card.artBounds.height == 1) { card.artBounds.height += 1/35; changedArtBounds = true; }
-	if (card.artBounds.y == 0) { card.artBounds.y = -1/35; card.artBounds.height += 1/35; changedArtBounds = true; }
-	if (changedArtBounds) autoFitArt();
-	const marginFrames = buildMarginFrames(frameType, colors);
-	for (const frame of marginFrames) {
-		card.frames.unshift(frame);
-		await addFrame([], frame);
-	}
-	if (card.version.includes('planeswalker')) planeswalkerEdited();
-	if (card.version.includes('saga')) sagaEdited();
-	if (card.version.includes('class') && !card.version.includes('classic')) classEdited();
-	if (card.version.includes('station')) stationEdited();
-	drawTextBuffer();
-	bottomInfoEdited();
-	watermarkEdited();
-	drawNewGuidelines();
-}
 // Scans PT frame pixels once to find the topmost non-transparent row AND leftmost non-transparent
 // column, caching both. Returns {top, left} in normalized card coordinates, or null.
 function getPTBoxEdges() {
@@ -4959,7 +4852,7 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 	var name = cardToImport.printed_name || cardToImport.name || '';
 	if (name.startsWith('A-')) { name = name.replace('A-', '{alchemy}'); }
 
-	if (card.text.title) {
+	if (card.text && card.text.title) {
 		if (card.version == 'wanted') {
 			var subtitle = '';
 			var index = name.indexOf(', ');
@@ -5761,7 +5654,7 @@ if ('number' in defaultCollector) {
 	document.querySelector('#info-language').value = defaultCollector.lang;
 	if (defaultCollector.starDot) {setTimeout(function(){defaultCollector.starDot = false; toggleStarDot();}, 500);}
 } else {
-	document.querySelector('#info-number').value = date.getFullYear();
+	document.querySelector('#info-number').value = new Date().getFullYear();
 }
 if (!localStorage.getItem('enableImportCollectorInfo')) {
 	localStorage.setItem('enableImportCollectorInfo', 'false');

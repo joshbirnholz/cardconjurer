@@ -1,6 +1,7 @@
 //Create objects for common properties across available frames
 var masks = [];
-var bounds = {x:-88/2010, y:-80/2817, width:2187/2010, height:2978/2817};
+var bounds = {x:-177/4020, y:-161/5628, width:2187/2010, height:2975/2814};
+registerMarginConfig('AdventureTime', -bounds.x, -bounds.y);
 var ogBounds = {x:0, y:0, width:1, height:1};
 //defines available frames
 availableFrames = [
@@ -38,9 +39,11 @@ availableFrames = [
 	{name:'Vehicle Snow Extension', src:'/img/frames/adventureTime/margins/snow/v.png', bounds:bounds, ogBounds:ogBounds, masks:masks},
 
 ];
-//disables/enables the "Load Frame Version" button
-document.querySelector('#loadFrameVersion').disabled = false;
-//defines process for loading this version, if applicable
-document.querySelector('#loadFrameVersion').onclick = loadMarginVersion;
-//loads available frames
-loadFramePack();
+if (typeof loadMarginVersion === 'function') {
+	//disables/enables the "Load Frame Version" button
+	document.querySelector('#loadFrameVersion').disabled = false;
+	//defines process for loading this version, if applicable
+	document.querySelector('#loadFrameVersion').onclick = loadMarginVersion;
+	//loads available frames
+	loadFramePack();
+}

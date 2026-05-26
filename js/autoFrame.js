@@ -169,6 +169,12 @@ const frameTypeConfigs = {
 		supportsCrown: true, supportsPT: true, supportsStamp: false,
 		filterFrames: (frame) => frame.name.includes('Extension')
 	},
+	'AdventureTimeAdventure': {
+		label: 'Adventure Time Adventure', menuGroup: 'Custom frames',
+		group: 'Custom', makeFrameFunction: makeAdventureTimeAdventureFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
 };
 
 function getFrameTypeConfig(frameType) {
@@ -900,6 +906,54 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
+		'AdventureTimeAdventure': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventuretime/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {x: 0, y: 0, width: 1, height: 521/2814},
+				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
+			},
+			crownMasks: [
+				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
+				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
+			],
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				let styleFolder = 'regular';
+				if (style === 'snow') styleFolder = 'snow';
+				else if (style === 'Nyx') styleFolder = 'enchantment';
+
+				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				return `adventures/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'adventures/pinline.png',
+					'Title': 'title.png',
+					'Type': 'type.png',
+					'Rules': 'adventures/book.png',
+					'Rules (Left)': 'adventures/bookLeft.png',
+					'Rules (Left, Multicolor)': 'adventures/bookLeftMulticolor.png',
+					'Rules (Right)': 'adventures/bookRight.png',
+					'Rules (Right, Multicolor)': 'adventures/bookRightMulticolor.png',
+					'Frame': 'maskFrame.png',
+					'Border': 'maskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (mask === 'PT' && letter === 'C') {
+					return 'L';
+				}
+				// Strip land indicator from Crown and PT (no colored-land variants)
+				if (letter.includes('L') && letter.length > 1) {
+					return letter[0];
+				}
+				return letter;
+			}
+		},
 	};
 
 	return configs[frameType];
@@ -1215,6 +1269,10 @@ function makeAdventureTimeFrameByLetter(letter, mask = false, maskToRightHalf = 
 	return makeFrameByLetterUnified('AdventureTime', letter, mask, maskToRightHalf, style);
 }
 
+function makeAdventureTimeAdventureFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('AdventureTimeAdventure', letter, mask, maskToRightHalf, style);
+}
+
 
 // ============================================================================
 // SECTION 5: AUTO FRAME ORCHESTRATION
@@ -1301,7 +1359,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 	// ----------------------------------------------------------------
 	// cardFrameProperties assigns 'L' to colorless non-artifact cards, but for Adventure Time
 	// colorless non-land cards should use the C frame instead.
-	if (frameType === 'AdventureTime' && colors.length === 0 && properties.frame === 'L' &&
+	if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') && colors.length === 0 && properties.frame === 'L' &&
 		!type_line.toLowerCase().includes('land')) {
 		properties.frame = 'C';
 		properties.rules = 'C';
@@ -1316,7 +1374,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 
 	// LEGENDARY CROWNS (if legendary creature/planeswalker)
 	if (config.supportsCrown && type_line.toLowerCase().includes('legendary')) {
-		if (frameType === 'AdventureTime') {
+		if (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') {
 			const isVehicleType = type_line.toLowerCase().includes('vehicle');
 			const isArtifactType = type_line.toLowerCase().includes('artifact');
 			const isLandType = type_line.toLowerCase().includes('land');
@@ -1496,7 +1554,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 		frames.push(config.makeFrameFunction(properties.typeTitle, 'Title', false, style));
 
 		// ADVENTURE SPECIAL HANDLING - Rules (Left) for adventure side
-		if (frameType === 'Adventure') {
+		if (frameType === 'Adventure' || frameType === 'AdventureTimeAdventure') {
 			// Detect adventure cost colors from mana2Text (adventure mana cost)
 			let adventureColors = [];
 			if (mana2Text) {
@@ -1796,6 +1854,7 @@ async function autoFrame() {
 		var packFrame = frame;
 		if (frame == 'BorderlessUB') packFrame = 'Borderless';
 		else if (frame == 'AdventureTime') packFrame = 'AdventureTimeRegular';
+		else if (frame == 'AdventureTimeAdventure') packFrame = 'AdventureTimeAdventures';
 
 		if (autoFramePack != packFrame) {
 			loadScript('/js/frames/pack' + packFrame + '.js');
@@ -1810,7 +1869,142 @@ async function autoFrame() {
 
 
 // ============================================================================
-// SECTION 7: AUTOFRAME SELECT POPULATION
+// SECTION 7: MARGIN FRAME BUILDING
+// ============================================================================
+
+const marginConfigs = {};
+function registerMarginConfig(frameType, mX, mY) {
+	marginConfigs[frameType] = [mX, mY];
+}
+
+// Tries to load a script, resolving silently if the file doesn't exist.
+function tryLoadScript(path) {
+	return new Promise((resolve) => {
+		const script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.onload = resolve;
+		script.onerror = resolve;
+		script.src = path;
+		document.head.appendChild(script);
+	});
+}
+
+function buildMarginFrames(frameType, colors) {
+	const [mX, mY] = marginConfigs[frameType] ?? [0.044, 1/35];
+	const canvasW = Math.round(getStandardWidth() * (1 + 2 * mX));
+	const canvasH = Math.round(getStandardHeight() * (1 + 2 * mY));
+	const genericBounds = {x:-mX, y:-mY, width:canvasW/getStandardWidth(), height:canvasH/getStandardHeight()};
+	const ogBounds = {x:0, y:0, width:1, height:1};
+
+	const typeLine = (card.text.type.text || '').toLowerCase();
+	const isLand = typeLine.includes('land');
+
+	// Determine which border color letter(s) to use, mirroring buildAutoFrames exactly.
+	function getPinlineLetters() {
+		if (isLand) return ['l'];
+
+		const props = cardFrameProperties(colors, card.text.mana.text, card.text.type.text, card.text.pt.text);
+
+		// Mirror buildAutoFrames per-type overrides
+		if (frameType === 'Vault' && colors.length === 2) {
+			props.frame = colors[0].toUpperCase();
+			props.frameRight = colors[1].toUpperCase();
+		}
+		if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') && colors.length === 0 && props.frame === 'L') {
+			props.frame = 'C';
+		}
+
+		// Japan Showcase and Vault have no v.png, so vehicles fall back to artifact.
+		function toLetter(f) {
+			f = (f || 'A').toUpperCase();
+			if (f === 'V') return (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') ? 'v' : 'a';
+			return f.toLowerCase();
+		}
+
+		const left = toLetter(props.frame);
+		const right = props.frameRight ? toLetter(props.frameRight) : null;
+		return right ? [left, right] : [left];
+	}
+
+	// Colored extensions: Japan Showcase, Vault, AdventureTime
+	if (frameType === 'JapanShowcase' || frameType === 'Vault' || frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') {
+		let basePath;
+		if (frameType === 'JapanShowcase') {
+			basePath = '/img/frames/m15/japanShowcase/margin/';
+		} else if (frameType === 'Vault') {
+			basePath = '/img/frames/vault/margin/';
+		} else {
+			const isNyx = typeLine.includes('enchantment creature') || typeLine.includes('enchantment artifact') ||
+				(document.querySelector('#autoframe-always-nyx')?.checked && typeLine.includes('enchantment'));
+			const style = typeLine.includes('snow') ? 'snow' : (isNyx ? 'enchantment' : 'regular');
+			basePath = `/img/frames/adventureTime/margins/${style}/`;
+		}
+
+		// Japan Showcase land file uses capital L; others lowercase
+		const toFileLetter = (l) => (frameType === 'JapanShowcase' && l === 'l') ? 'L' : l;
+
+		// Japan Showcase uses a border mask to clip the extension to the border area
+		const defaultMasks = frameType === 'JapanShowcase'
+			? [{src:'/img/frames/m15/japanShowcase/margin/masks/maskBorder.png', name:'Border'}]
+			: [];
+
+		const letters = getPinlineLetters();
+		const makeFrame = (letter, maskRight = false) => ({
+			name: letter.toUpperCase() + ' Extension',
+			src: basePath + toFileLetter(letter) + '.png',
+			bounds: genericBounds,
+			ogBounds,
+			masks: [
+				...defaultMasks.map(m => ({...m})),
+				...(maskRight ? [{src:'/img/frames/maskRightHalf.png', name:'Right Half'}] : [])
+			],
+			isMarginFrame: true
+		});
+		const frames = [makeFrame(letters[0])];
+		if (letters[1]) frames.push(makeFrame(letters[1], true));
+		return frames;
+	}
+
+	// Generic extension frames
+	const genericFrame = (src, name) => ({name, src:'/img/frames/margins/' + src, bounds:genericBounds, masks:[], isMarginFrame:true});
+	if (frameType === 'M15BoxTopper') return [genericFrame('boxTopperBorderExtension.png', 'Box Topper Extension')];
+	if (frameType === 'M15ExtendedArtShort') return [genericFrame('boxTopperShortBorderExtension.png', 'Box Topper Extension (Short)')];
+	if (frameType === 'Borderless' || frameType === 'BorderlessUB') return [genericFrame('borderlessBorderExtension.png', 'Borderless Extension')];
+	return [genericFrame('blackBorderExtension.png', 'Black Extension')];
+}
+
+async function applyAutoFrameMargins(frameType, colors) {
+	const config = getFrameTypeConfig(frameType);
+	if (!marginConfigs[frameType]) {
+		await tryLoadScript('/js/frames/packMargin' + frameType + '.js');
+	}
+	const [mX, mY] = marginConfigs[frameType] ?? [0.044, 1/35];
+	await resetCardIrregularities({canvas:[getStandardWidth(), getStandardHeight(), mX, mY], resetOthers:false});
+	card.margins = true;
+	var changedArtBounds = false;
+	if (card.artBounds.width == 1) { card.artBounds.width += mX; changedArtBounds = true; }
+	if (card.artBounds.x == 0) { card.artBounds.x = -mX; card.artBounds.width += mX; changedArtBounds = true; }
+	if (card.artBounds.height == 1) { card.artBounds.height += mY; changedArtBounds = true; }
+	if (card.artBounds.y == 0) { card.artBounds.y = -mY; card.artBounds.height += mY; changedArtBounds = true; }
+	if (changedArtBounds) autoFitArt();
+	const marginFrames = buildMarginFrames(frameType, colors);
+	for (const frame of marginFrames) {
+		card.frames.push(frame);
+		await addFrame([], frame);
+	}
+	if (card.version.includes('planeswalker')) planeswalkerEdited();
+	if (card.version.includes('saga')) sagaEdited();
+	if (card.version.includes('class') && !card.version.includes('classic')) classEdited();
+	if (card.version.includes('station')) stationEdited();
+	drawTextBuffer();
+	bottomInfoEdited();
+	watermarkEdited();
+	drawNewGuidelines();
+}
+
+
+// ============================================================================
+// SECTION 8: AUTOFRAME SELECT POPULATION
 // ============================================================================
 // Populates an autoframe <select> from frameTypeConfigs.
 // Group separators are inserted automatically when menuGroup changes between entries.
