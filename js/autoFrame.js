@@ -1560,15 +1560,17 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 			if (mana2Text) {
 				let manaText = mana2Text.toUpperCase();
 
-				// For hybrid mana (contains /), only use the second color
-				if (manaText.includes('/')) {
-					// Extract all colors from hybrid symbols like {G/W}, then use the second one
-					let colors = manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char));
+				// Hybrid: {R/G} style slash, or {RG} style two color letters in one symbol
+				const isHybrid = manaText.includes('/') || /[WUBRG]{2}/.test(manaText);
+
+				if (isHybrid) {
+					let colors = [...new Set(manaText.split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
 					if (colors.length > 2) {
 						adventureColors = ['M'];
 					} else if (colors.length === 1) {
 						adventureColors = [colors[0]];
 					} else {
+						// Hybrid 2-color: land background, no color overlay
 						adventureColors = ['L'];
 					}
 				} else {
@@ -1685,10 +1687,17 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 			if (preparePinline) frames.push(preparePinline);
 		}
 
-		if (properties.pinlineRight) {
-			frames.push(config.makeFrameFunction(properties.rulesRight, 'Rules', true, style));
+		if (frameType === 'Adventure' || frameType === 'AdventureTimeAdventure') {
+			if (properties.pinlineRight) {
+				frames.push(config.makeFrameFunction(properties.rulesRight, 'Rules (Right, Multicolor)', false, style));
+			}
+			frames.push(config.makeFrameFunction(properties.rules, 'Rules (Right)', false, style));
+		} else {
+			if (properties.pinlineRight) {
+				frames.push(config.makeFrameFunction(properties.rulesRight, 'Rules', true, style));
+			}
+			frames.push(config.makeFrameFunction(properties.rules, 'Rules', false, style));
 		}
-		frames.push(config.makeFrameFunction(properties.rules, 'Rules', false, style));
 		if (properties.frameRight) {
 			frames.push(config.makeFrameFunction(properties.frameRight, 'Frame', true, style));
 		}
@@ -1960,9 +1969,8 @@ function buildMarginFrames(frameType, colors) {
 			],
 			isMarginFrame: true
 		});
-		const frames = [makeFrame(letters[0])];
-		if (letters[1]) frames.push(makeFrame(letters[1], true));
-		return frames;
+		if (letters[1]) return [makeFrame(letters[1], true), makeFrame(letters[0])];
+		return [makeFrame(letters[0])];
 	}
 
 	// Generic extension frames
@@ -1990,8 +1998,11 @@ async function applyAutoFrameMargins(frameType, colors) {
 	const marginFrames = buildMarginFrames(frameType, colors);
 	for (const frame of marginFrames) {
 		card.frames.push(frame);
-		await addFrame([], frame);
 	}
+	document.querySelector('#frame-list').innerHTML = null;
+	card.frames.reverse();
+	await card.frames.forEach(item => addFrame([], item));
+	card.frames.reverse();
 	if (card.version.includes('planeswalker')) planeswalkerEdited();
 	if (card.version.includes('saga')) sagaEdited();
 	if (card.version.includes('class') && !card.version.includes('classic')) classEdited();

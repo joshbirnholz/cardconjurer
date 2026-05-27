@@ -4505,9 +4505,7 @@ async function changeCardIndex() {
 	var langFontCode = "";
 	if (cardToImport.lang == "ph") {langFontCode = "{fontphyrexian}"}
 	// Handle Multi Faced Card Layouts
-	const multiFacedVersions = ['flip', 'split', 'fuse', 'aftermath', 'adventure', 'omen', 'room', 'battle', 'transform', 'modal', 'prepare'];
-	const isMultiFacedVersion = multiFacedVersions.some(keyword => card.version.toLowerCase().includes(keyword));
-	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure', 'omen', 'prepare'].includes(cardToImport.layout) && isMultiFacedVersion) {
+	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure', 'omen', 'prepare'].includes(cardToImport.layout)) {
 		const flipData = parseMultiFacedCards(cardToImport);
 		if (!flipData) {
 			console.error('Failed to parse Multi Faced card data');
@@ -4579,6 +4577,16 @@ async function changeCardIndex() {
 			if (card.text.pt2) {
 				card.text.pt2.text = flipData.back.pt || '';
 			}
+		}
+		// Always cache adventure/prepare back-face text so autoframe's loadTextOptions can restore
+		// it even when the current text structure doesn't have these fields yet.
+		if (['adventure', 'prepare'].includes(cardToImport.layout)) {
+			let _r2 = langFontCode + (flipData.back.rules || '');
+			if (flipData.back.flavor) _r2 += '{flavor}' + curlyQuotes(flipData.back.flavor.replace('\n', '{lns}'));
+			savedTextContents['title2'] = langFontCode + (flipData.back.name || '');
+			savedTextContents['type2'] = langFontCode + (flipData.back.type || '');
+			savedTextContents['rules2'] = _r2;
+			savedTextContents['mana2'] = flipData.back.mana || '';
 		}
 		
 		// Handle pt2 for battle and transform front faces (cards without title2/mana2)
