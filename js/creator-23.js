@@ -3291,6 +3291,7 @@ async function bottomInfoEdited() {
 	card.infoLanguage = document.querySelector('#info-language').value;
 	card.infoArtist = document.querySelector('#info-artist').value;
 	card.infoCredit = document.querySelector('#info-credit').value;
+	localStorage.setItem('infoCredit', card.infoCredit);
 	card.infoNote = document.querySelector('#info-note').value;
 
 	if (document.querySelector('#enableCollectorInfo').checked) {
@@ -5645,6 +5646,9 @@ document.querySelector('#autoLoadFrameVersion').checked = 'true' == localStorage
 // document.querySelector('#high-res').checked = 'true' == localStorage.getItem('high-res');
 
 // collector info (user defaults)
+if (localStorage.getItem('infoCredit')) {
+	document.querySelector('#info-credit').value = localStorage.getItem('infoCredit');
+}
 var defaultCollector = JSON.parse(localStorage.getItem('defaultCollector') || '{}');
 if ('number' in defaultCollector) {
 	document.querySelector('#info-number').value = defaultCollector.number;
