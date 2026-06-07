@@ -43,7 +43,15 @@ if (typeof loadMarginVersion === 'function') {
 	//disables/enables the "Load Frame Version" button
 	document.querySelector('#loadFrameVersion').disabled = false;
 	//defines process for loading this version, if applicable
-	document.querySelector('#loadFrameVersion').onclick = loadMarginVersion;
+	document.querySelector('#loadFrameVersion').onclick = async function() {
+		loadMarginVersion();
+		await resetCardIrregularities({canvas:[getStandardWidth(), getStandardHeight(), -bounds.x, -bounds.y], resetOthers:false});
+		drawTextBuffer();
+		drawFrames();
+		bottomInfoEdited();
+		watermarkEdited();
+		drawNewGuidelines();
+	};
 	//loads available frames
 	loadFramePack();
 }
