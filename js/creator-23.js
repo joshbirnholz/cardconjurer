@@ -928,6 +928,10 @@ function setAutoframeMargins(value) {
 	localStorage.setItem('autoframe-margins', value);
 	setAutoFrame();
 }
+function setAutoframeDfcBackHideSetSymbol(value) {
+	localStorage.setItem('autoframe-dfc-back-hide-set-symbol', value);
+	drawCard();
+}
 // Scans PT frame pixels once to find the topmost non-transparent row AND leftmost non-transparent
 // column, caching both. Returns {top, left} in normalized card coordinates, or null.
 function getPTBoxEdges() {
@@ -3502,7 +3506,11 @@ function drawCard() {
 	cardContext.drawImage(textCanvas, 0, 0, cardCanvas.width, cardCanvas.height);
 	// set symbol
 	if (card.setSymbolBounds) {
-		drawSetSymbol(cardContext, setSymbol, card.setSymbolBounds); 
+		const dfcBackHideSetSymbol = document.querySelector('#autoframe-dfc-back-hide-set-symbol')?.checked;
+		const isDfcBack = card.version && card.version.toLowerCase().includes('back');
+		if (!(dfcBackHideSetSymbol && isDfcBack)) {
+			drawSetSymbol(cardContext, setSymbol, card.setSymbolBounds);
+		}
 	}
 	// serial
 	if (card.serialNumber || card.serialTotal) {
@@ -3824,10 +3832,13 @@ async function startScryfallBulkDownload() {
     const savedAvoidOverlapValue = avoidOverlapCheckbox.checked;
     const marginsCheckbox = document.querySelector('#autoframe-margins');
     const savedMarginsValue = marginsCheckbox.checked;
+    const dfcBackHideSetSymbolCheckbox = document.querySelector('#autoframe-dfc-back-hide-set-symbol');
+    const savedDfcBackHideSetSymbolValue = dfcBackHideSetSymbolCheckbox.checked;
     autoFrameSelect.value = frameType;
     nyxCheckbox.checked = useNyx;
     avoidOverlapCheckbox.checked = document.querySelector('#scryfall-bulk-avoid-overlap').checked;
     marginsCheckbox.checked = document.querySelector('#scryfall-bulk-margins').checked;
+    dfcBackHideSetSymbolCheckbox.checked = document.querySelector('#scryfall-bulk-dfc-back-hide-set-symbol').checked;
 
     // Suppress the async art search that changeCardIndex() triggers via fetchScryfallData().
     const origFetchScryfallData = window.fetchScryfallData;
@@ -3954,6 +3965,7 @@ async function startScryfallBulkDownload() {
     nyxCheckbox.checked = savedNyxValue;
     avoidOverlapCheckbox.checked = savedAvoidOverlapValue;
     marginsCheckbox.checked = savedMarginsValue;
+    dfcBackHideSetSymbolCheckbox.checked = savedDfcBackHideSetSymbolValue;
 
     // Generate and save the ZIP
     try {
@@ -5718,9 +5730,11 @@ if (!localStorage.getItem('autoframe-always-nyx')) {
 document.querySelector('#autoframe-always-nyx').checked = localStorage.getItem('autoframe-always-nyx');
 document.querySelector('#autoframe-avoid-overlap').checked = localStorage.getItem('autoframe-avoid-overlap') === 'true';
 document.querySelector('#autoframe-margins').checked = localStorage.getItem('autoframe-margins') === 'true';
+document.querySelector('#autoframe-dfc-back-hide-set-symbol').checked = localStorage.getItem('autoframe-dfc-back-hide-set-symbol') === 'true';
 document.querySelector('#scryfall-bulk-nyx').checked = localStorage.getItem('bulk-nyx') === 'true';
 document.querySelector('#scryfall-bulk-avoid-overlap').checked = localStorage.getItem('bulk-avoid-overlap') === 'true';
 document.querySelector('#scryfall-bulk-margins').checked = localStorage.getItem('bulk-margins') === 'true';
+document.querySelector('#scryfall-bulk-dfc-back-hide-set-symbol').checked = localStorage.getItem('bulk-dfc-back-hide-set-symbol') === 'true';
 document.querySelector('#scryfall-bulk-format').value = localStorage.getItem('bulk-format') || 'png';
 if (!localStorage.getItem('autoFit')) {
 	localStorage.setItem('autoFit', 'true');
