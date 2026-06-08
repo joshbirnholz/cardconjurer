@@ -984,7 +984,14 @@ function getFrameLetterConfig(frameType) {
 				if (style === 'snow') styleFolder = 'snow';
 				else if (style === 'Nyx') styleFolder = 'enchantment';
 
-				if (mask === 'Crown') return `dfc/front/regular/crown/${colorLetter}.png`;
+				if (mask === 'Crown') {
+					const noEnchantCrown = ['a', 'l', 'v'];
+					const noSnowCrown = ['v'];
+					let crownFolder = styleFolder;
+					if (styleFolder === 'enchantment' && noEnchantCrown.includes(colorLetter)) crownFolder = 'regular';
+					if (styleFolder === 'snow' && noSnowCrown.includes(colorLetter)) crownFolder = 'regular';
+					return `dfc/front/${crownFolder}/crown/${colorLetter}.png`;
+				}
 				if (mask === 'PT') return `pt/${colorLetter}.png`;
 				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
 				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
@@ -1025,7 +1032,14 @@ function getFrameLetterConfig(frameType) {
 				if (style === 'snow') styleFolder = 'snow';
 				else if (style === 'Nyx') styleFolder = 'enchantment';
 
-				if (mask === 'Crown') return `dfc/back/regular/crown/${colorLetter}.png`;
+				if (mask === 'Crown') {
+					const noEnchantCrown = ['l', 'v'];
+					const noSnowCrown = ['v'];
+					let crownFolder = styleFolder;
+					if (styleFolder === 'enchantment' && noEnchantCrown.includes(colorLetter)) crownFolder = 'regular';
+					if (styleFolder === 'snow' && noSnowCrown.includes(colorLetter)) crownFolder = 'regular';
+					return `dfc/back/${crownFolder}/crown/${colorLetter}.png`;
+				}
 				if (mask === 'PT') return `dfc/back/pt/${colorLetter}.png`;
 				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
 				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
