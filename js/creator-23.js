@@ -3834,7 +3834,7 @@ async function startScryfallBulkDownload() {
     const savedMarginsValue = marginsCheckbox.checked;
     const dfcBackHideSetSymbolCheckbox = document.querySelector('#autoframe-dfc-back-hide-set-symbol');
     const savedDfcBackHideSetSymbolValue = dfcBackHideSetSymbolCheckbox.checked;
-    autoFrameSelect.value = frameType;
+    if (frameType !== 'AdventureTimeAuto') autoFrameSelect.value = frameType;
     nyxCheckbox.checked = useNyx;
     avoidOverlapCheckbox.checked = document.querySelector('#scryfall-bulk-avoid-overlap').checked;
     marginsCheckbox.checked = document.querySelector('#scryfall-bulk-margins').checked;
@@ -3889,6 +3889,104 @@ async function startScryfallBulkDownload() {
             try {
             notify(`Processing card ${totalRendered} of ${totalRequested}: ${cardObj.name}`, 1);
 
+            if (frameType === 'AdventureTimeAuto') {
+                const layout = cardObj.layout;
+                const isDFC = ['transform', 'modal_dfc', 'transform double faced'].includes(layout)
+                           || (Array.isArray(cardObj.card_faces) && cardObj.card_faces.length === 2
+                               && !['adventure', 'split', 'flip', 'aftermath', 'meld'].includes(layout));
+                const setCode = cardObj.set ? cardObj.set.toUpperCase() : '';
+                const collNum = cardObj.collector_number || '';
+                const safeFilename = name => (name + (setCode ? ` (${setCode})` : '') + (collNum ? ` ${collNum}` : '')).replace(/[<>:"/\\|?*]/g, '_');
+
+                // Split into face objects for DFC (both faces rendered) and adventure
+                // (so the single-faced block gets front-face-only name/type/mana rather than
+                // the combined top-level values like "Hypnotic Sprite // Mesmeric Glare").
+                const cardFaces = (isDFC || layout === 'adventure') ? [] : null;
+                if (cardFaces) processScryfallCard(cardObj, cardFaces);
+
+                // --- FRONT / SINGLE ---
+                autoFrameSelect.value = isDFC ? 'AdventureTimeTransformFront'
+                                      : layout === 'adventure' ? 'AdventureTimeAdventure'
+                                      : 'AdventureTime';
+
+                ImageLoadTracker.start();
+                FontLoadTracker.start();
+                await importCard(cardFaces ?? [cardObj]);
+                clearTimeout(writingText);
+                clearTimeout(autoFrameTimer);
+
+                const frontArtUrl = cardObj.card_faces?.[0]?.image_uris?.art_crop ?? cardObj.image_uris?.art_crop;
+                if (frontArtUrl) {
+                    await new Promise(resolve => {
+                        art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                        art.onerror = resolve;
+                        art.src = frontArtUrl;
+                    });
+                }
+                const frontArtist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
+                if (frontArtist) artistEdited(frontArtist);
+
+                await autoFrame();
+                clearTimeout(writingText);
+                clearTimeout(autoFrameTimer);
+
+                // autoFrame() now fully awaits the pack load (resetCardIrregularities +
+                // loadTextOptions), so card.text.reminder is guaranteed to exist here.
+                const backPT = isDFC && cardFaces?.[1]?.power
+                    ? `${cardFaces[1].power}/${cardFaces[1].toughness}` : '';
+                if (backPT && card.text?.reminder) card.text.reminder.text = backPT;
+
+                await drawText();
+                await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                await drawText();
+                drawCard();
+
+                const frontTitle = getCardName();
+                const frontFile = safeFilename(frontTitle) + (isDFC ? ' (front)' : '') + '.' + imageExt;
+                zip.file(frontFile, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
+                console.log(`Zipped: ${frontFile}`);
+
+                // --- BACK (DFC only) ---
+                if (isDFC) {
+                    notify(`Processing card ${totalRendered} of ${totalRequested}: ${cardObj.name} (back)`, 1);
+                    autoFrameSelect.value = 'AdventureTimeTransformBack';
+
+                    ImageLoadTracker.start();
+                    FontLoadTracker.start();
+
+                    await importCard(cardFaces);                         // imports face 0 by default
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+                    document.querySelector('#import-index').value = '1'; // select back face
+                    await changeCardIndex();
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+
+                    const backArtUrl = cardObj.card_faces?.[1]?.image_uris?.art_crop;
+                    if (backArtUrl) {
+                        await new Promise(resolve => {
+                            art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                            art.onerror = resolve;
+                            art.src = backArtUrl;
+                        });
+                    }
+                    const backArtist = cardObj.card_faces?.[1]?.artist || cardObj.artist;
+                    if (backArtist) artistEdited(backArtist);
+
+                    await autoFrame();
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+                    await drawText();
+                    await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                    await drawText();
+                    drawCard();
+
+                    const backTitle = getCardName();
+                    const backFile = safeFilename(backTitle) + ' (back).' + imageExt;
+                    zip.file(backFile, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
+                    console.log(`Zipped: ${backFile}`);
+                }
+            } else {
             ImageLoadTracker.start();
             FontLoadTracker.start();
 
@@ -3948,6 +4046,7 @@ async function startScryfallBulkDownload() {
             const imageData = cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1];
             zip.file(imageName, imageData, { base64: true });
             console.log(`Zipped: ${imageName}`);
+            }
 
         } catch (error) {
             console.error(`Failed to process card "${cardObj.name}":`, error);
@@ -4573,6 +4672,11 @@ async function changeCardIndex() {
 			}
 		}
 
+		// Apply the same italic/symbol formatting to the back-face rules that the
+		// single-faced block applies to the front face (reminder text → {i}...{/i}, etc.).
+		const backRulesItalicized = (flipData.back.rules || '').replace(/(?:\((?:.*?)\)|[^"\n]+(?= — ))/g, a => '{i}' + a + '{/i}');
+		const backRulesFormatted = curlyQuotes(backRulesItalicized).replace(/{Q}/g, '{untap}').replace(/{∞}/g, '{inf}').replace(/• /g, '• {indent}');
+
 		// Handle MDFC cards separately (they use flipsideType and flipSideReminder)
 		if (cardToImport.layout === 'modal_dfc' && card.text?.flipsideType && card.text?.flipSideReminder) {
 			card.text.flipsideType.text = langFontCode + flipData.back.type;
@@ -4585,7 +4689,7 @@ async function changeCardIndex() {
 			if (!cardToImport.type_line?.toLowerCase().includes('room')) {
 				card.text.type2.text = langFontCode + flipData.back.type;
 			}
-			card.text.rules2.text = langFontCode + flipData.back.rules;
+			card.text.rules2.text = langFontCode + backRulesFormatted;
 			if (flipData.back.flavor) {
 				card.text.rules2.text += '{flavor}' + curlyQuotes(flipData.back.flavor.replace('\n', '{lns}'));
 			}
@@ -4597,7 +4701,7 @@ async function changeCardIndex() {
 		// Always cache adventure/prepare back-face text so autoframe's loadTextOptions can restore
 		// it even when the current text structure doesn't have these fields yet.
 		if (['adventure', 'prepare'].includes(cardToImport.layout)) {
-			let _r2 = langFontCode + (flipData.back.rules || '');
+			let _r2 = langFontCode + backRulesFormatted;
 			if (flipData.back.flavor) _r2 += '{flavor}' + curlyQuotes(flipData.back.flavor.replace('\n', '{lns}'));
 			savedTextContents['title2'] = langFontCode + (flipData.back.name || '');
 			savedTextContents['type2'] = langFontCode + (flipData.back.type || '');
@@ -4606,11 +4710,14 @@ async function changeCardIndex() {
 		}
 		
 		// Handle pt2 for battle and transform front faces (cards without title2/mana2)
-		if ((card.version === 'battle' || card.version.includes('transform') || card.version.includes('Transform')) && card.text?.pt2) {
+		const autoFrameVal = document.querySelector('#autoFrame').value;
+		const isTransformContext = card.version.includes('transform') || card.version.includes('Transform')
+		                        || autoFrameVal.includes('Transform');
+		if ((card.version === 'battle' || isTransformContext) && card.text?.pt2) {
 			card.text.pt2.text = flipData.back.pt || '';
 		}
 
-		if ((card.version.includes('transform') || card.version.includes('Transform')) && card.text?.reminder && flipData.back.pt) {
+		if (isTransformContext && card.text?.reminder && flipData.back.pt) {
 			card.text.reminder.text = flipData.back.pt;
 		}
 	
@@ -5107,7 +5214,9 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 
 		// Add {right88} to the type line to make room for the indicator dot
 		const atTransformBackVersions = ['adventureTimeTransformBack', 'adventureTimeEnchantmentTransformBack', 'adventureTimeSnowTransformBack'];
-		if (atTransformBackVersions.includes(card.version) && card.text?.type && !card.text.type.text.startsWith('{right88}')) {
+		const isAtTransformBack = atTransformBackVersions.includes(card.version)
+		                       || document.querySelector('#autoFrame').value === 'AdventureTimeTransformBack';
+		if (isAtTransformBack && card.text?.type && !card.text.type.text.startsWith('{right88}')) {
 			card.text.type.text = '{right88}' + card.text.type.text;
 		}
 	}

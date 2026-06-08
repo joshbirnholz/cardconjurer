@@ -1854,7 +1854,8 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 	});
 
 	// Compute new frame layers without touching the card
-	var mana2Text = card.text.mana2 ? card.text.mana2.text : '';
+	const isAdventureFrameType = frameType === 'Adventure' || frameType === 'AdventureTimeAdventure';
+	var mana2Text = card.text.mana2 ? card.text.mana2.text : (isAdventureFrameType ? (savedTextContents?.mana2 || '') : '');
 	var newFrames = buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Text);
 
 	// Vehicle P/T text should be white
@@ -1999,8 +2000,21 @@ async function autoFrame() {
 		else if (frame == 'AdventureTimeTransformBack') packFrame = 'AdventureTimeRegularTransformBack';
 
 		if (autoFramePack != packFrame) {
-			loadScript('/js/frames/pack' + packFrame + '.js');
+			// Temporarily disable autoLoadFrameVersion so loadFramePack() does not
+			// auto-click #loadFrameVersion — we await it ourselves so the pack's
+			// resetCardIrregularities + loadTextOptions run synchronously (relative to
+			// the awaiting caller) before autoFrame() returns.
+			const wasAutoLoad = localStorage.getItem('autoLoadFrameVersion');
+			localStorage.setItem('autoLoadFrameVersion', 'false');
+			await loadScript('/js/frames/pack' + packFrame + '.js');
+			localStorage.setItem('autoLoadFrameVersion', wasAutoLoad);
 			autoFramePack = packFrame;
+			if (wasAutoLoad === 'true') {
+				const loadFrameVersionBtn = document.querySelector('#loadFrameVersion');
+				if (loadFrameVersionBtn?.onclick) {
+					await loadFrameVersionBtn.onclick();
+				}
+			}
 		}
 
 		if (document.querySelector('#autoframe-margins')?.checked) {
@@ -2181,4 +2195,20 @@ function populateAutoFrameSelect(selectEl, includeDisabled) {
 if (!localStorage.getItem('autoFrame')) localStorage.setItem('autoFrame', 'false');
 populateAutoFrameSelect(document.querySelector('#autoFrame'), true);
 populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), false);
+// In the bulk dropdown, replace the four individual AT options with a single auto option.
+(function () {
+	const sel = document.querySelector('#scryfall-bulk-autoframe');
+	const firstAtOpt = sel.querySelector('option[value="AdventureTime"]');
+	if (!firstAtOpt) return;
+	const sep = firstAtOpt.previousElementSibling;
+	if (sep && sep.disabled) sep.remove();
+	const autoOpt = document.createElement('option');
+	autoOpt.value = 'AdventureTimeAuto';
+	autoOpt.textContent = 'Adventure Time';
+	sel.insertBefore(autoOpt, firstAtOpt);
+	['AdventureTime', 'AdventureTimeAdventure', 'AdventureTimeTransformFront', 'AdventureTimeTransformBack']
+		.forEach(v => sel.querySelector(`option[value="${v}"]`)?.remove());
+})();
 document.querySelector('#autoFrame').value = localStorage.getItem('autoFrame');
+const savedBulkAutoFrame = localStorage.getItem('bulk-autoframe');
+if (savedBulkAutoFrame) document.querySelector('#scryfall-bulk-autoframe').value = savedBulkAutoFrame;
