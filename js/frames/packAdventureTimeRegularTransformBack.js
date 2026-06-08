@@ -3,6 +3,7 @@ var masks = [{src:'/img/frames/adventuretime/dfc/back/maskPinline.png', name:'Pi
 var ptBounds = {x:1548/2010, y:2500/2814, width:360/2010, height:167/2814};
 var crownBounds = {x:0/2010, y:0/2814, width:1, height: 521/2814};
 var crownMasks = [{src:'/img/frames/adventuretime/maskCrownPinline.png', name:'Pinline'}, {src:'/img/frames/adventuretime/maskCrownFrame.png', name:'Frame'}];
+var ciMasks = [{src:'/img/frames/m15/ciPips/firstHalf.svg', name:'First Half'}, {src:'/img/frames/m15/ciPips/secondHalf.svg', name:'Second Half'}, {src:'/img/frames/m15/ciPips/firstThird.svg', name:'First Third'}, {src:'/img/frames/m15/ciPips/secondThird.svg', name:'Second Third'}, {src:'/img/frames/m15/ciPips/thirdThird.svg', name:'Third Third'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/adventuretime/dfc/back/regular/w.png', masks:masks},
@@ -42,7 +43,14 @@ availableFrames = [
 	{name:'Artifact Legendary Crown', src:'/img/frames/adventuretime/dfc/back/regular/crown/a.png', bounds:crownBounds, masks:crownMasks},
 	{name:'Land Legendary Crown', src:'/img/frames/adventuretime/dfc/back/regular/crown/l.png', bounds:crownBounds, masks:crownMasks},
 	{name:'Colorless Legendary Crown', src:'/img/frames/adventuretime/dfc/back/regular/crown/c.png', bounds:crownBounds, masks:crownMasks},
-	{name:'Vehicle Legendary Crown', src:'/img/frames/adventuretime/dfc/back/regular/crown/v.png', bounds:crownBounds, masks:crownMasks}
+	{name:'Vehicle Legendary Crown', src:'/img/frames/adventuretime/dfc/back/regular/crown/v.png', bounds:crownBounds, masks:crownMasks},
+
+	{name:'White Color Indicator', src:'/img/frames/m15/ciPips/w.svg', masks:ciMasks, complementary:'Color Indicator Base'},
+	{name:'Blue Color Indicator', src:'/img/frames/m15/ciPips/u.svg', masks:ciMasks, complementary:'Color Indicator Base'},
+	{name:'Black Color Indicator', src:'/img/frames/m15/ciPips/b.svg', masks:ciMasks, complementary:'Color Indicator Base'},
+	{name:'Red Color Indicator', src:'/img/frames/m15/ciPips/r.svg', masks:ciMasks, complementary:'Color Indicator Base'},
+	{name:'Green Color Indicator', src:'/img/frames/m15/ciPips/g.svg', masks:ciMasks, complementary:'Color Indicator Base'},
+	{name:'Color Indicator Base', src:'/img/frames/adventuretime/dfc/back/base.png', bounds:{x:162/2010, y:1626/2814, width:77/2010, height:76/2814}}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
@@ -69,7 +77,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		rules: {name:'Rules Text', text:'', x:0.086, y:0.6303, width:0.828, height:0.2875, size:0.0362},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center', color:'white'}
 	});
-	notify('If you intend to add the color identity pips, we recommend that you shift your Type text to the right with "{right88}".')
+	notify('If you intend to add the color identity pips, we recommend that you shift your Type text to the right with "{right88}".', 15)
 }
 //loads available frames
 loadFramePack();
