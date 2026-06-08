@@ -5075,6 +5075,31 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 	} else if (card.version.includes('battle')) {
 		card.text.defense.text = cardToImport.defense || '';
 	}
+	// Reset color override and color indicator on every import
+	document.querySelector('#autoframe-color-override-enabled').checked = false;
+	document.querySelector('#autoframe-color-indicator').checked = false;
+	for (const lower of ['w', 'u', 'b', 'r', 'g']) {
+		document.querySelector(`#autoframe-color-override-${lower}`).checked = false;
+	}
+
+	// Enable override and color indicator if the imported card has a color_indicator field
+	const colorIndicator = (cardToImport.object === 'card_face')
+		? cardToImport.color_indicator
+		: cardToImport.card_faces?.[1]?.color_indicator;
+	if (colorIndicator?.length >= 1 && colorIndicator.length <= 3) {
+		document.querySelector('#autoframe-color-override-enabled').checked = true;
+		document.querySelector('#autoframe-color-indicator').checked = true;
+		for (const [upper, lower] of Object.entries({W:'w', U:'u', B:'b', R:'r', G:'g'})) {
+			document.querySelector(`#autoframe-color-override-${lower}`).checked = colorIndicator.includes(upper);
+		}
+
+		// Add {right88} to the type line to make room for the indicator dot
+		const atTransformBackVersions = ['adventureTimeTransformBack', 'adventureTimeEnchantmentTransformBack', 'adventureTimeSnowTransformBack'];
+		if (atTransformBackVersions.includes(card.version) && card.text?.type && !card.text.type.text.startsWith('{right88}')) {
+			card.text.type.text = '{right88}' + card.text.type.text;
+		}
+	}
+
 	document.querySelector('#text-editor').value = card.text[Object.keys(card.text)[selectedTextIndex]].text;
 	document.querySelector('#text-editor-font-size').value = 0;
 	//font size

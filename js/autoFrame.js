@@ -1402,6 +1402,26 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 
 	var frames = [];
 
+	// COLOR INDICATOR — Adventure Time Transform Back, pushed first so they draw on top
+	if (frameType === 'AdventureTimeTransformBack' &&
+		colors.length >= 1 && colors.length <= 3 &&
+		document.querySelector('#autoframe-color-indicator')?.checked) {
+		const ciLetters = {W: 'w', U: 'u', B: 'b', R: 'r', G: 'g'};
+		const ciNames   = {W: 'White', U: 'Blue', B: 'Black', R: 'Red', G: 'Green'};
+		const pipMasksByCount = {
+			2: [{src: '/img/frames/m15/ciPips/firstHalf.svg',  name: 'First Half'},  {src: '/img/frames/m15/ciPips/secondHalf.svg',  name: 'Second Half'}],
+			3: [{src: '/img/frames/m15/ciPips/firstThird.svg', name: 'First Third'}, {src: '/img/frames/m15/ciPips/secondThird.svg', name: 'Second Third'}, {src: '/img/frames/m15/ciPips/thirdThird.svg', name: 'Third Third'}]
+		};
+		const pipMasks = pipMasksByCount[colors.length] ?? [];
+		for (let i = 0; i < colors.length; i++) {
+			const letter = ciLetters[colors[i]];
+			const name   = ciNames[colors[i]];
+			if (!letter) continue;
+			frames.push({name: `${name} Color Indicator`, src: `/img/frames/m15/ciPips/${letter}.svg`, masks: pipMasks[i] ? [pipMasks[i]] : []});
+		}
+		frames.push({name: 'Color Indicator Base', src: '/img/frames/adventuretime/dfc/back/base.png', bounds: {x: 162/2010, y: 1626/2814, width: 77/2010, height: 76/2814}, masks: []});
+	}
+
 	// Get frame properties (pinline colors, PT, etc.) based on card attributes
 	var properties = cardFrameProperties(colors, mana_cost, type_line, power,
 		frameType === 'Borderless' || frameType === 'BorderlessUB' ? 'Borderless' :
@@ -1948,6 +1968,15 @@ async function autoFrame() {
 		// ----------------------------------------------------------------
 		// For non-lands, extract colors from mana cost (W, U, B, R, G)
 		colors = [...new Set(card.text.mana.text.toUpperCase().split('').filter(char => ['W', 'U', 'B', 'R', 'G'].includes(char)))];
+	}
+
+	// ----------------------------------------------------------------
+	// COLOR OVERRIDE
+	// ----------------------------------------------------------------
+	if (document.querySelector('#autoframe-color-override-enabled')?.checked) {
+		colors = ['W', 'U', 'B', 'R', 'G'].filter(c =>
+			document.querySelector(`#autoframe-color-override-${c.toLowerCase()}`)?.checked
+		);
 	}
 
 	// ----------------------------------------------------------------
