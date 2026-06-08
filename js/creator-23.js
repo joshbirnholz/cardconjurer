@@ -91,6 +91,30 @@ window.ImageLoadTracker = {
     },
 
     /**
+     * Tracks an existing Image element directly, resolving when it fires onload.
+     * Wraps the element's existing onload handler so it still fires normally.
+     */
+    trackElement: function(img) {
+        if (!this.isTracking || !img) return;
+        const promise = new Promise(resolve => {
+            if (img.complete && img.naturalWidth > 0) { resolve(img); return; }
+            const orig = img.onload;
+            img.onload = function(e) {
+                img.onload = orig;
+                if (orig) orig.call(img, e);
+                resolve(img);
+            };
+            const origErr = img.onerror;
+            img.onerror = function(e) {
+                img.onerror = origErr;
+                if (origErr) origErr.call(img, e);
+                resolve(null);
+            };
+        });
+        this.promises.push(promise);
+    },
+
+    /**
      * Returns a single promise that resolves when all tracked images have finished loading.
      */
     waitForAll: function() {
@@ -1202,8 +1226,8 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 		item.image.crossOrigin = 'anonymous';
 		item.image.src = blank.src;
 		item.image.onload = drawFrames;
-		ImageLoadTracker.track(fixUri(item.src));
 		item.image.src = fixUri(item.src);
+		ImageLoadTracker.trackElement(item.image);
 	});
 	frameToAdd.image = new Image();
 	frameToAdd.image.crossOrigin = 'anonymous'
@@ -1212,8 +1236,8 @@ async function addFrame(additionalMasks = [], loadingFrame = false) {
 	if ('stretch' in frameToAdd) {
 		stretchSVG(frameToAdd);
 	} else {
-		ImageLoadTracker.track(fixUri(frameToAdd.src));
 		frameToAdd.image.src = fixUri(frameToAdd.src);
+		ImageLoadTracker.trackElement(frameToAdd.image);
 	}
 	if (!loadingFrame) {
 		card.frames.unshift(frameToAdd);
@@ -2088,6 +2112,7 @@ function writeText(textObject, targetContext) {
 						if (!textFontStyle.includes('italic')) {textFontStyle += 'italic ';}
 					}
 					lineContext.font = textFontStyle + textSize + 'px ' + textFont + textFontExtension;
+					if (textFontExtension) FontLoadTracker.track(textFont + textFontExtension);
 				} else if (possibleCode == '/i') {
 					textFontExtension = '';
 					textFontStyle = textFontStyle.replace('italic ', '');
@@ -3633,15 +3658,18 @@ async function bulkDownloadZip() {
         return;
     }
 
+    const zipName = (document.querySelector('#bulk-zip-name')?.value.trim() || 'CardConjurer_Bulk').replace(/[<>:"/\\|?*]/g, '_');
+
     let fileHandle = null;
     let useStreaming = false;
 
     // 2. Trigger the file picker immediately to capture the user gesture.
-    if (window.showSaveFilePicker) {
+    // Skip for single cards — they'll be downloaded directly, no ZIP needed.
+    if (cardKeys.length > 1 && window.showSaveFilePicker) {
         try {
             notify('Please choose a location to save your ZIP file.', 15);
             fileHandle = await window.showSaveFilePicker({
-                suggestedName: 'CardConjurer_Bulk.zip',
+                suggestedName: zipName + '.zip',
                 types: [{
                     description: 'ZIP file',
                     accept: { 'application/zip': ['.zip'] },
@@ -3704,14 +3732,26 @@ async function bulkDownloadZip() {
 
     // 5. Generate and save the ZIP file using the appropriate method.
     try {
-        if (useStreaming && fileHandle) {
+        const zipFileNames = Object.keys(zip.files);
+        if (zipFileNames.length === 1) {
+            // Single image: download directly without wrapping in a ZIP.
+            const blob = await zip.files[zipFileNames[0]].async('blob');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = zipFileNames[0];
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            notify('Card downloaded successfully!', 5);
+        } else if (useStreaming && fileHandle) {
             // Ideal Path: Manually pump the JSZip stream to the WritableStream.
             notify('Saving ZIP file to disk...', 10);
             const writable = await fileHandle.createWritable();
 
             await new Promise((resolve, reject) => {
                 const stream = zip.generateInternalStream({ type: 'uint8array', streamFiles: true });
-                
+
                 stream
                     .on('data', (chunk) => { writable.write(chunk).catch(reject); })
                     .on('end', () => { writable.close().then(resolve).catch(reject); })
@@ -3724,10 +3764,10 @@ async function bulkDownloadZip() {
             // Fallback Path: For browsers without streaming support.
             notify('Streaming not supported. Building ZIP in memory... This may be slow or fail.', 10);
             const content = await zip.generateAsync({ type: 'blob' });
-            
+
             const downloadElement = document.createElement('a');
             downloadElement.href = URL.createObjectURL(content);
-            downloadElement.download = 'CardConjurer_Bulk.zip';
+            downloadElement.download = zipName + '.zip';
             document.body.appendChild(downloadElement);
             downloadElement.click();
             document.body.removeChild(downloadElement);
@@ -3786,20 +3826,23 @@ async function startScryfallBulkDownload() {
         return;
     }
 
+    const zipName = (document.querySelector('#scryfall-bulk-zip-name')?.value.trim() || 'CardConjurer_Scryfall').replace(/[<>:"/\\|?*]/g, '_');
+
     const BATCH_SIZE = 75;
     const batches = [];
     for (let i = 0; i < identifiers.length; i += BATCH_SIZE) {
         batches.push(identifiers.slice(i, i + BATCH_SIZE));
     }
 
-    // Trigger file picker immediately to capture the user gesture
+    // Trigger file picker immediately to capture the user gesture.
+    // Skip for single identifiers — if only one image is produced it will be downloaded directly.
     let fileHandle = null;
     let useStreaming = false;
-    if (window.showSaveFilePicker) {
+    if (identifiers.length > 1 && window.showSaveFilePicker) {
         try {
             notify('Please choose a location to save your ZIP file.', 15);
             fileHandle = await window.showSaveFilePicker({
-                suggestedName: 'CardConjurer_Scryfall.zip',
+                suggestedName: zipName + '.zip',
                 types: [{ description: 'ZIP file', accept: { 'application/zip': ['.zip'] } }],
             });
             useStreaming = true;
@@ -3911,7 +3954,10 @@ async function startScryfallBulkDownload() {
 
                 ImageLoadTracker.start();
                 FontLoadTracker.start();
+                const origUploadArt = window.uploadArt;
+                window.uploadArt = () => {};
                 await importCard(cardFaces ?? [cardObj]);
+                window.uploadArt = origUploadArt;
                 clearTimeout(writingText);
                 clearTimeout(autoFrameTimer);
 
@@ -3919,14 +3965,19 @@ async function startScryfallBulkDownload() {
                 if (frontArtUrl) {
                     await new Promise(resolve => {
                         art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
-                        art.onerror = resolve;
+                        art.onerror = () => {
+                            if (!art.src.includes('/img/blank.png')) {
+                                art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                                art.src = fixUri('/img/blank.png');
+                            } else { art.onload = artEdited; resolve(); }
+                        };
                         art.src = frontArtUrl;
                     });
                 }
                 const frontArtist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
                 if (frontArtist) artistEdited(frontArtist);
 
-                await autoFrame();
+                await autoFrame(true);
                 clearTimeout(writingText);
                 clearTimeout(autoFrameTimer);
 
@@ -3941,7 +3992,9 @@ async function startScryfallBulkDownload() {
                 await drawText();
                 drawCard();
 
-                const frontTitle = getCardName();
+                const frontTitle = layout === 'adventure' && cardObj.card_faces?.length >= 2
+                    ? `${cardObj.card_faces[0].name} & ${cardObj.card_faces[1].name}`
+                    : getCardName();
                 const frontFile = safeFilename(frontTitle) + (isDFC ? ' (front)' : '') + '.' + imageExt;
                 zip.file(frontFile, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
                 console.log(`Zipped: ${frontFile}`);
@@ -3954,11 +4007,14 @@ async function startScryfallBulkDownload() {
                     ImageLoadTracker.start();
                     FontLoadTracker.start();
 
+                    const origUploadArtBack = window.uploadArt;
+                    window.uploadArt = () => {};
                     await importCard(cardFaces);                         // imports face 0 by default
                     clearTimeout(writingText);
                     clearTimeout(autoFrameTimer);
                     document.querySelector('#import-index').value = '1'; // select back face
                     await changeCardIndex();
+                    window.uploadArt = origUploadArtBack;
                     clearTimeout(writingText);
                     clearTimeout(autoFrameTimer);
 
@@ -3966,14 +4022,19 @@ async function startScryfallBulkDownload() {
                     if (backArtUrl) {
                         await new Promise(resolve => {
                             art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
-                            art.onerror = resolve;
+                            art.onerror = () => {
+                                if (!art.src.includes('/img/blank.png')) {
+                                    art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                                    art.src = fixUri('/img/blank.png');
+                                } else { art.onload = artEdited; resolve(); }
+                            };
                             art.src = backArtUrl;
                         });
                     }
                     const backArtist = cardObj.card_faces?.[1]?.artist || cardObj.artist;
                     if (backArtist) artistEdited(backArtist);
 
-                    await autoFrame();
+                    await autoFrame(true);
                     clearTimeout(writingText);
                     clearTimeout(autoFrameTimer);
                     await drawText();
@@ -3993,7 +4054,10 @@ async function startScryfallBulkDownload() {
             // Import card text and metadata via importCard(), which populates
             // the #import-index select before calling changeCardIndex().
             // The art search it would normally trigger is suppressed above.
+            const origUploadArt = window.uploadArt;
+            window.uploadArt = () => {};
             await importCard([cardObj]);
+            window.uploadArt = origUploadArt;
 
             // Cancel debounced draw/autoframe callbacks triggered by changeCardIndex
             clearTimeout(writingText);
@@ -4005,12 +4069,13 @@ async function startScryfallBulkDownload() {
             const artUrl = cardObj.image_uris?.art_crop || cardObj.card_faces?.[0]?.image_uris?.art_crop;
             if (artUrl) {
                 await new Promise((resolve) => {
-                    art.onload = function() {
-                        autoFitArt();
-                        art.onload = artEdited;
-                        resolve();
+                    art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                    art.onerror = () => {
+                        if (!art.src.includes('/img/blank.png')) {
+                            art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                            art.src = fixUri('/img/blank.png');
+                        } else { art.onload = artEdited; resolve(); }
                     };
-                    art.onerror = resolve;
                     art.src = artUrl;
                 });
             }
@@ -4019,7 +4084,7 @@ async function startScryfallBulkDownload() {
 
             // Apply autoframe if selected
             if (frameType !== 'false') {
-                await autoFrame();
+                await autoFrame(true);
             }
 
             // First draw: runs through every text field so all fonts get registered with
@@ -4066,9 +4131,21 @@ async function startScryfallBulkDownload() {
     marginsCheckbox.checked = savedMarginsValue;
     dfcBackHideSetSymbolCheckbox.checked = savedDfcBackHideSetSymbolValue;
 
-    // Generate and save the ZIP
+    // Generate and save the ZIP (or download directly if only one image was rendered)
     try {
-        if (useStreaming && fileHandle) {
+        const zipFileNames = Object.keys(zip.files);
+        if (zipFileNames.length === 1) {
+            // Single image: download directly without wrapping in a ZIP.
+            const blob = await zip.files[zipFileNames[0]].async('blob');
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = zipFileNames[0];
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+            notify('Card downloaded successfully!', 5);
+        } else if (useStreaming && fileHandle) {
             notify('Saving ZIP file to disk...', 10);
             const writable = await fileHandle.createWritable();
             await new Promise((resolve, reject) => {
@@ -4085,7 +4162,7 @@ async function startScryfallBulkDownload() {
             const content = await zip.generateAsync({ type: 'blob' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(content);
-            a.download = 'CardConjurer_Scryfall.zip';
+            a.download = zipName + '.zip';
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

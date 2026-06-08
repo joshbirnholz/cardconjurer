@@ -714,6 +714,7 @@
 							<h5 class='padding margin-bottom input-description'>Download all saved cards as a file</h5>
 							<button class='input margin-bottom' onclick='downloadSavedCards();'>Download Cards File</button>
 							<h5 class='padding margin-bottom input-description'>Download all saved card images as a zip file(can take a long time)</h5>
+							<input type='text' id='bulk-zip-name' class='input margin-bottom' placeholder='CardConjurer_Bulk' aria-label='ZIP file name'>
 							<button class='input margin-bottom' onclick="bulkDownloadZip();">Download All Images</button>
 							<h5 class='padding margin-bottom input-description'>Upload previously downloaded file of saved cards (downloaded from above)</h5>
 							<input type='file' accept='.cardconjurer,.txt' class='input margin-bottom' oninput='uploadSavedCards(event);' aria-label='Upload saved cards file'>
@@ -771,6 +772,10 @@
 								<option value='png'>PNG</option>
 								<option value='jpg'>JPEG</option>
 							</select>
+						</div>
+						<div class='padding margin-bottom'>
+							<h5 class='padding margin-bottom input-description'>File name</h5>
+							<input type='text' id='scryfall-bulk-zip-name' class='input' placeholder='CardConjurer_Scryfall' aria-label='ZIP file name'>
 						</div>
 						<div class='input-grid'>
 							<button class='input' onclick='startScryfallBulkDownload();'>Download All</button>

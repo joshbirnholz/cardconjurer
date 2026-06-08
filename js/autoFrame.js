@@ -1899,7 +1899,7 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
  * Main auto frame function triggered by UI
  * Detects card colors and builds appropriate frame
  */
-async function autoFrame() {
+async function autoFrame(forceOnclick = false) {
 	var frame = document.querySelector('#autoFrame').value;
 	if (frame == 'false') { autoFramePack = null; return; }
 
@@ -2023,7 +2023,7 @@ async function autoFrame() {
 			await loadScript('/js/frames/pack' + packFrame + '.js');
 			localStorage.setItem('autoLoadFrameVersion', wasAutoLoad);
 			autoFramePack = packFrame;
-			if (wasAutoLoad === 'true') {
+			if (wasAutoLoad === 'true' || forceOnclick) {
 				const loadFrameVersionBtn = document.querySelector('#loadFrameVersion');
 				if (loadFrameVersionBtn?.onclick) {
 					await loadFrameVersionBtn.onclick();
