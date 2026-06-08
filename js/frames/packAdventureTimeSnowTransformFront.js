@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/adventuretime/maskPinline.png', name:'Pinline'}, {src:'/img/frames/adventuretime/title.png', name:'Title'}, {src:'/img/frames/adventuretime/type.png', name:'Type'}, {src:'/img/frames/adventuretime/maskRules.png', name:'Rules'}, {src:'/img/frames/adventuretime/maskFrame.png', name:'Frame'}, {src:'/img/frames/adventuretime/maskBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/adventuretime/dfc/front/maskPinline.png', name:'Pinline'}, {src:'/img/frames/adventuretime/dfc/front/title.png', name:'Title'}, {src:'/img/frames/adventuretime/type.png', name:'Type'}, {src:'/img/frames/adventuretime/dfc/front/maskRules.png', name:'Rules'}, {src:'/img/frames/adventuretime/dfc/front/maskFrame.png', name:'Frame'}, {src:'/img/frames/adventuretime/dfc/front/maskBorder.png', name:'Border'}];
 var ptBounds = {x:1548/2010, y:2500/2814, width:360/2010, height:167/2814};
 var crownBounds = {x:0/2010, y:0/2814, width:1, height: 521/2814};
 var crownMasks = [{src:'/img/frames/adventuretime/maskCrownPinline.png', name:'Pinline'}, {src:'/img/frames/adventuretime/maskCrownFrame.png', name:'Frame'}];
@@ -44,7 +44,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//resets things so that every frame doesn't have to
 	await resetCardIrregularities();
 	//sets card version
-	card.version = 'adventureTimeSnow';
+	card.version = 'adventureTimeSnowTransformFront';
 	//art bounds
 	card.artBounds = {x:0.0767, y:0.1129, width:0.8476, height:0.4429};
 	autoFitArt();

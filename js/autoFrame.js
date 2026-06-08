@@ -164,14 +164,26 @@ const frameTypeConfigs = {
 		filterFrames: (frame) => frame.name.includes('Extension') || frame.name.includes('Gray Holo Stamp') || frame.name.includes('Gold Holo Stamp')
 	},
 	'AdventureTime': {
-		label: 'Adventure Time', menuGroup: 'Custom frames',
-		group: 'Custom', makeFrameFunction: makeAdventureTimeFrameByLetter,
+		label: 'Adventure Time', menuGroup: 'Adventure Time',
+		group: 'AdventureTime', makeFrameFunction: makeAdventureTimeFrameByLetter,
 		supportsCrown: true, supportsPT: true, supportsStamp: false,
 		filterFrames: (frame) => frame.name.includes('Extension')
 	},
 	'AdventureTimeAdventure': {
-		label: 'Adventure Time Adventure', menuGroup: 'Custom frames',
-		group: 'Custom', makeFrameFunction: makeAdventureTimeAdventureFrameByLetter,
+		label: 'Adventure Time Adventure', menuGroup: 'Adventure Time',
+		group: 'AdventureTime', makeFrameFunction: makeAdventureTimeAdventureFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'AdventureTimeTransformFront': {
+		label: 'Adventure Time Transform (Front)', menuGroup: 'Adventure Time',
+		group: 'AdventureTime', makeFrameFunction: makeAdventureTimeTransformFrontFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'AdventureTimeTransformBack': {
+		label: 'Adventure Time Transform (Back)', menuGroup: 'Adventure Time',
+		group: 'AdventureTime', makeFrameFunction: makeAdventureTimeTransformBackFrameByLetter,
 		supportsCrown: true, supportsPT: true, supportsStamp: false,
 		filterFrames: (frame) => frame.name.includes('Extension')
 	},
@@ -954,6 +966,88 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
+		'AdventureTimeTransformFront': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventuretime/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {x: 0, y: 0, width: 1, height: 521/2814},
+				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
+			},
+			crownMasks: [
+				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
+				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
+			],
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				let styleFolder = 'regular';
+				if (style === 'snow') styleFolder = 'snow';
+				else if (style === 'Nyx') styleFolder = 'enchantment';
+
+				if (mask === 'Crown') return `dfc/front/regular/crown/${colorLetter}.png`;
+				if (mask === 'PT') return `pt/${colorLetter}.png`;
+				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
+				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
+				return `dfc/front/${baseFolder}/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'dfc/front/maskPinline.png',
+					'Title': 'dfc/front/title.png',
+					'Type': 'type.png',
+					'Rules': 'dfc/front/maskRules.png',
+					'Frame': 'dfc/front/maskFrame.png',
+					'Border': 'dfc/front/maskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (mask === 'PT' && letter === 'C') return 'L';
+				if ((mask === 'Crown' || mask === 'PT') && letter.includes('L') && letter.length > 1) return letter[0];
+				return letter;
+			}
+		},
+		'AdventureTimeTransformBack': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/adventuretime/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {x: 0, y: 0, width: 1, height: 521/2814},
+				pt: {x: 1548/2010, y: 2500/2814, width: 360/2010, height: 167/2814}
+			},
+			crownMasks: [
+				{src: '/img/frames/adventuretime/maskCrownPinline.png', name: 'Pinline'},
+				{src: '/img/frames/adventuretime/maskCrownFrame.png', name: 'Frame'}
+			],
+			pathBuilder: (letter, mask, style) => {
+				const colorLetter = letter.toLowerCase();
+				let styleFolder = 'regular';
+				if (style === 'snow') styleFolder = 'snow';
+				else if (style === 'Nyx') styleFolder = 'enchantment';
+
+				if (mask === 'Crown') return `dfc/back/regular/crown/${colorLetter}.png`;
+				if (mask === 'PT') return `dfc/back/pt/${colorLetter}.png`;
+				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
+				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
+				return `dfc/back/${baseFolder}/${colorLetter}.png`;
+			},
+			maskPath: (mask) => {
+				const maskMap = {
+					'Pinline': 'dfc/back/maskPinline.png',
+					'Title': 'dfc/back/title.png',
+					'Type': 'type.png',
+					'Rules': 'maskRules.png',
+					'Frame': 'maskFrame.png',
+					'Border': 'maskBorder.png'
+				};
+				return maskMap[mask] || null;
+			},
+			letterTransform: (letter, mask) => {
+				if (mask === 'PT' && letter === 'C') return 'L';
+				if ((mask === 'Crown' || mask === 'PT') && letter.includes('L') && letter.length > 1) return letter[0];
+				return letter;
+			}
+		},
 	};
 
 	return configs[frameType];
@@ -1273,6 +1367,14 @@ function makeAdventureTimeAdventureFrameByLetter(letter, mask = false, maskToRig
 	return makeFrameByLetterUnified('AdventureTimeAdventure', letter, mask, maskToRightHalf, style);
 }
 
+function makeAdventureTimeTransformFrontFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('AdventureTimeTransformFront', letter, mask, maskToRightHalf, style);
+}
+
+function makeAdventureTimeTransformBackFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('AdventureTimeTransformBack', letter, mask, maskToRightHalf, style);
+}
+
 
 // ============================================================================
 // SECTION 5: AUTO FRAME ORCHESTRATION
@@ -1359,7 +1461,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 	// ----------------------------------------------------------------
 	// cardFrameProperties assigns 'L' to colorless non-artifact cards, but for Adventure Time
 	// colorless non-land cards should use the C frame instead.
-	if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') && colors.length === 0 && properties.frame === 'L' &&
+	if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure' || frameType === 'AdventureTimeTransformFront' || frameType === 'AdventureTimeTransformBack') && colors.length === 0 && properties.frame === 'L' &&
 		!type_line.toLowerCase().includes('land')) {
 		properties.frame = 'C';
 		properties.rules = 'C';
@@ -1374,7 +1476,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 
 	// LEGENDARY CROWNS (if legendary creature/planeswalker)
 	if (config.supportsCrown && type_line.toLowerCase().includes('legendary')) {
-		if (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') {
+		if (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure' || frameType === 'AdventureTimeTransformFront' || frameType === 'AdventureTimeTransformBack') {
 			const isVehicleType = type_line.toLowerCase().includes('vehicle');
 			const isArtifactType = type_line.toLowerCase().includes('artifact');
 			const isLandType = type_line.toLowerCase().includes('land');
@@ -1470,8 +1572,8 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 				});
 			}
 
-			// Crown border cover hides the border under the crown (not used for Vault or AdventureTime)
-			if (frameType !== 'Vault' && frameType !== 'AdventureTime') {
+			// Crown border cover hides the border under the crown (not used for Vault or AdventureTime variants)
+			if (frameType !== 'Vault' && frameType !== 'AdventureTime' && frameType !== 'AdventureTimeTransformFront' && frameType !== 'AdventureTimeTransformBack') {
 				let crownBorderCover = config.makeFrameFunction(properties.pinline, "Crown Border Cover", false, style);
 				// Only Borderless uses erase blend mode to cut through layers below
 				if (frameType === 'Borderless' || frameType === 'BorderlessUB') {
@@ -1864,6 +1966,8 @@ async function autoFrame() {
 		if (frame == 'BorderlessUB') packFrame = 'Borderless';
 		else if (frame == 'AdventureTime') packFrame = 'AdventureTimeRegular';
 		else if (frame == 'AdventureTimeAdventure') packFrame = 'AdventureTimeAdventures';
+		else if (frame == 'AdventureTimeTransformFront') packFrame = 'AdventureTimeRegularTransformFront';
+		else if (frame == 'AdventureTimeTransformBack') packFrame = 'AdventureTimeRegularTransformBack';
 
 		if (autoFramePack != packFrame) {
 			loadScript('/js/frames/pack' + packFrame + '.js');
@@ -1919,14 +2023,14 @@ function buildMarginFrames(frameType, colors) {
 			props.frame = colors[0].toUpperCase();
 			props.frameRight = colors[1].toUpperCase();
 		}
-		if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') && colors.length === 0 && props.frame === 'L') {
+		if ((frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure' || frameType === 'AdventureTimeTransformFront' || frameType === 'AdventureTimeTransformBack') && colors.length === 0 && props.frame === 'L') {
 			props.frame = 'C';
 		}
 
 		// Japan Showcase and Vault have no v.png, so vehicles fall back to artifact.
 		function toLetter(f) {
 			f = (f || 'A').toUpperCase();
-			if (f === 'V') return (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') ? 'v' : 'a';
+			if (f === 'V') return (frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure' || frameType === 'AdventureTimeTransformFront' || frameType === 'AdventureTimeTransformBack') ? 'v' : 'a';
 			return f.toLowerCase();
 		}
 
@@ -1936,7 +2040,7 @@ function buildMarginFrames(frameType, colors) {
 	}
 
 	// Colored extensions: Japan Showcase, Vault, AdventureTime
-	if (frameType === 'JapanShowcase' || frameType === 'Vault' || frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure') {
+	if (frameType === 'JapanShowcase' || frameType === 'Vault' || frameType === 'AdventureTime' || frameType === 'AdventureTimeAdventure' || frameType === 'AdventureTimeTransformFront' || frameType === 'AdventureTimeTransformBack') {
 		let basePath;
 		if (frameType === 'JapanShowcase') {
 			basePath = '/img/frames/m15/japanShowcase/margin/';

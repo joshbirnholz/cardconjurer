@@ -700,7 +700,11 @@ function maskOptionClicked(event) {
 	if (newMaskIndex != selectedMaskIndex) { button = null; }
 	selectedMaskIndex = newMaskIndex;
 	var selectedMaskName = 'No Mask'
-	if (selectedMaskIndex > 0) {selectedMaskName = availableFrames[selectedFrameIndex].masks[selectedMaskIndex - 1].name;}
+	if (selectedMaskIndex > 0) {
+		const maskData = availableFrames[selectedFrameIndex]?.masks?.[selectedMaskIndex - 1];
+		if (maskData) { selectedMaskName = maskData.name; }
+		else { selectedMaskIndex = 0; }
+	}
 	document.querySelector('#selectedPreview').innerHTML = '(Selected: ' + availableFrames[selectedFrameIndex].name + ', ' + selectedMaskName + ')';
 	if (button) { button.click(); resetDoubleClick(); }
 }
@@ -4505,7 +4509,7 @@ async function changeCardIndex() {
 	var langFontCode = "";
 	if (cardToImport.lang == "ph") {langFontCode = "{fontphyrexian}"}
 	// Handle Multi Faced Card Layouts
-	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure', 'omen', 'prepare'].includes(cardToImport.layout)) {
+	if (['flip', 'modal_dfc', 'transform', 'split', 'adventure', 'omen', 'prepare', 'transform double faced'].includes(cardToImport.layout)) {
 		const flipData = parseMultiFacedCards(cardToImport);
 		if (!flipData) {
 			console.error('Failed to parse Multi Faced card data');
