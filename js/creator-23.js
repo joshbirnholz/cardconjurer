@@ -2213,7 +2213,8 @@ function writeText(textObject, targetContext) {
 		lineContext.lineJoin = textLineJoin;
 		var rubyGlobalAnnSize = prescanRubySize(splitText, textObject, lineContext, textSize, textFontStyle, textFont, textFontExtension);
 		//Begin looping through words/codes
-		innerloop: for (word of splitText) {
+		innerloop: for (let wordIdx = 0; wordIdx < splitText.length; wordIdx++) {
+			var word = splitText[wordIdx];
 			var wordToWrite = word;
 			if (wordToWrite.includes('{') && wordToWrite.includes('}') || textManaCost || savedFont) {
 				var possibleCode = wordToWrite.toLowerCase().replace('{', '').replace('}', '');
@@ -2513,6 +2514,35 @@ function writeText(textObject, targetContext) {
 					var manaSymbolSpacing = textSize * 0.04 + textManaSpacing;
 					var manaSymbolWidth = manaSymbol.width * textSize * 0.78;
 					var manaSymbolHeight = manaSymbol.height * textSize * 0.78;
+					// Treat consecutive mana symbols as a single word unit for line-breaking:
+					// look ahead to find the total width of this run and wrap the whole group
+					// together if it won't fit on the current line.
+					if (!textObject.manaPlacement && !textObject.manaLayout && !textOneLine && textArcRadius === 0 && currentX > startingCurrentX) {
+						let groupWidth = manaSymbolWidth + manaSymbolSpacing * 2;
+						let ahead = wordIdx + 1;
+						while (ahead < splitText.length) {
+							const ac = splitText[ahead].toLowerCase().replace('{', '').replace('}', '').replaceAll('/', '');
+							const as_ = getManaSymbol(ac) || getManaSymbol(ac.split('').reverse().join(''));
+							if (as_) {
+								groupWidth += as_.width * textSize * 0.78 + (textSize * 0.04 + textManaSpacing) * 2;
+								ahead++;
+							} else { break; }
+						}
+						if (currentX + groupWidth > textWidth) {
+							var hAdj = 0;
+							if (textAlign === 'center') hAdj = (textWidth - currentX) / 2;
+							else if (textAlign === 'right') hAdj = textWidth - currentX;
+							if (currentX > widestLineWidth) widestLineWidth = currentX;
+							if (manaSymbolsToRender.length > 0) renderManaSymbols();
+							paragraphContext.drawImage(lineCanvas, hAdj, currentY);
+							lineY = 0;
+							lineContext.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
+							currentX = startingCurrentX;
+							currentY += textSize + newLineSpacing;
+							newLineSpacing = (textObject.lineSpacing || 0) * textSize;
+							newLine = false;
+						}
+					}
 					var manaSymbolX = currentX + canvasMargin + manaSymbolSpacing;
 					var manaSymbolY = canvasMargin + textSize * 0.34 - manaSymbolHeight / 2;
 					if (textObject.manaPlacement) {
