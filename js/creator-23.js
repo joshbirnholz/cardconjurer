@@ -1010,6 +1010,45 @@ function getPTBoxTop() {
 	return e ? e.top : null;
 }
 
+// Scans the set symbol image to find the leftmost non-transparent column, then returns
+// that column's x position in canvas pixels, accounting for zoom/position.
+// Cached by src+position+zoom so the scan only runs when the symbol changes.
+let _setSymbolEdgeCache = null;
+function getSetSymbolLeftEdgePX() {
+	if (!card.setSymbolBounds) return null;
+	if (!setSymbol.complete || setSymbol.naturalWidth === 0) return null;
+	if (setSymbol.src === blank.src) return null;
+
+	const cacheKey = `${setSymbol.src}:${card.setSymbolX}:${card.setSymbolY}:${card.setSymbolZoom}`;
+	if (_setSymbolEdgeCache && _setSymbolEdgeCache.key === cacheKey) {
+		return _setSymbolEdgeCache.leftPX;
+	}
+
+	const symbolWidth = setSymbol.width * card.setSymbolZoom;
+	const x = scaleX(card.setSymbolX);
+
+	const offscreen = document.createElement('canvas');
+	offscreen.width = setSymbol.naturalWidth;
+	offscreen.height = setSymbol.naturalHeight;
+	const ctx = offscreen.getContext('2d');
+	ctx.drawImage(setSymbol, 0, 0);
+	const pixels = ctx.getImageData(0, 0, offscreen.width, offscreen.height).data;
+	const W = offscreen.width, H = offscreen.height;
+
+	let leftmostCol = -1;
+	outer: for (let col = 0; col < W; col++) {
+		for (let row = 0; row < H; row++) {
+			if (pixels[(row * W + col) * 4 + 3] > 10) { leftmostCol = col; break outer; }
+		}
+	}
+
+	// Offset leftward by any outline so we treat the outline as part of the symbol
+	const outlineOffset = card.setSymbolBounds.outlineWidth ? scaleHeight(card.setSymbolBounds.outlineWidth) : 0;
+	const leftPX = (leftmostCol < 0 ? x : x + (leftmostCol / W) * symbolWidth) - outlineOffset;
+	_setSymbolEdgeCache = { key: cacheKey, leftPX };
+	return leftPX;
+}
+
 // Split rules text into tokens with character positions for layout simulation.
 function _tokenizeRulesText(text) {
 	const tokens = [];
@@ -1639,6 +1678,108 @@ async function drawText() {
 				if (done3) continue;
 				// Fallback: hard height cap
 				textData = Object.assign({}, textData, { height: maxHeight });
+			}
+		}
+		if (textObject[0] === 'type' && avoidOverlap && card.setSymbolBounds) {
+			const ssLeftPX = getSetSymbolLeftEdgePX();
+			if (ssLeftPX !== null) {
+				const typeTop    = scaleY(textData.y);
+				const typeBottom = typeTop + scaleHeight(textData.height);
+				const ssTop      = scaleY(card.setSymbolY);
+				const ssBottom   = ssTop + setSymbol.height * card.setSymbolZoom;
+				const yOverlap   = ssTop < typeBottom && ssBottom > typeTop;
+				if (yOverlap && ssLeftPX > scaleX(textData.x)) {
+					const checkOverlap = (ctx) => {
+						const rX = Math.max(0, Math.floor(ssLeftPX));
+						if (rX >= ctx.canvas.width) return false;
+						const rY = Math.max(0, Math.floor(typeTop));
+						const rW = Math.max(1, ctx.canvas.width - rX);
+						const rH = Math.max(1, Math.min(ctx.canvas.height, Math.ceil(typeBottom)) - rY);
+						if (rH <= 0) return false;
+						const px = ctx.getImageData(rX, rY, rW, rH).data;
+						for (let i = 3; i < px.length; i += 4) { if (px[i] > 10) return true; }
+						return false;
+					};
+					const ctx0 = newOff();
+					writeText(textData, ctx0);
+					if (!checkOverlap(ctx0)) {
+						textContext.drawImage(ctx0.canvas, 0, 0);
+						continue;
+					}
+					// Reduce font size 1pt at a time until type text clears the set symbol
+					const baseFS = parseInt(textData.fontSize || '0');
+					let reduced = false;
+					for (let n = 1; n <= 20 && !reduced; n++) {
+						const ctxN = newOff();
+						writeText(Object.assign({}, textData, { fontSize: String(baseFS - n) }), ctxN);
+						if (!checkOverlap(ctxN)) {
+							textContext.drawImage(ctxN.canvas, 0, 0);
+							reduced = true;
+						}
+					}
+					if (reduced) continue;
+				}
+			}
+		}
+		if ((textObject[0] === 'title' || textObject[0] === 'title2') && avoidOverlap) {
+			const manaKey = textObject[0] === 'title' ? 'mana' : 'mana2';
+			const manaData = card.text[manaKey];
+			if (manaData && manaData.text) {
+				// Pre-render the mana cost on an offscreen canvas to find its leftmost visible pixel
+				const manaOff = newOff();
+				writeText(manaData, manaOff);
+				const mTop   = Math.max(0, Math.floor(scaleY(manaData.y)));
+				const mBot   = Math.min(manaOff.canvas.height, Math.ceil(mTop + scaleHeight(manaData.height)));
+				const mH     = Math.max(1, mBot - mTop);
+				const W      = manaOff.canvas.width;
+				const manaPx = manaOff.getImageData(0, mTop, W, mH).data;
+				let manaLeft = -1;
+				outerMana: for (let col = 0; col < W; col++) {
+					for (let row = 0; row < mH; row++) {
+						if (manaPx[(row * W + col) * 4 + 3] > 10) { manaLeft = col; break outerMana; }
+					}
+				}
+				if (manaLeft >= 0) {
+					const titleTop    = scaleY(textData.y);
+					const titleBottom = titleTop + scaleHeight(textData.height);
+					const manaTop     = scaleY(manaData.y);
+					const manaBottom  = manaTop + scaleHeight(manaData.height);
+					const yOverlap    = manaTop < titleBottom && manaBottom > titleTop;
+					// Pull the boundary inward by ~1% of card width so the title doesn't
+					// sit flush against the first mana symbol.
+					const manaBuffer  = Math.round(scaleWidth(0.012));
+					if (yOverlap && manaLeft > scaleX(textData.x || 0)) {
+						const checkOverlap = (ctx) => {
+							const rX = Math.max(0, manaLeft - manaBuffer);
+							if (rX >= ctx.canvas.width) return false;
+							const rY = Math.max(0, Math.floor(titleTop));
+							const rW = Math.max(1, ctx.canvas.width - rX);
+							const rH = Math.max(1, Math.min(ctx.canvas.height, Math.ceil(titleBottom)) - rY);
+							if (rH <= 0) return false;
+							const px = ctx.getImageData(rX, rY, rW, rH).data;
+							for (let i = 3; i < px.length; i += 4) { if (px[i] > 10) return true; }
+							return false;
+						};
+						const ctx0 = newOff();
+						writeText(textData, ctx0);
+						if (!checkOverlap(ctx0)) {
+							textContext.drawImage(ctx0.canvas, 0, 0);
+							continue;
+						}
+						// Reduce font size 1pt at a time until title clears the mana cost
+						const baseFS = parseInt(textData.fontSize || '0');
+						let reduced = false;
+						for (let n = 1; n <= 20 && !reduced; n++) {
+							const ctxN = newOff();
+							writeText(Object.assign({}, textData, { fontSize: String(baseFS - n) }), ctxN);
+							if (!checkOverlap(ctxN)) {
+								textContext.drawImage(ctxN.canvas, 0, 0);
+								reduced = true;
+							}
+						}
+						if (reduced) continue;
+					}
+				}
 			}
 		}
 		writeText(textData, textContext);
