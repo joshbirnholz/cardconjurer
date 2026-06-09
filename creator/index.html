@@ -738,8 +738,9 @@
 						<h3 class='padding margin-bottom'>Bulk Card Rendering (Experimental)</h3>
 						<h5 class='padding margin-bottom input-description'>Select a frame</h5>
 						<div class='padding input-grid margin-bottom'>
-							<select id='scryfall-bulk-autoframe' class='input' aria-label='Automatically update frame' onchange='localStorage.setItem("bulk-autoframe", this.value);'></select>
+							<select id='scryfall-bulk-autoframe' class='input' aria-label='Automatically update frame' onchange='localStorage.setItem("bulk-autoframe", this.value); updateBulkAutoframeDescription();'></select>
 						</div>
+						<p id='bulk-autoframe-description' class='padding margin-bottom input-description' style='font-style:italic;'></p>
 						<h5 class='padding margin-bottom input-description'>Enter one card per line. CardConjurer will create all of your cards in the selected frame and download them as a zip file. This may take a long time, especially if you are rendering a lot of cards.</h5>
 						<textarea id='scryfall-bulk-list' class='input margin-bottom' placeholder='Lightning Bolt&#10;Black Lotus (LEA)&#10;Brainstorm (ICE) 76' style='min-height:12rem;'></textarea>
 						<div class='padding input-grid margin-bottom'>

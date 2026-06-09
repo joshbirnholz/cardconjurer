@@ -43,6 +43,25 @@ const frameTypeConfigs = {
 		supportsCrown: true, supportsPT: true, supportsStamp: false,
 		filterFrames: (frame) => frame.name.includes('Extension')
 	},
+	'M15TransformFront': {
+		label: 'Transform (Front)', menuGroup: 'Double-Faced',
+		group: 'Standard-3', makeFrameFunction: makeM15TransformFrontFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15TransformBack': {
+		label: 'Transform (Back)', menuGroup: 'Double-Faced',
+		group: 'Standard-3', makeFrameFunction: makeM15TransformBackFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15TransformBackNew': {
+		label: 'Transform (Back, New)', menuGroup: 'Double-Faced',
+		group: 'Standard-3', makeFrameFunction: makeM15TransformBackNewFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension'),
+		requiresColorIndicatorShift: true
+	},
 	'M15BoxTopper': {
 		label: 'Extended Art', menuGroup: null,
 		group: 'Showcase-5', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, false),
@@ -185,7 +204,8 @@ const frameTypeConfigs = {
 		label: 'Adventure Time Transform (Back)', menuGroup: 'Adventure Time',
 		group: 'AdventureTime', makeFrameFunction: makeAdventureTimeTransformBackFrameByLetter,
 		supportsCrown: true, supportsPT: true, supportsStamp: false,
-		filterFrames: (frame) => frame.name.includes('Extension')
+		filterFrames: (frame) => frame.name.includes('Extension'),
+		requiresColorIndicatorShift: true
 	},
 };
 
@@ -1074,6 +1094,95 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
+		'M15TransformFront': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/m15/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
+				pt: {height: 0.0733, width: 0.188, x: 0.7573, y: 0.8848}
+			},
+			pathBuilder: (letter, mask, style) => {
+				if (mask === 'Crown') return `transform/crowns/regular/${letter}.png`;
+				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}.png`;
+				if (mask === 'PT') return `regular/m15PT${letter}.png`;
+				return `transform/regular/front${letter}.png`;
+			},
+			maskPath: (mask) => ({
+				'Pinline': 'transform/regular/maskPinlineFront.png',
+				'Title': 'transform/regular/maskTitle.png',
+				'Type': 'regular/m15MaskType.png',
+				'Rules': 'transform/regular/maskRulesFront.png',
+				'Frame': 'transform/regular/maskFrameFront.png',
+				'Border': 'transform/regular/maskBorderFront.png'
+			})[mask] || null,
+			letterTransform: (letter, mask) => {
+				if ((mask === 'Crown' || mask === 'Inner Crown') && letter.includes('L') && letter.length > 1) return letter[0];
+				return letter;
+			}
+		},
+		'M15TransformBack': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/m15/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
+				pt: {height: 0.0733, width: 0.188, x: 0.7573, y: 0.8848}
+			},
+			pathBuilder: (letter, mask, style) => {
+				if (mask === 'Crown') return `transform/crowns/regular/${letter}.png`;
+				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}.png`;
+				if (mask === 'PT') return `transform/regular/pt${letter}.png`;
+				return `transform/regular/back${letter}.png`;
+			},
+			maskPath: (mask) => ({
+				'Pinline': 'transform/regular/maskPinlineBack.png',
+				'Title': 'transform/regular/maskTitle.png',
+				'Type': 'regular/m15MaskType.png',
+				'Rules': 'regular/m15MaskRules.png',
+				'Frame': 'transform/regular/maskFrameBack.png',
+				'Border': 'regular/m15MaskBorder.png'
+			})[mask] || null,
+			letterTransform: (letter, mask) => {
+				if ((mask === 'Crown' || mask === 'Inner Crown') && letter.includes('L') && letter.length > 1) return letter[0];
+				return letter;
+			}
+		},
+		'M15TransformBackNew': {
+			frameNames: standardFrameNames,
+			basePath: '/img/frames/m15/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
+				pt: {height: 0.0733, width: 0.188, x: 0.7573, y: 0.8848}
+			},
+			pathBuilder: (letter, mask, style) => {
+				if (mask === 'Crown') return `transform/crowns/regular/new/${letter}.png`;
+				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}.png`;
+				if (mask === 'PT') return `transform/regular/pt${letter}.png`;
+				const styleFolder = style === 'Nyx' ? 'nyx' : style === 'snow' ? 'snow' : 'regular';
+				return `transform/${styleFolder}/new/back${letter}.png`;
+			},
+			maskPath: (mask) => ({
+				'Pinline': 'transform/regular/new/maskPinlineBack.png',
+				'Title': 'transform/regular/new/maskTitle.png',
+				'Type': 'regular/m15MaskType.png',
+				'Rules': 'regular/m15MaskRules.png',
+				'Frame': 'transform/regular/new/maskFrameBack.png',
+				'Border': 'regular/m15MaskBorder.png'
+			})[mask] || null,
+			letterTransform: (letter, mask, style) => {
+				// Nyx has no land frame — fall back to regular style for that letter
+				if (style === 'Nyx' && letter === 'L') return { letter, style: 'regular' };
+				// Nyx and snow have no vehicle frame — use artifact instead
+				if ((style === 'Nyx' || style === 'snow') && letter === 'V') return { letter: 'A', style };
+				if ((mask === 'Crown' || mask === 'Inner Crown') && letter.includes('L') && letter.length > 1) return letter[0];
+				return letter;
+			}
+		},
 	};
 
 	return configs[frameType];
@@ -1325,6 +1434,18 @@ function makeM15NewFrameByLetter(letter, mask = false, maskToRightHalf = false, 
 	return makeFrameByLetterUnified('M15New', letter, mask, maskToRightHalf, style);
 }
 
+function makeM15TransformFrontFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('M15TransformFront', letter, mask, maskToRightHalf, style);
+}
+
+function makeM15TransformBackFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('M15TransformBack', letter, mask, maskToRightHalf, style);
+}
+
+function makeM15TransformBackNewFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
+	return makeFrameByLetterUnified('M15TransformBackNew', letter, mask, maskToRightHalf, style);
+}
+
 function makeM15EighthFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
 	return makeFrameByLetterUnified('M15Eighth', letter, mask, maskToRightHalf, style);
 }
@@ -1429,7 +1550,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 	var frames = [];
 
 	// COLOR INDICATOR — Adventure Time Transform Back, pushed first so they draw on top
-	if (frameType === 'AdventureTimeTransformBack' &&
+	if ((frameType === 'M15TransformBackNew' || frameType === 'AdventureTimeTransformBack') &&
 		colors.length >= 1 && colors.length <= 3 &&
 		document.querySelector('#autoframe-color-indicator')?.checked) {
 		const ciLetters = {W: 'w', U: 'u', B: 'b', R: 'r', G: 'g'};
@@ -1445,7 +1566,12 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 			if (!letter) continue;
 			frames.push({name: `${name} Color Indicator`, src: `/img/frames/m15/ciPips/${letter}.svg`, masks: pipMasks[i] ? [pipMasks[i]] : []});
 		}
-		frames.push({name: 'Color Indicator Base', src: '/img/frames/adventuretime/dfc/back/base.png', bounds: {x: 162/2010, y: 1626/2814, width: 77/2010, height: 76/2814}, masks: []});
+
+		if (frameType == 'M15TransformBackNew') {
+			frames.push({name:'Color Indicator Base', src:'/img/frames/m15/ciPips/base.png', bounds: {x:0.0767, y:0.5748, width:0.0467, height:0.0334}, masks: []});
+		} else if (frameType == 'AdventureTimeTransformBack') {
+			frames.push({name: 'Color Indicator Base', src: '/img/frames/adventuretime/dfc/back/base.png', bounds: {x: 162/2010, y: 1626/2814, width: 77/2010, height: 76/2814}, masks: []});
+		}
 	}
 
 	// Get frame properties (pinline colors, PT, etc.) based on card attributes
@@ -2041,6 +2167,14 @@ async function autoFrame(forceOnclick = false) {
 					await loadFrameVersionBtn.onclick();
 				}
 			}
+		} else if (forceOnclick) {
+			// Same pack reused — still fire the onclick to reset canvas size, art/set-symbol
+			// bounds, and text layout between bulk cards. Without this, stale margin state
+			// from a previous card can leave frameCanvas cleared with no redraw.
+			const loadFrameVersionBtn = document.querySelector('#loadFrameVersion');
+			if (loadFrameVersionBtn?.onclick) {
+				await loadFrameVersionBtn.onclick();
+			}
 		}
 
 		if (document.querySelector('#autoframe-margins')?.checked) {
@@ -2053,6 +2187,28 @@ async function autoFrame(forceOnclick = false) {
 // ============================================================================
 // SECTION 7: MARGIN FRAME BUILDING
 // ============================================================================
+
+// Waits until every image (and mask image) currently in card.frames has
+// fully loaded. Use this directly before drawFrames()+drawCard() in bulk
+// rendering — the ImageLoadTracker promise can resolve before the Image
+// element's pixel data is ready if the tracker was tripped by a stale
+// onload (e.g. blank.src placeholder) rather than the real image load.
+async function waitForAllFrameImages() {
+	const images = [];
+	for (const frame of card.frames) {
+		if (frame.image) images.push(frame.image);
+		for (const mask of (frame.masks || [])) {
+			if (mask.image) images.push(mask.image);
+		}
+	}
+	await Promise.all(images.map(img => {
+		if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+		return new Promise(resolve => {
+			img.addEventListener('load', resolve, { once: true });
+			img.addEventListener('error', resolve, { once: true });
+		});
+	}));
+}
 
 const marginConfigs = {};
 function registerMarginConfig(frameType, mX, mY) {
@@ -2221,13 +2377,32 @@ function populateAutoFrameSelect(selectEl, includeDisabled) {
 if (!localStorage.getItem('autoFrame')) localStorage.setItem('autoFrame', 'false');
 populateAutoFrameSelect(document.querySelector('#autoFrame'), true);
 populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), false);
-// In the bulk dropdown, replace the four individual AT options with a single auto option.
+// In the bulk dropdown:
+// - Convert "Regular" (M15Regular-1) to RegularAuto so DFC/adventure cards route correctly.
+// - Remove individual transform/adventure/omen/prepare options (handled automatically by RegularAuto).
+// - Replace the four individual AT options with a single auto option.
 (function () {
 	const sel = document.querySelector('#scryfall-bulk-autoframe');
+	// Convert Regular option to RegularAuto
+	const regularOpt = sel.querySelector('option[value="M15Regular-1"]');
+	if (regularOpt) regularOpt.value = 'RegularAuto';
+	// Remove the "Double-Faced" separator (sits directly before M15TransformFront)
+	const firstTransformOpt = sel.querySelector('option[value="M15TransformFront"]');
+	if (firstTransformOpt?.previousElementSibling?.disabled)
+		firstTransformOpt.previousElementSibling.remove();
+	// Remove individual transform/adventure/omen/prepare options
+	['M15TransformFront', 'M15TransformBack', 'M15TransformBackNew', 'Adventure', 'Omen', 'Prepare']
+		.forEach(v => sel.querySelector(`option[value="${v}"]`)?.remove());
+	// Remove any remaining orphaned separators (followed immediately by another separator or end)
+	Array.from(sel.querySelectorAll('option[disabled]')).forEach(sep => {
+		const next = sep.nextElementSibling;
+		if (!next || next.disabled) sep.remove();
+	});
+	// Replace the four individual AT options with a single auto option
 	const firstAtOpt = sel.querySelector('option[value="AdventureTime"]');
 	if (!firstAtOpt) return;
-	const sep = firstAtOpt.previousElementSibling;
-	if (sep && sep.disabled) sep.remove();
+	const atSep = firstAtOpt.previousElementSibling;
+	if (atSep && atSep.disabled) atSep.remove();
 	const autoOpt = document.createElement('option');
 	autoOpt.value = 'AdventureTimeAuto';
 	autoOpt.textContent = 'Adventure Time';
@@ -2237,4 +2412,75 @@ populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), fals
 })();
 document.querySelector('#autoFrame').value = localStorage.getItem('autoFrame');
 const savedBulkAutoFrame = localStorage.getItem('bulk-autoframe');
-if (savedBulkAutoFrame) document.querySelector('#scryfall-bulk-autoframe').value = savedBulkAutoFrame;
+// Migrate saved value: M15Regular-1 was renamed to RegularAuto in the bulk dropdown.
+const resolvedBulkAutoFrame = savedBulkAutoFrame === 'M15Regular-1' ? 'RegularAuto' : savedBulkAutoFrame;
+if (resolvedBulkAutoFrame) document.querySelector('#scryfall-bulk-autoframe').value = resolvedBulkAutoFrame;
+
+// Each entry maps a frameType key to the card layouts that trigger it.
+// Special layout values: 'dfc-front' and 'dfc-back' match double-faced cards.
+// 'default' matches any layout not claimed by another entry.
+// This single structure drives both the description text and the bulk routing logic.
+const bulkAutoframeSupportedTypes = {
+	'RegularAuto': [
+		{ frameType: 'M15Regular-1',       layouts: ['default'] },
+		{ frameType: 'M15TransformFront',   layouts: ['dfc-front'] },
+		{ frameType: 'M15TransformBackNew', layouts: ['dfc-back'] },
+		{ frameType: 'Adventure',           layouts: ['adventure'] },
+		{ frameType: 'Omen',                layouts: ['omen'] },
+		{ frameType: 'Prepare',             layouts: ['prepare'] },
+	],
+	'AdventureTimeAuto': [
+		{ frameType: 'AdventureTime',              layouts: ['default'] },
+		{ frameType: 'AdventureTimeTransformFront', layouts: ['dfc-front'] },
+		{ frameType: 'AdventureTimeTransformBack',  layouts: ['dfc-back'] },
+		{ frameType: 'AdventureTimeAdventure',      layouts: ['adventure'] },
+	],
+};
+
+// Returns the frameType key to use for a given auto option, card layout, and face.
+// isDFC: true if the card is double-faced. isFront: true for the front/single-faced card.
+function getBulkAutoframeType(autoValue, layout, isDFC, isFront, typeLine) {
+	const entries = bulkAutoframeSupportedTypes[autoValue];
+	if (!entries) return autoValue;
+	const role = isDFC ? (isFront ? 'dfc-front' : 'dfc-back') : (layout == 'adventure' && typeLine.includes('Omen')) ? 'omen' : layout;
+	const match = entries.find(e => e.layouts.includes(role));
+	if (match) return match.frameType;
+	return entries.find(e => e.layouts.includes('default'))?.frameType ?? autoValue;
+}
+
+function updateBulkAutoframeDescription() {
+	const val = document.querySelector('#scryfall-bulk-autoframe').value;
+	const el = document.querySelector('#bulk-autoframe-description');
+	if (!el) return;
+	const entries = bulkAutoframeSupportedTypes[val];
+	if (!entries || entries.length === 0) { el.textContent = ''; return; }
+	const labels = entries.map(e => frameTypeConfigs[e.frameType]?.label ?? e.frameType);
+	el.textContent = 'Supported layouts: ' + labels.join(', ') + '.';
+}
+updateBulkAutoframeDescription();
+
+// Version strings for frames that require {right88} on the type line when a color indicator pip
+// is shown. frameTypeConfigs entries declare this via requiresColorIndicatorShift:true (used
+// during bulk rendering when card.version isn't set yet). This Set covers sub-variants like
+// Nyx and Snow that aren't separate frameTypeConfigs entries — pack files can also call
+// registerColorIndicatorShift() to self-register going forward.
+const colorIndicatorShiftVersions = new Set([
+	'adventureTimeTransformBack',
+	'adventureTimeEnchantmentTransformBack',
+	'adventureTimeSnowTransformBack',
+	'm15TransformBackNew',
+	'm15TransformNyxBackNew',
+	'm15TransformSnowBackNew',
+]);
+function registerColorIndicatorShift(version) {
+	colorIndicatorShiftVersions.add(version);
+}
+
+// Returns true if the currently active frame needs {right88} prepended to the type line
+// when a color indicator is present. Checks the frameTypeConfigs flag first (reliable during
+// bulk rendering before card.version is set), then falls back to card.version for manual use.
+function frameRequiresColorIndicatorShift() {
+	const autoFrameValue = document.querySelector('#autoFrame')?.value;
+	if (autoFrameValue && frameTypeConfigs[autoFrameValue]?.requiresColorIndicatorShift) return true;
+	return colorIndicatorShiftVersions.has(card.version);
+}

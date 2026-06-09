@@ -4048,7 +4048,7 @@ async function startScryfallBulkDownload() {
     const savedMarginsValue = marginsCheckbox.checked;
     const dfcBackHideSetSymbolCheckbox = document.querySelector('#autoframe-dfc-back-hide-set-symbol');
     const savedDfcBackHideSetSymbolValue = dfcBackHideSetSymbolCheckbox.checked;
-    if (frameType !== 'AdventureTimeAuto') autoFrameSelect.value = frameType;
+    if (frameType !== 'AdventureTimeAuto' && frameType !== 'RegularAuto') autoFrameSelect.value = frameType;
     nyxCheckbox.checked = useNyx;
     avoidOverlapCheckbox.checked = document.querySelector('#scryfall-bulk-avoid-overlap').checked;
     marginsCheckbox.checked = document.querySelector('#scryfall-bulk-margins').checked;
@@ -4119,9 +4119,7 @@ async function startScryfallBulkDownload() {
                 if (cardFaces) processScryfallCard(cardObj, cardFaces);
 
                 // --- FRONT / SINGLE ---
-                autoFrameSelect.value = isDFC ? 'AdventureTimeTransformFront'
-                                      : layout === 'adventure' ? 'AdventureTimeAdventure'
-                                      : 'AdventureTime';
+                autoFrameSelect.value = getBulkAutoframeType('AdventureTimeAuto', layout, isDFC, true, cardObj.type_line);
 
                 ImageLoadTracker.start();
                 FontLoadTracker.start();
@@ -4156,11 +4154,13 @@ async function startScryfallBulkDownload() {
                 // loadTextOptions), so card.text.reminder is guaranteed to exist here.
                 const backPT = isDFC && cardFaces?.[1]?.power
                     ? `${cardFaces[1].power}/${cardFaces[1].toughness}` : '';
-                if (backPT && card.text?.reminder) card.text.reminder.text = backPT;
+                if (card.text?.reminder) card.text.reminder.text = backPT;
 
                 await drawText();
                 await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                await waitForAllFrameImages();
                 await drawText();
+                drawFrames();
                 drawCard();
 
                 const frontTitle = layout === 'adventure' && cardObj.card_faces?.length >= 2
@@ -4173,7 +4173,7 @@ async function startScryfallBulkDownload() {
                 // --- BACK (DFC only) ---
                 if (isDFC) {
                     notify(`Processing card ${totalRendered} of ${totalRequested}: ${cardObj.name} (back)`, 1);
-                    autoFrameSelect.value = 'AdventureTimeTransformBack';
+                    autoFrameSelect.value = getBulkAutoframeType('AdventureTimeAuto', layout, isDFC, false, cardObj.type_line);
 
                     ImageLoadTracker.start();
                     FontLoadTracker.start();
@@ -4210,13 +4210,126 @@ async function startScryfallBulkDownload() {
                     clearTimeout(autoFrameTimer);
                     await drawText();
                     await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                    await waitForAllFrameImages();
                     await drawText();
+                    drawFrames();
                     drawCard();
 
                     const backTitle = getCardName();
                     const backFile = safeFilename(backTitle) + ' (back).' + imageExt;
                     zip.file(backFile, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
                     console.log(`Zipped: ${backFile}`);
+                }
+            } else if (frameType === 'RegularAuto') {
+                const layout = cardObj.layout;
+                const isDFC = ['transform', 'modal_dfc', 'transform double faced'].includes(layout)
+                           || (Array.isArray(cardObj.card_faces) && cardObj.card_faces.length === 2
+                               && !['adventure', 'split', 'flip', 'aftermath', 'meld', 'omen', 'prepare'].includes(layout));
+                const isSpell2 = ['adventure', 'omen', 'prepare'].includes(layout);
+                const setCode = cardObj.set ? cardObj.set.toUpperCase() : '';
+                const collNum = cardObj.collector_number || '';
+                const safeFilenameReg = name => (name + (setCode ? ` (${setCode})` : '') + (collNum ? ` ${collNum}` : '')).replace(/[<>:"/\\|?*]/g, '_');
+
+                const cardFacesReg = (isDFC || isSpell2) ? [] : null;
+                if (cardFacesReg) processScryfallCard(cardObj, cardFacesReg);
+
+                // --- FRONT / SINGLE ---
+                autoFrameSelect.value = getBulkAutoframeType('RegularAuto', layout, isDFC, true, cardObj.type_line);
+
+                ImageLoadTracker.start();
+                FontLoadTracker.start();
+                const origUploadArtReg = window.uploadArt;
+                window.uploadArt = () => {};
+                await importCard(cardFacesReg ?? [cardObj]);
+                window.uploadArt = origUploadArtReg;
+                clearTimeout(writingText);
+                clearTimeout(autoFrameTimer);
+
+                const frontArtUrl = cardObj.card_faces?.[0]?.image_uris?.art_crop ?? cardObj.image_uris?.art_crop;
+                if (frontArtUrl) {
+                    await new Promise(resolve => {
+                        art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                        art.onerror = () => {
+                            if (!art.src.includes('/img/blank.png')) {
+                                art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                                art.src = fixUri('/img/blank.png');
+                            } else { art.onload = artEdited; resolve(); }
+                        };
+                        art.src = frontArtUrl;
+                    });
+                }
+                const frontArtist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
+                if (frontArtist) artistEdited(frontArtist);
+
+                await autoFrame(true);
+                clearTimeout(writingText);
+                clearTimeout(autoFrameTimer);
+
+                const backPTReg = isDFC && cardFacesReg?.[1]?.power
+                    ? `${cardFacesReg[1].power}/${cardFacesReg[1].toughness}` : '';
+                if (card.text?.reminder) card.text.reminder.text = backPTReg;
+
+                await drawText();
+                await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                await waitForAllFrameImages();
+                await drawText();
+                drawFrames();
+                drawCard();
+
+                const frontTitle = getCardName();
+                const frontFile = safeFilenameReg(frontTitle) + (isDFC ? ' (front)' : '') + '.' + imageExt;
+                zip.file(frontFile, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
+                console.log(`Zipped: ${frontFile}`);
+
+                // --- BACK (DFC only) ---
+                if (isDFC) {
+                    notify(`Processing card ${totalRendered} of ${totalRequested}: ${cardObj.name} (back)`, 1);
+                    autoFrameSelect.value = getBulkAutoframeType('RegularAuto', layout, isDFC, false, cardObj.type_line);
+
+                    ImageLoadTracker.start();
+                    FontLoadTracker.start();
+
+                    const origUploadArtRegBack = window.uploadArt;
+                    window.uploadArt = () => {};
+                    await importCard(cardFacesReg);
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+                    document.querySelector('#import-index').value = '1';
+                    await changeCardIndex();
+                    window.uploadArt = origUploadArtRegBack;
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+
+                    const backArtUrl = cardObj.card_faces?.[1]?.image_uris?.art_crop;
+                    if (backArtUrl) {
+                        await new Promise(resolve => {
+                            art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                            art.onerror = () => {
+                                if (!art.src.includes('/img/blank.png')) {
+                                    art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+                                    art.src = fixUri('/img/blank.png');
+                                } else { art.onload = artEdited; resolve(); }
+                            };
+                            art.src = backArtUrl;
+                        });
+                    }
+                    const backArtist = cardObj.card_faces?.[1]?.artist || cardObj.artist;
+                    if (backArtist) artistEdited(backArtist);
+
+                    await autoFrame(true);
+                    clearTimeout(writingText);
+                    clearTimeout(autoFrameTimer);
+                    await drawText();
+                    await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+                    await waitForAllFrameImages();
+                    await drawText();
+                    drawFrames();
+                    drawCard();
+
+                    const backTitleReg = getCardName();
+                    const backFileReg = safeFilenameReg(backTitleReg) + ' (back).' + imageExt;
+                    zip.file(backFileReg, cardCanvas.toDataURL(imageMime, imageQuality).split(',')[1], { base64: true });
+                    console.log(`Zipped: ${backFileReg}`);
                 }
             } else {
             ImageLoadTracker.start();
@@ -4265,11 +4378,16 @@ async function startScryfallBulkDownload() {
 
             // Wait for frame images, set symbol, and all tracked fonts to finish loading.
             await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
+            // Directly confirm every image currently in card.frames is loaded —
+            // the tracker can resolve early if a stale onload callback (e.g. from the
+            // blank.src placeholder) fires instead of the real image's onload.
+            await waitForAllFrameImages();
 
             // Second draw: all fonts are now loaded, so this produces the correct output.
             await drawText();
-
-            await new Promise(resolve => setTimeout(resolve, 50));
+            // Draw frames immediately before drawCard with no await in between,
+            // so no event-loop callback can clear frameCanvas after this point.
+            drawFrames();
             drawCard();
 
             const cardTitle = getCardName();
@@ -5461,10 +5579,7 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 		}
 
 		// Add {right88} to the type line to make room for the indicator dot
-		const atTransformBackVersions = ['adventureTimeTransformBack', 'adventureTimeEnchantmentTransformBack', 'adventureTimeSnowTransformBack'];
-		const isAtTransformBack = atTransformBackVersions.includes(card.version)
-		                       || document.querySelector('#autoFrame').value === 'AdventureTimeTransformBack';
-		if (isAtTransformBack && card.text?.type && !card.text.type.text.startsWith('{right88}')) {
+		if (frameRequiresColorIndicatorShift() && card.text?.type && !card.text.type.text.startsWith('{right88}')) {
 			card.text.type.text = '{right88}' + card.text.type.text;
 		}
 	}
