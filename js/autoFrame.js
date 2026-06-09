@@ -892,10 +892,14 @@ function getFrameLetterConfig(frameType) {
 
 				if (mask === 'Crown') return `crown/${styleFolder}/${colorLetter}.png`;
 				if (mask === 'PT') return `pt/${colorLetter}.png`;
-				// Enchantment and snow don't have land/artifact/vehicle variants - fall back to regular
-				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
-				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
-				return `${baseFolder}/${colorLetter}.png`;
+				if (styleFolder === 'snow') {
+					if (colorLetter === 'v') return `regular/${colorLetter}.png`;
+					// Snow has no colored-land variants (ul, wl, etc.) — use the single-color snow frame
+					if (colorLetter.length > 1 && colorLetter.endsWith('l')) return `snow/${colorLetter.slice(0, -1)}.png`;
+				} else if (styleFolder === 'enchantment') {
+					if (['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter)) return `regular/${colorLetter}.png`;
+				}
+				return `${styleFolder}/${colorLetter}.png`;
 			},
 			maskPath: (mask) => {
 				const maskMap = {
@@ -993,9 +997,13 @@ function getFrameLetterConfig(frameType) {
 					return `dfc/front/${crownFolder}/crown/${colorLetter}.png`;
 				}
 				if (mask === 'PT') return `pt/${colorLetter}.png`;
-				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
-				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
-				return `dfc/front/${baseFolder}/${colorLetter}.png`;
+				if (styleFolder === 'snow') {
+					if (colorLetter === 'v') return `dfc/front/regular/${colorLetter}.png`;
+					if (colorLetter.length > 1 && colorLetter.endsWith('l')) return `dfc/front/snow/${colorLetter.slice(0, -1)}.png`;
+				} else if (styleFolder === 'enchantment') {
+					if (['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter)) return `dfc/front/regular/${colorLetter}.png`;
+				}
+				return `dfc/front/${styleFolder}/${colorLetter}.png`;
 			},
 			maskPath: (mask) => {
 				const maskMap = {
@@ -1041,9 +1049,13 @@ function getFrameLetterConfig(frameType) {
 					return `dfc/back/${crownFolder}/crown/${colorLetter}.png`;
 				}
 				if (mask === 'PT') return `dfc/back/pt/${colorLetter}.png`;
-				const noSpecialVariant = ['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter);
-				const baseFolder = (noSpecialVariant && styleFolder !== 'regular') ? 'regular' : styleFolder;
-				return `dfc/back/${baseFolder}/${colorLetter}.png`;
+				if (styleFolder === 'snow') {
+					if (colorLetter === 'v') return `dfc/back/regular/${colorLetter}.png`;
+					if (colorLetter.length > 1 && colorLetter.endsWith('l')) return `dfc/back/snow/${colorLetter.slice(0, -1)}.png`;
+				} else if (styleFolder === 'enchantment') {
+					if (['l', 'a', 'v', 'wl', 'ul', 'bl', 'rl', 'gl', 'ml'].includes(colorLetter)) return `dfc/back/regular/${colorLetter}.png`;
+				}
+				return `dfc/back/${styleFolder}/${colorLetter}.png`;
 			},
 			maskPath: (mask) => {
 				const maskMap = {
