@@ -1087,11 +1087,25 @@ function _simulateTextLayout(tokens, textWidth, textSize, lineSpacing, ctx) {
 	const EXTRA = textSize * 0.35; // {line} adds extra gap
 	const manaW = textSize * 0.90;
 
-	// Codes that produce NO rendered glyph (styling/position only)
-	const skipPrefixes = ['i','bold','left','center','right','indent','fixtextalign','font',
+	// Mirror writeText()'s font-switching logic so word widths are measured with the
+	// same font that writeText() actually renders (fixes italic/bold line-wrap discrepancies).
+	const baseFont = ctx.font;
+	// Parse baseFont into its components: style prefix, size, and family name.
+	const _fp = baseFont.match(/^(.*?)(\d+(?:\.\d+)?)px\s+(.+)$/);
+	const _bStyle = _fp ? _fp[1].trim() : '';
+	const _bSize  = _fp ? _fp[2] : '12';
+	const _bName  = _fp ? _fp[3].trim() : baseFont;
+	let _fStyle = _bStyle, _fExt = '';
+	function applyFont() {
+		ctx.font = (_fStyle ? _fStyle + ' ' : '') + _bSize + 'px ' + _bName + _fExt;
+	}
+
+	// Codes that produce NO rendered glyph (styling/position only).
+	// '/' prefix catches remaining closing tags: {/b}, {/bold}, etc. (after explicit handling above).
+	const skipPrefixes = ['bold','left','center','right','indent','fixtextalign','font',
 		'up','down','shadow','ruby','elemid','outline','kerning','permashift','ptshift',
 		'arcradius','arcstart','rotate','roll','rollcolor','manacolor','fontcolor',
-		'fontsize','planechase','savex','loadx','conditionalcolor','linecap','linejoin','-'];
+		'fontsize','planechase','savex','loadx','conditionalcolor','linecap','linejoin','-','/'];
 
 	const positions = [];
 
@@ -1103,6 +1117,27 @@ function _simulateTextLayout(tokens, textWidth, textSize, lineSpacing, ctx) {
 		}
 		if (token.type === 'code') {
 			const code = token.text.toLowerCase().slice(1, -1);
+			// Handle italic/bold toggles — mirrors writeText()'s font-switching exactly.
+			if (code === 'i') {
+				if (_bName === 'mplantin') { _fExt = 'i'; _fStyle = _fStyle.replace('italic ', ''); }
+				else if (_bName === 'gilllsans' || _bName === 'neosans') { _fExt = 'italic'; }
+				else { _fExt = ''; if (!_fStyle.includes('italic')) _fStyle = 'italic ' + _fStyle; }
+				applyFont(); positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false }); continue;
+			}
+			if (code === '/i') {
+				_fExt = ''; _fStyle = _fStyle.replace('italic ', '');
+				applyFont(); positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false }); continue;
+			}
+			if (code === 'b' || code === 'bold') {
+				if (_bName === 'gillsans') { _fExt = 'bold'; }
+				else { if (!_fStyle.includes('bold')) _fStyle = 'bold ' + _fStyle; }
+				applyFont(); positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false }); continue;
+			}
+			if (code === '/b' || code === '/bold') {
+				if (_bName === 'gillsans') { _fExt = ''; }
+				else { _fStyle = _fStyle.replace('bold ', ''); }
+				applyFont(); positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false }); continue;
+			}
 			if (code === 'line') {
 				positions.push({ token, x: currentX, xEnd: currentX, y: currentY, visible: false });
 				currentX = 0; currentY += textSize + EXTRA; currentNLS = lineSpacing * textSize;
@@ -1146,6 +1181,7 @@ function _simulateTextLayout(tokens, textWidth, textSize, lineSpacing, ctx) {
 		positions.push({ token, x: currentX, xEnd: currentX + ww, y: currentY, visible: true });
 		currentX += ww;
 	}
+	ctx.font = baseFont; // restore font after any italic/bold changes
 	// Add the height of the last line so totalY matches writeText()'s currentY at the
 	// point it computes verticalAdjust (writeText flushes one extra time via its '' sentinel).
 	return { positions, totalY: currentY + textSize + currentNLS };
@@ -1185,7 +1221,9 @@ function findPTOverlapInsertionIndex(textData, ptTop, ptLeft) {
 	const ptTopRel  = ptTop  * card.height - textY - vAdj;
 	const ptLeftRel = ptLeft * card.width  - textX;
 
-	if (ptTopRel <= 0 || ptLeftRel <= 0) { lineContext.font = savedFont; return null; }
+	console.log('[findPTOverlap] ptTop=', ptTop, 'ptLeft=', ptLeft, 'textX=', textX, 'textY=', textY, 'vAdj=', vAdj, 'ptTopRel=', ptTopRel, 'ptLeftRel=', ptLeftRel, 'textSize=', textSize);
+
+	if (ptTopRel <= 0) { lineContext.font = savedFont; console.log('[findPTOverlap] ptTopRel<=0, returning null'); return null; }
 
 	// Pass 2 – find the first token positioned inside the PT box region.
 	const { positions } = _simulateTextLayout(tokens, textW, textSize, lineSpacing, lineContext);
@@ -1195,11 +1233,35 @@ function findPTOverlapInsertionIndex(textData, ptTop, ptLeft) {
 	//   - the line's bottom edge crosses the PT box top:  y + textSize > ptTopRel
 	//   - the token's right edge crosses the PT box left: xEnd > ptLeftRel
 	const yThreshold = ptTopRel - textSize;
-	for (const { token, x, xEnd, y, visible } of positions) {
+	let firstOverlapIdx = -1;
+	for (let i = 0; i < positions.length; i++) {
+		const { token, xEnd, y, visible } = positions[i];
 		if (!visible) continue;
-		if (y > yThreshold && xEnd > ptLeftRel) return token.charStart;
+		if (y > yThreshold && xEnd > ptLeftRel) { firstOverlapIdx = i; break; }
 	}
-	return null;
+	console.log('[findPTOverlap] yThreshold=', yThreshold, 'firstOverlapIdx=', firstOverlapIdx, firstOverlapIdx >= 0 ? 'token=' + JSON.stringify(positions[firstOverlapIdx].token.text) + ' y=' + positions[firstOverlapIdx].y + ' xEnd=' + positions[firstOverlapIdx].xEnd : '');
+	if (firstOverlapIdx < 0) return null;
+
+	// For the reminder case (ptLeftRel <= 0): the yThreshold check finds lines whose
+	// BOTTOM reaches the reminder zone (e.g. the "Daybound" line above it). We actually
+	// want the line whose TOP starts within the reminder zone — that is, y >= ptTopRel.
+	// Find the last visible token on the last such line; insert {lns} before it so that
+	// word moves to the next line, clearing the reminder area.
+	if (ptLeftRel <= 0) {
+		const yUpper = ptTopRel + textSize; // lines whose TOP falls within the reminder zone
+		let lastInZone = -1;
+		for (let i = 0; i < positions.length; i++) {
+			const pos = positions[i];
+			if (!pos.visible) continue;
+			if (pos.token.type !== 'word') continue; // skip code tokens like {/i}
+			if (pos.y >= ptTopRel && pos.y < yUpper) lastInZone = i;
+		}
+		if (lastInZone < 0) lastInZone = firstOverlapIdx; // fallback
+		console.log('[findPTOverlap] ptLeftRel<=0 path: lastInZone=', lastInZone, 'token=', JSON.stringify(positions[lastInZone].token.text), 'charStart=', positions[lastInZone].token.charStart);
+		return positions[lastInZone].token.charStart;
+	}
+
+	return positions[firstOverlapIdx].token.charStart;
 }
 
 var autoFramePack;
@@ -1610,6 +1672,34 @@ async function drawText() {
 		for (let i = 3; i < px.length; i += 4) { if (px[i] > 10) return true; }
 		return false;
 	}
+	const reminderData = (avoidOverlap && card.text?.reminder?.text) ? card.text.reminder : null;
+	const reminderEdges = reminderData ? {
+		top:    reminderData.y,
+		left:   reminderData.x,
+		right:  reminderData.x + (reminderData.width  || 0),
+		bottom: reminderData.y + (reminderData.height || 0)
+	} : null;
+	// For right-aligned reminders (like the back-face PT "6/6"), use the rightmost
+	// portion of the field as the scan target. This avoids font-measurement issues while
+	// still excluding the empty left side of the field that causes false positives.
+	// Heuristic: scan the rightmost (2 × field height) of the reminder field.
+	// Multiplier 2 ≈ width of a 3-char right-aligned text like "6/6", keeps the window
+	// tight enough that a preceding word ending before it doesn't cause a false positive.
+	let remRenderLeft = reminderEdges ? reminderEdges.left : 0;
+	if (reminderData?.align === 'right') {
+		const remFieldH = reminderData.height || 0;
+		remRenderLeft = Math.max(reminderEdges.left, reminderEdges.right - remFieldH * 2);
+	}
+	const remPX = reminderEdges ? Math.floor(scaleX(remRenderLeft))        : -1;
+	const remPY = reminderEdges ? Math.floor(scaleY(reminderEdges.top))    : -1;
+	const remCW = reminderEdges ? Math.max(1, Math.ceil(scaleX(reminderEdges.right)) - remPX) : 0;
+	const remCH = reminderEdges ? Math.max(1, Math.ceil(scaleY(reminderEdges.bottom)) - remPY) : 0;
+	function overlapsReminder(ctx) {
+		if (!reminderEdges || remPX < 0 || remPY < 0) return false;
+		const px = ctx.getImageData(remPX, remPY, remCW, remCH).data;
+		for (let i = 3; i < px.length; i += 4) { if (px[i] > 10) return true; }
+		return false;
+	}
 	function newOff() {
 		const c = document.createElement('canvas');
 		c.width = textCanvas.width; c.height = textCanvas.height;
@@ -1617,68 +1707,120 @@ async function drawText() {
 	}
 	for (var textObject of Object.entries(card.text)) {
 		let textData = textObject[1];
-		if (textObject[0] === 'rules' && ptEdges !== null && textData.height > 0) {
-			const maxHeight = ptEdges.top - textData.y;
-			if (maxHeight > 0 && textData.height > maxHeight) {
-				// Render at full height to check for actual pixel overlap with PT box
-				const ctx0 = newOff();
-				writeText(textData, ctx0);
-				if (!overlapsPT(ctx0)) {
-					// No actual overlap — use this render directly
-					textContext.drawImage(ctx0.canvas, 0, 0);
-					continue;
-				}
-				// Step 1: insert one {lns} break — only when two lines overlap the PT box.
-				// A single overlapping line would just produce an orphan word on a new last line.
-				const ptRgn = ctx0.getImageData(ptPX, ptPY, ptCW, ptCH).data;
-				let ptBands = 0, inBand = false;
-				for (let y = 0; y < ptCH && ptBands < 2; y++) {
-					let rowHit = false;
-					for (let x = 0; x < ptCW; x++) {
-						if (ptRgn[(y * ptCW + x) * 4 + 3] > 10) { rowHit = true; break; }
-					}
-					if (rowHit && !inBand) { ptBands++; inBand = true; }
-					else if (!rowHit) { inBand = false; }
-				}
-				const insertIdx = ptBands >= 2 ? findPTOverlapInsertionIndex(textData, ptEdges.top, ptEdges.left) : null;
-				if (insertIdx !== null && insertIdx > 0) {
-					const lbData = Object.assign({}, textData, {
-						text: textData.text.slice(0, insertIdx) + '{lns}' + textData.text.slice(insertIdx)
-					});
-					const ctx1 = newOff();
-					writeText(lbData, ctx1);
-					if (!overlapsPT(ctx1)) {
-						const lineH = scaleHeight(textData.size || 0.038);
-						if (_bottomTextRow(ctx1, textData) <= _bottomTextRow(ctx0, textData) + lineH * 1.2) {
-							textContext.drawImage(ctx1.canvas, 0, 0);
-							continue;
+		if (textObject[0] === 'rules' && (ptEdges !== null || reminderEdges) && textData.height > 0) {
+			// workCtx: offscreen canvas ready to blit; null means fall through to writeText(workData).
+			// workData: the text data state to render from (may have {lns}, height cap, etc. applied).
+			let workCtx = null;
+			let workData = textData;
+
+			// ---- PT AVOIDANCE ----
+			if (ptEdges !== null) {
+				const maxHeight = ptEdges.top - workData.y;
+				if (maxHeight > 0 && workData.height > maxHeight) {
+					const ctx0 = newOff();
+					writeText(workData, ctx0);
+					if (!overlapsPT(ctx0)) {
+						workCtx = ctx0;
+					} else {
+						// Step 1: insert one {lns} break — only when two lines overlap the PT box.
+						const ptRgn = ctx0.getImageData(ptPX, ptPY, ptCW, ptCH).data;
+						let ptBands = 0, inBand = false;
+						for (let y = 0; y < ptCH && ptBands < 2; y++) {
+							let rowHit = false;
+							for (let x = 0; x < ptCW; x++) {
+								if (ptRgn[(y * ptCW + x) * 4 + 3] > 10) { rowHit = true; break; }
+							}
+							if (rowHit && !inBand) { ptBands++; inBand = true; }
+							else if (!rowHit) { inBand = false; }
+						}
+						const ptInsertIdx = ptBands >= 2 ? findPTOverlapInsertionIndex(workData, ptEdges.top, ptEdges.left) : null;
+						if (ptInsertIdx !== null && ptInsertIdx > 0) {
+							const lbData = Object.assign({}, workData, {
+								text: workData.text.slice(0, ptInsertIdx) + '{lns}' + workData.text.slice(ptInsertIdx)
+							});
+							const ctx1 = newOff();
+							writeText(lbData, ctx1);
+							if (!overlapsPT(ctx1)) {
+								const lineH = scaleHeight(workData.size || 0.038);
+								if (_bottomTextRow(ctx1, workData) <= _bottomTextRow(ctx0, workData) + lineH * 1.2) {
+									workCtx = ctx1;
+									workData = lbData;
+								}
+							}
+						}
+						// Step 2: shift text to top of rules box (remove vertical centering)
+						if (!workCtx && !workData.noVerticalCenter) {
+							const d2 = Object.assign({}, workData, { noVerticalCenter: true });
+							const ctx2 = newOff();
+							writeText(d2, ctx2);
+							if (!overlapsPT(ctx2)) { workCtx = ctx2; workData = d2; }
+						}
+						// Step 3: reduce font size 1pt at a time until no overlap
+						if (!workCtx) {
+							const baseFS = parseInt(workData.fontSize || '0');
+							for (let n = 1; n <= 20 && !workCtx; n++) {
+								const d3 = Object.assign({}, workData, { fontSize: String(baseFS - n) });
+								const ctx3 = newOff();
+								writeText(d3, ctx3);
+								if (!overlapsPT(ctx3)) { workCtx = ctx3; workData = d3; }
+							}
+						}
+						// Fallback: hard height cap (no workCtx — falls through to writeText)
+						if (!workCtx) {
+							workData = Object.assign({}, workData, { height: maxHeight });
 						}
 					}
 				}
-				// Step 2: shift text to top of rules box (remove vertical centering)
-				if (!textData.noVerticalCenter) {
-					const ctx2 = newOff();
-					writeText(Object.assign({}, textData, { noVerticalCenter: true }), ctx2);
-					if (!overlapsPT(ctx2)) {
-						textContext.drawImage(ctx2.canvas, 0, 0);
-						continue;
-					}
-				}
-				// Step 3: reduce font size 1pt at a time until no overlap
-				const baseFS = parseInt(textData.fontSize || '0');
-				let done3 = false;
-				for (let n = 1; n <= 20 && !done3; n++) {
-					const ctx3 = newOff();
-					writeText(Object.assign({}, textData, { fontSize: String(baseFS - n) }), ctx3);
-					if (!overlapsPT(ctx3)) {
-						textContext.drawImage(ctx3.canvas, 0, 0);
-						done3 = true;
-					}
-				}
-				if (done3) continue;
-				// Fallback: hard height cap
-				textData = Object.assign({}, textData, { height: maxHeight });
 			}
+
+			// ---- REMINDER AVOIDANCE ----
+			if (reminderEdges && workData.text) {
+				// Reuse workCtx if PT avoidance already produced one; otherwise render workData now.
+				const checkCtx = workCtx ?? (() => { const c = newOff(); writeText(workData, c); return c; })();
+				const initialOverlap = overlapsReminder(checkCtx);
+				console.log('[ReminderAvoid] reminderEdges=', reminderEdges, 'remRenderLeft=', remRenderLeft, 'remPX=', remPX, 'remPY=', remPY, 'remCW=', remCW, 'remCH=', remCH, 'initialOverlap=', initialOverlap);
+				if (initialOverlap) {
+					let remFixed = false;
+					let tryData = workData;
+					for (let attempt = 0; attempt < 2 && !remFixed; attempt++) {
+						// Use reminderEdges.left (not remRenderLeft) so ptLeftRel=0 triggers the
+						// "last token on overlapping line" path — remRenderLeft is only for the pixel scan.
+						const remInsertIdx = findPTOverlapInsertionIndex(tryData, reminderEdges.top, reminderEdges.left);
+						console.log('[ReminderAvoid] attempt=', attempt, 'remInsertIdx=', remInsertIdx, 'textLen=', tryData.text?.length, 'textSnippet=', JSON.stringify(tryData.text?.slice(Math.max(0,(remInsertIdx||0)-20), (remInsertIdx||0)+20)));
+						if (remInsertIdx === null || remInsertIdx <= 0) break;
+						const lbData = Object.assign({}, tryData, {
+							text: tryData.text.slice(0, remInsertIdx) + '{lns}' + tryData.text.slice(remInsertIdx)
+						});
+						console.log('[ReminderAvoid] inserted {lns}, new text around insertion:', JSON.stringify(lbData.text.slice(Math.max(0,remInsertIdx-20), remInsertIdx+25)));
+						const ctx1 = newOff();
+						writeText(lbData, ctx1);
+						const stillOverlaps = overlapsReminder(ctx1);
+						const ptConflict = ptEdges && overlapsPT(ctx1);
+						console.log('[ReminderAvoid] after insert: stillOverlaps=', stillOverlaps, 'ptConflict=', ptConflict);
+						if (!stillOverlaps && !ptConflict) {
+							workCtx = ctx1;
+							workData = lbData;
+							remFixed = true;
+						} else {
+							tryData = lbData;
+						}
+					}
+					console.log('[ReminderAvoid] remFixed=', remFixed);
+					// If line breaks couldn't fix the overlap, leave as-is (best effort).
+					if (!remFixed && !workCtx) workCtx = checkCtx;
+				} else {
+					// No reminder overlap — if PT avoidance hadn't already set workCtx, record the
+					// clean render we just produced so we don't render twice below.
+					if (!workCtx) workCtx = checkCtx;
+				}
+			}
+
+			if (workCtx) {
+				textContext.drawImage(workCtx.canvas, 0, 0);
+				continue;
+			}
+			// workCtx is null only when PT fallback height-capped workData; fall through to writeText.
+			textData = workData;
 		}
 		if (textObject[0] === 'type' && avoidOverlap && card.setSymbolBounds) {
 			const ssLeftPX = getSetSymbolLeftEdgePX();
@@ -1689,8 +1831,9 @@ async function drawText() {
 				const ssBottom   = ssTop + setSymbol.height * card.setSymbolZoom;
 				const yOverlap   = ssTop < typeBottom && ssBottom > typeTop;
 				if (yOverlap && ssLeftPX > scaleX(textData.x)) {
+					const ssBuffer = Math.round(scaleX(0.01));
 					const checkOverlap = (ctx) => {
-						const rX = Math.max(0, Math.floor(ssLeftPX));
+						const rX = Math.max(0, Math.floor(ssLeftPX) - ssBuffer);
 						if (rX >= ctx.canvas.width) return false;
 						const rY = Math.max(0, Math.floor(typeTop));
 						const rW = Math.max(1, ctx.canvas.width - rX);
@@ -4929,6 +5072,15 @@ function parseStationCard(oracleText) {
 
 async function changeCardIndex() {
 	var cardToImport = scryfallCard[document.querySelector('#import-index').value];
+	// Normalize en dash (–) to em dash (—) in oracle text so ability words are detected correctly
+	if (cardToImport.oracle_text) {
+		cardToImport.oracle_text = cardToImport.oracle_text.replace(/–/g, '—');
+	}
+	if (cardToImport.card_faces) {
+		cardToImport.card_faces.forEach(face => {
+			if (face.oracle_text) face.oracle_text = face.oracle_text.replace(/–/g, '—');
+		});
+	}
 	// Add debug logging for card Layout detection
 	console.log('Card layout:', cardToImport.layout);
 	console.log('Card version:', card.version);
@@ -5078,13 +5230,15 @@ async function changeCardIndex() {
 		// Handle pt2 for battle and transform front faces (cards without title2/mana2)
 		const autoFrameVal = document.querySelector('#autoFrame').value;
 		const isTransformContext = card.version.includes('transform') || card.version.includes('Transform')
-		                        || autoFrameVal.includes('Transform');
+		                        || autoFrameVal.includes('Transform')
+		                        || ['transform', 'transform double faced'].includes(cardToImport.layout);
 		if ((card.version === 'battle' || isTransformContext) && card.text?.pt2) {
 			card.text.pt2.text = flipData.back.pt || '';
 		}
 
-		if (isTransformContext && card.text?.reminder && flipData.back.pt) {
-			card.text.reminder.text = flipData.back.pt;
+		if (isTransformContext && flipData.back.pt) {
+			if (card.text?.reminder) card.text.reminder.text = flipData.back.pt;
+			savedTextContents['reminder'] = flipData.back.pt;
 		}
 	
 		textEdited();
