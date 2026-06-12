@@ -1831,7 +1831,7 @@ async function drawText() {
 				const ssBottom   = ssTop + setSymbol.height * card.setSymbolZoom;
 				const yOverlap   = ssTop < typeBottom && ssBottom > typeTop;
 				if (yOverlap && ssLeftPX > scaleX(textData.x)) {
-					const ssBuffer = Math.round(scaleX(0.01));
+					const ssBuffer = Math.round(scaleWidth(0.01));
 					const checkOverlap = (ctx) => {
 						const rX = Math.max(0, Math.floor(ssLeftPX) - ssBuffer);
 						if (rX >= ctx.canvas.width) return false;
