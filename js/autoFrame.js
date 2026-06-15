@@ -62,6 +62,19 @@ const frameTypeConfigs = {
 		filterFrames: (frame) => frame.name.includes('Extension'),
 		requiresColorIndicatorShift: true
 	},
+	'M15TransformUBFront': {
+		label: 'Transform (Front) (Universes Beyond)', menuGroup: 'Double-Faced',
+		group: 'Showcase-5', makeFrameFunction: makeM15TransformUBFrontFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: true,
+		filterFrames: (frame) => frame.name.includes('Extension')
+	},
+	'M15TransformUBBackNew': {
+		label: 'Transform (Back, New) (Universes Beyond)', menuGroup: 'Double-Faced',
+		group: 'Showcase-5', makeFrameFunction: makeM15TransformUBBackNewFrameByLetter,
+		supportsCrown: true, supportsPT: true, supportsStamp: false,
+		filterFrames: (frame) => frame.name.includes('Extension'),
+		requiresColorIndicatorShift: true
+	},
 	'M15BoxTopper': {
 		label: 'Extended Art', menuGroup: null,
 		group: 'Showcase-5', makeFrameFunction: (letter, mask, maskToRightHalf, style) => makeExtendedArtFrameByLetter(letter, mask, maskToRightHalf, style, false),
@@ -1183,6 +1196,89 @@ function getFrameLetterConfig(frameType) {
 				return letter;
 			}
 		},
+		'M15TransformUBFront': {
+			frameNames: extendedFrameNames,
+			basePath: '/img/frames/m15/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
+				pt: {height: 0.0733, width: 0.188, x: 0.7573, y: 0.8848},
+				stamp: {height: 0.0486, width: 0.1494, x: 0.4254, y: 0.9005}
+			},
+			pathBuilder: (letter, mask, style) => {
+				if (mask === 'Crown') return `transform/crowns/ub/regular/${letter.toLowerCase()}.png`;
+				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}UB.png`;
+				if (mask === 'PT') {
+					let ptLetter = letter === 'L' ? 'C' : letter;
+					return `ub/pt/${ptLetter.toLowerCase()}.png`;
+				}
+				if (mask === 'Stamp') return `ub/regular/stamp/${letter.toLowerCase()}.png`;
+				return `transform/ub/front${letter}.png`;
+			},
+			maskPath: (mask) => ({
+				'Pinline': 'transform/regular/maskPinlineFront.png',
+				'Title': 'transform/regular/maskTitle.png',
+				'Type': 'regular/m15MaskType.png',
+				'Rules': 'transform/regular/maskRulesFront.png',
+				'Frame': 'transform/regular/maskFrameFront.png',
+				'Border': 'transform/regular/maskBorderFront.png'
+			})[mask] || null,
+			letterTransform: (letter, mask, style) => {
+				if (letter === 'C') letter = 'L';
+				if (style === 'Nyx') letter += 'E';
+				// Crown and Inner Crown have no land/Nyx colored variants — strip all suffixes
+				if ((mask === 'Crown' || mask === 'Inner Crown') && (letter.includes('L') || letter.includes('E')) && letter.length > 1) {
+					return letter[0];
+				}
+				// PT and Stamp have no land/Nyx variants
+				if ((mask === 'PT' || mask === 'Stamp') && (letter.includes('L') || letter.includes('E')) && letter.length > 1) {
+					return letter[0];
+				}
+				// Main frame supports land (L) and Nyx (E) variants, but not combined
+				if (letter.includes('L') && letter.includes('E')) {
+					return letter.replace('L', '');
+				}
+				return letter;
+			}
+		},
+		'M15TransformUBBackNew': {
+			frameNames: extendedFrameNames,
+			basePath: '/img/frames/m15/',
+			bounds: {
+				crownBorderCover: {height: 0.0177, width: 0.9214, x: 0.0394, y: 0.0277},
+				crown: {height: 0.1667, width: 0.9454, x: 0.0274, y: 0.0191},
+				innerCrown: {height: 0.0239, width: 0.672, x: 0.164, y: 0.0239},
+				pt: {height: 0.0733, width: 0.188, x: 0.7573, y: 0.8848},
+				stamp: {height: 0.0486, width: 0.1494, x: 0.4254, y: 0.9005}
+			},
+			pathBuilder: (letter, mask, style) => {
+				if (mask === 'Crown') return `transform/crowns/ub/regular/new/${letter.toLowerCase()}.png`;
+				if (mask === 'Inner Crown') return `innerCrowns/m15InnerCrown${letter}${style}UB.png`;
+				if (mask === 'PT') {
+					let ptLetter = letter === 'L' ? 'C' : letter;
+					return `transform/ub/pt${ptLetter}.png`;
+				}
+				if (mask === 'Stamp') return `ub/regular/stamp/${letter.toLowerCase()}.png`;
+				return `transform/ub/new/back${letter}.png`;
+			},
+			maskPath: (mask) => ({
+				'Pinline': 'transform/regular/new/maskPinlineBack.png',
+				'Title': 'transform/regular/new/maskTitle.png',
+				'Type': 'regular/m15MaskType.png',
+				'Rules': 'regular/m15MaskRules.png',
+				'Frame': 'transform/regular/new/maskFrameBack.png',
+				'Border': 'regular/m15MaskBorder.png'
+			})[mask] || null,
+			letterTransform: (letter, mask, style) => {
+				if (letter === 'C') letter = 'L';
+				// Back face has no Nyx or land-colored variants — strip all multi-char letters
+				if ((letter.includes('L') || letter.includes('E')) && letter.length > 1) {
+					return letter[0];
+				}
+				return letter;
+			}
+		},
 	};
 
 	return configs[frameType];
@@ -1446,6 +1542,14 @@ function makeM15TransformBackNewFrameByLetter(letter, mask = false, maskToRightH
 	return makeFrameByLetterUnified('M15TransformBackNew', letter, mask, maskToRightHalf, style);
 }
 
+function makeM15TransformUBFrontFrameByLetter(letter, mask = false, maskToRightHalf = false, style = false) {
+	return makeFrameByLetterUnified('M15TransformUBFront', letter, mask, maskToRightHalf, style);
+}
+
+function makeM15TransformUBBackNewFrameByLetter(letter, mask = false, maskToRightHalf = false, style = false) {
+	return makeFrameByLetterUnified('M15TransformUBBackNew', letter, mask, maskToRightHalf, style);
+}
+
 function makeM15EighthFrameByLetter(letter, mask = false, maskToRightHalf = false, style = 'regular') {
 	return makeFrameByLetterUnified('M15Eighth', letter, mask, maskToRightHalf, style);
 }
@@ -1550,7 +1654,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 	var frames = [];
 
 	// COLOR INDICATOR — Adventure Time Transform Back, pushed first so they draw on top
-	if ((frameType === 'M15TransformBackNew' || frameType === 'AdventureTimeTransformBack') &&
+	if ((frameType === 'M15TransformBackNew' || frameType === 'AdventureTimeTransformBack' || frameType === 'M15TransformUBBackNew') &&
 		colors.length >= 1 && colors.length <= 3 &&
 		document.querySelector('#autoframe-color-indicator')?.checked) {
 		const ciLetters = {W: 'w', U: 'u', B: 'b', R: 'r', G: 'g'};
@@ -1567,7 +1671,7 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 			frames.push({name: `${name} Color Indicator`, src: `/img/frames/m15/ciPips/${letter}.svg`, masks: pipMasks[i] ? [pipMasks[i]] : []});
 		}
 
-		if (frameType == 'M15TransformBackNew') {
+		if (frameType == 'M15TransformBackNew' || frameType === 'M15TransformUBBackNew') {
 			frames.push({name:'Color Indicator Base', src:'/img/frames/m15/ciPips/base.png', bounds: {x:0.0767, y:0.5748, width:0.0467, height:0.0334}, masks: []});
 		} else if (frameType == 'AdventureTimeTransformBack') {
 			frames.push({name: 'Color Indicator Base', src: '/img/frames/adventuretime/dfc/back/base.png', bounds: {x: 162/2010, y: 1626/2814, width: 77/2010, height: 76/2814}, masks: []});
@@ -1617,6 +1721,13 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 		if (isNyxEnchantment) {
 			style = 'Nyx';
 		}
+	} else if (frameType === 'M15TransformUBFront') {
+		style = false;
+		if (isNyxEnchantment) {
+			style = 'Nyx';
+		}
+	} else if (frameType === 'M15TransformUBBackNew') {
+		style = false;
 	} else if (frameType === '8th' && isNyxEnchantment) {
 		style = 'Nyx';
 	} else if (frameType !== 'Seventh' && frameType !== '8th' && frameType !== 'Borderless' && frameType !== 'BorderlessUB') {
@@ -1790,6 +1901,18 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 				frames.push(config.makeFrameFunction(properties.pinlineRight, 'Stamp', true, style));
 			}
 			frames.push(config.makeFrameFunction(properties.pinline, "Stamp", false, style));
+		} else if (frameType === 'M15TransformUBFront') {
+			// Gray stamp on top, then color stamp(s) underneath (first-pushed = top layer)
+			frames.push({
+				name: 'Gray Holo Stamp',
+				src: '/img/frames/m15/ub/regular/stamp/gray.png',
+				masks: [],
+				bounds: {height: 0.0486, width: 0.1494, x: 0.4254, y: 0.9005}
+			});
+			if (properties.pinlineRight) {
+				frames.push(config.makeFrameFunction(properties.pinlineRight, 'Stamp', true, style));
+			}
+			frames.push(config.makeFrameFunction(properties.pinline, 'Stamp', false, style));
 		} else {
 			// Standard stamp handling for all other frame types
 			if (properties.pinlineRight) {
@@ -2386,12 +2509,15 @@ populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), fals
 	// Convert Regular option to RegularAuto
 	const regularOpt = sel.querySelector('option[value="M15Regular-1"]');
 	if (regularOpt) regularOpt.value = 'RegularAuto';
+	// Convert UB option to UBAuto
+	const ubOpt = sel.querySelector('option[value="UB"]');
+	if (ubOpt) ubOpt.value = 'UBAuto';
 	// Remove the "Double-Faced" separator (sits directly before M15TransformFront)
 	const firstTransformOpt = sel.querySelector('option[value="M15TransformFront"]');
 	if (firstTransformOpt?.previousElementSibling?.disabled)
 		firstTransformOpt.previousElementSibling.remove();
 	// Remove individual transform/adventure/omen/prepare options
-	['M15TransformFront', 'M15TransformBack', 'M15TransformBackNew', 'Adventure', 'Omen', 'Prepare']
+	['M15TransformFront', 'M15TransformBack', 'M15TransformBackNew', 'M15TransformUBFront', 'M15TransformUBBackNew', 'Adventure', 'Omen', 'Prepare']
 		.forEach(v => sel.querySelector(`option[value="${v}"]`)?.remove());
 	// Remove any remaining orphaned separators (followed immediately by another separator or end)
 	Array.from(sel.querySelectorAll('option[disabled]')).forEach(sep => {
@@ -2412,8 +2538,8 @@ populateAutoFrameSelect(document.querySelector('#scryfall-bulk-autoframe'), fals
 })();
 document.querySelector('#autoFrame').value = localStorage.getItem('autoFrame');
 const savedBulkAutoFrame = localStorage.getItem('bulk-autoframe');
-// Migrate saved value: M15Regular-1 was renamed to RegularAuto in the bulk dropdown.
-const resolvedBulkAutoFrame = savedBulkAutoFrame === 'M15Regular-1' ? 'RegularAuto' : savedBulkAutoFrame;
+// Migrate saved value: M15Regular-1 was renamed to RegularAuto; UB was renamed to UBAuto in the bulk dropdown.
+const resolvedBulkAutoFrame = savedBulkAutoFrame === 'M15Regular-1' ? 'RegularAuto' : savedBulkAutoFrame === 'UB' ? 'UBAuto' : savedBulkAutoFrame;
 if (resolvedBulkAutoFrame) document.querySelector('#scryfall-bulk-autoframe').value = resolvedBulkAutoFrame;
 
 // Each entry maps a frameType key to the card layouts that trigger it.
@@ -2428,6 +2554,11 @@ const bulkAutoframeSupportedTypes = {
 		{ frameType: 'Adventure',           layouts: ['adventure'] },
 		{ frameType: 'Omen',                layouts: ['omen'] },
 		{ frameType: 'Prepare',             layouts: ['prepare'] },
+	],
+	'UBAuto': [
+		{ frameType: 'UB',                    layouts: ['default'] },
+		{ frameType: 'M15TransformUBFront',   layouts: ['dfc-front'] },
+		{ frameType: 'M15TransformUBBackNew', layouts: ['dfc-back'] },
 	],
 	'AdventureTimeAuto': [
 		{ frameType: 'AdventureTime',              layouts: ['default'] },
@@ -2471,6 +2602,7 @@ const colorIndicatorShiftVersions = new Set([
 	'm15TransformBackNew',
 	'm15TransformNyxBackNew',
 	'm15TransformSnowBackNew',
+	'm15TransformUBBackNew',
 ]);
 function registerColorIndicatorShift(version) {
 	colorIndicatorShiftVersions.add(version);

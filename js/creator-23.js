@@ -3278,6 +3278,56 @@ async function upscaleArt() {
   const url = URL.createObjectURL(upscaledBlob);
   uploadArt(url, document.querySelector("#art-update-autofit").checked ? "autoFit" : "");
 }
+
+// Loads art from the local Gatherer server for bulk rendering. Requires artBounds (set by autoFrame).
+async function loadGathererArtBulk(setCode, collNum) {
+    if (!card.artBounds || !setCode || !collNum) return;
+    const targetWidth  = Math.round(card.artBounds.width  * card.width);
+    const targetHeight = Math.round(card.artBounds.height * card.height);
+    const url = `http://localhost:3119/gatherer-crop-upscale?set=${setCode}&number=${collNum}&target_width=${targetWidth}&target_height=${targetHeight}`;
+    try {
+        const resp = await fetch(url);
+        if (!resp.ok) return;
+        const contentType = resp.headers.get('Content-Type') || '';
+        if (!contentType.startsWith('image/')) { console.warn('[bulk] gatherer returned non-image content-type:', contentType); return; }
+        const blobUrl = URL.createObjectURL(await resp.blob());
+        const prevSrc = art.src;
+        await new Promise(resolve => {
+            art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+            art.onerror = () => {
+                // Gatherer blob couldn't be decoded — restore the previous valid art src
+                URL.revokeObjectURL(blobUrl);
+                art.onload = () => { art.onload = artEdited; resolve(); };
+                art.onerror = () => { art.onload = artEdited; resolve(); };
+                art.src = prevSrc;
+            };
+            art.src = blobUrl;
+        });
+    } catch (e) { /* server unavailable — keep existing art */ }
+}
+
+// Silent variant for bulk rendering — skips if art is already large enough, swallows errors.
+async function upscaleArtBulk() {
+    if (!art || art.src === blank.src || !card.artBounds) return;
+    const targetWidth  = card.artBounds.width  * card.width;
+    const targetHeight = card.artBounds.height * card.height;
+    if (art.width >= targetWidth && art.height >= targetHeight) return;
+    const artScale = Math.min(Math.max(Math.ceil(Math.max(targetWidth / art.width, targetHeight / art.height)), 1), 4);
+    try {
+        const imgBlob = await fetch(art.src).then(r => r.blob());
+        const formData = new FormData();
+        formData.append('image', imgBlob, 'input.png');
+        formData.append('scale', artScale);
+        const resp = await fetch('http://localhost:3119/upscayl', { method: 'POST', body: formData });
+        if (!resp.ok) return;
+        const url = URL.createObjectURL(await resp.blob());
+        await new Promise(resolve => {
+            art.onload = () => { autoFitArt(); art.onload = artEdited; resolve(); };
+            art.onerror = () => { art.onload = artEdited; resolve(); };
+            art.src = url;
+        });
+    } catch (e) { /* server unavailable — continue without upscaling */ }
+}
 function artEdited() {
 	card.artSource = art.src;
 	card.artX = document.querySelector('#art-x').value / card.width;
@@ -4125,6 +4175,8 @@ async function startScryfallBulkDownload() {
     const cardListText = document.querySelector('#scryfall-bulk-list').value;
     const frameType = document.querySelector('#scryfall-bulk-autoframe').value;
     const useNyx = document.querySelector('#scryfall-bulk-nyx').checked;
+    const useUpscale = document.querySelector('#scryfall-bulk-upscale').checked;
+    const useGatherer = document.querySelector('#scryfall-bulk-gatherer').checked;
     const useJpeg = document.querySelector('#scryfall-bulk-format').value === 'jpg';
     const imageExt = useJpeg ? 'jpg' : 'png';
     const imageMime = useJpeg ? 'image/jpeg' : 'image/png';
@@ -4286,12 +4338,14 @@ async function startScryfallBulkDownload() {
                         art.src = frontArtUrl;
                     });
                 }
+                if (useUpscale) await upscaleArtBulk();
                 const frontArtist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
                 if (frontArtist) artistEdited(frontArtist);
 
                 await autoFrame(true);
                 clearTimeout(writingText);
                 clearTimeout(autoFrameTimer);
+                if (useGatherer) await loadGathererArtBulk(cardObj.set, cardObj.collector_number);
 
                 // autoFrame() now fully awaits the pack load (resetCardIrregularities +
                 // loadTextOptions), so card.text.reminder is guaranteed to exist here.
@@ -4345,12 +4399,14 @@ async function startScryfallBulkDownload() {
                             art.src = backArtUrl;
                         });
                     }
+                    if (useUpscale) await upscaleArtBulk();
                     const backArtist = cardObj.card_faces?.[1]?.artist || cardObj.artist;
                     if (backArtist) artistEdited(backArtist);
 
                     await autoFrame(true);
                     clearTimeout(writingText);
                     clearTimeout(autoFrameTimer);
+                    if (useGatherer) await loadGathererArtBulk(cardObj.set, cardObj.collector_number);
                     await drawText();
                     await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
                     await waitForAllFrameImages();
@@ -4401,12 +4457,14 @@ async function startScryfallBulkDownload() {
                         art.src = frontArtUrl;
                     });
                 }
+                if (useUpscale) await upscaleArtBulk();
                 const frontArtist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
                 if (frontArtist) artistEdited(frontArtist);
 
                 await autoFrame(true);
                 clearTimeout(writingText);
                 clearTimeout(autoFrameTimer);
+                if (useGatherer) await loadGathererArtBulk(cardObj.set, cardObj.collector_number);
 
                 const backPTReg = isDFC && cardFacesReg?.[1]?.power
                     ? `${cardFacesReg[1].power}/${cardFacesReg[1].toughness}` : '';
@@ -4456,12 +4514,14 @@ async function startScryfallBulkDownload() {
                             art.src = backArtUrl;
                         });
                     }
+                    if (useUpscale) await upscaleArtBulk();
                     const backArtist = cardObj.card_faces?.[1]?.artist || cardObj.artist;
                     if (backArtist) artistEdited(backArtist);
 
                     await autoFrame(true);
                     clearTimeout(writingText);
                     clearTimeout(autoFrameTimer);
+                    if (useGatherer) await loadGathererArtBulk(cardObj.set, cardObj.collector_number);
                     await drawText();
                     await Promise.all([ImageLoadTracker.waitForAll(), FontLoadTracker.waitForAll()]);
                     await waitForAllFrameImages();
@@ -4506,6 +4566,7 @@ async function startScryfallBulkDownload() {
                     art.src = artUrl;
                 });
             }
+            if (useUpscale) await upscaleArtBulk();
             const artist = cardObj.artist || cardObj.card_faces?.[0]?.artist;
             if (artist) artistEdited(artist);
 
@@ -4513,6 +4574,7 @@ async function startScryfallBulkDownload() {
             if (frameType !== 'false') {
                 await autoFrame(true);
             }
+            if (useGatherer) await loadGathererArtBulk(cardObj.set, cardObj.collector_number);
 
             // First draw: runs through every text field so all fonts get registered with
             // FontLoadTracker. Canvas can't repaint when fonts load later, so this pass
@@ -6361,6 +6423,8 @@ document.querySelector('#scryfall-bulk-nyx').checked = localStorage.getItem('bul
 document.querySelector('#scryfall-bulk-avoid-overlap').checked = localStorage.getItem('bulk-avoid-overlap') === 'true';
 document.querySelector('#scryfall-bulk-margins').checked = localStorage.getItem('bulk-margins') === 'true';
 document.querySelector('#scryfall-bulk-dfc-back-hide-set-symbol').checked = localStorage.getItem('bulk-dfc-back-hide-set-symbol') === 'true';
+document.querySelector('#scryfall-bulk-upscale').checked = localStorage.getItem('bulk-upscale') === 'true';
+document.querySelector('#scryfall-bulk-gatherer').checked = localStorage.getItem('bulk-gatherer') === 'true';
 document.querySelector('#scryfall-bulk-format').value = localStorage.getItem('bulk-format') || 'png';
 if (!localStorage.getItem('autoFit')) {
 	localStorage.setItem('autoFit', 'true');
