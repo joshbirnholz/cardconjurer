@@ -2106,6 +2106,30 @@ function buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Te
 }
 
 /**
+ * Returns true if two frame arrays are structurally identical (same sources, masks, bounds, erase flag).
+ * Used to skip a redundant DOM redraw when autoframe is triggered but nothing has changed.
+ */
+function framesAreEqual(a, b) {
+	if (a.length !== b.length) return false;
+	for (let i = 0; i < a.length; i++) {
+		const fa = a[i], fb = b[i];
+		if (fa.src !== fb.src) return false;
+		if (!!fa.erase !== !!fb.erase) return false;
+		const ba = fa.bounds, bb = fb.bounds;
+		if (ba !== bb) {
+			if (!ba || !bb) return false;
+			if (ba.x !== bb.x || ba.y !== bb.y || ba.width !== bb.width || ba.height !== bb.height) return false;
+		}
+		const ma = fa.masks || [], mb = fb.masks || [];
+		if (ma.length !== mb.length) return false;
+		for (let j = 0; j < ma.length; j++) {
+			if (ma[j].src !== mb[j].src) return false;
+		}
+	}
+	return true;
+}
+
+/**
  * Builds a complete frame by layering multiple frame elements and applying them to the card
  * @param {string} frameType - The frame type identifier
  * @param {Array} colors - Array of color letters detected from the card
@@ -2133,17 +2157,21 @@ async function autoFrameUnified(frameType, colors, mana_cost, type_line, power) 
 	var mana2Text = card.text.mana2 ? card.text.mana2.text : (isAdventureFrameType ? (savedTextContents?.mana2 || '') : '');
 	var newFrames = buildAutoFrames(frameType, colors, mana_cost, type_line, power, mana2Text);
 
-	// Vehicle P/T text should be white
+	// Vehicle P/T text should be white (idempotent — run even when skipping frame redraw)
 	if (card.text.pt && type_line.includes('Vehicle') && !card.text.pt.text.includes('fff')) {
 		card.text.pt.text = '{fontcolor#fff}' + card.text.pt.text;
 	}
+
+	// Skip the DOM redraw when the proposed frame list is identical to what's already rendered.
+	// When margins are enabled we always redraw so applyAutoFrameMargins starts with a clean state.
+	var proposedFrames = [...preservedFrames, ...newFrames];
+	if (!marginsEnabled && framesAreEqual(proposedFrames, card.frames)) return;
 
 	card.frames = [];
 	document.querySelector('#frame-list').innerHTML = null;
 
 	// Apply the frames to the card (reverse order so they render bottom-to-top)
-	var frames = [...preservedFrames, ...newFrames];
-	card.frames = frames;
+	card.frames = proposedFrames;
 	card.frames.reverse();
 	await card.frames.forEach(item => addFrame([], item));
 	card.frames.reverse();

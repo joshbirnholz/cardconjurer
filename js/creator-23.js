@@ -2909,8 +2909,9 @@ function writeText(textObject, targetContext) {
 			//if the word goes past the max line width, go to the next line
 			if (wordToWrite && lineContext.measureText(wordToWrite).width + currentX >= textWidth && textArcRadius == 0) {
 				if (textOneLine && startingTextSize > 1) {
-					//doesn't fit... try again at a smaller text size?
-					startingTextSize -= 1;
+					// Proportional jump: scale size so the overflowing word+position just fits.
+					const overflowWidth = lineContext.measureText(wordToWrite).width + currentX;
+					startingTextSize = Math.max(1, Math.floor(startingTextSize * (textWidth - 1) / overflowWidth));
 					continue outerloop;
 				}
 				newLine = true;
@@ -2995,9 +2996,20 @@ function writeText(textObject, targetContext) {
 					currentX += lineContext.measureText(wordToWrite).width;
 				}
 			}
-			if (currentY > textHeight && textBounded && !textOneLine && startingTextSize > 1 && textArcRadius == 0) {
-				//doesn't fit... try again at a smaller text size?
-				startingTextSize -= 1;
+			if (currentY > textHeight && textBounded && !textOneLine && textArcRadius == 0) {
+				if (startingTextSize <= 1) break;
+				// Binary-search for the largest size that fits using the fast layout simulator.
+				const simTokens = _tokenizeRulesText(rawText);
+				const fontSizeOffset = parseInt(textObject.fontSize || '0');
+				let lo = 1, hi = startingTextSize - 1;
+				while (lo < hi) {
+					const mid = Math.ceil((lo + hi) / 2);
+					lineContext.font = (textObject.fontStyle || '') + (mid + fontSizeOffset) + 'px ' + textFont;
+					const sim = _simulateTextLayout(simTokens, textWidth, mid + fontSizeOffset, textObject.lineSpacing || 0, lineContext);
+					if (sim.totalY <= textHeight) lo = mid;
+					else hi = mid - 1;
+				}
+				startingTextSize = lo;
 				continue outerloop;
 			}
 			if (splitText.indexOf(word) == splitText.length - 1) {
