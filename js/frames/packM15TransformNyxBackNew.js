@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/m15/transform/nyx/new/backG.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/m15/transform/nyx/new/backM.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/transform/nyx/new/backA.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/m15/transform/nyx/new/backC.png', masks:masks},
 	{name:'White Power/Toughness', src:'/img/frames/m15/transform/regular/ptW.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/transform/regular/ptU.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/transform/regular/ptB.png', bounds:bounds},

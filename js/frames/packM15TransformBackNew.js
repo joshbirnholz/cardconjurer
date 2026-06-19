@@ -12,6 +12,7 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/m15/transform/regular/new/backA.png', masks:masks},
 	{name:'Vehicle Frame', src:'/img/frames/m15/transform/regular/new/backV.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/transform/regular/new/backL.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/m15/transform/regular/new/backC.png', masks:masks},
 	{name:'White Power/Toughness', src:'/img/frames/m15/transform/regular/ptW.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/transform/regular/ptU.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/transform/regular/ptB.png', bounds:bounds},

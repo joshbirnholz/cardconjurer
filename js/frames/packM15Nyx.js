@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/m15/nyx/m15FrameGNyx.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/m15/nyx/m15FrameMNyx.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/m15/nyx/m15FrameANyx.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/m15/nyx/m15FrameCNyx.png', masks:masks},
 	{name:'White Inner Crown (Nyx)', src:'/img/frames/m15/innerCrowns/m15InnerCrownWNyx.png', bounds:bounds},
 	{name:'Blue Inner Crown (Nyx)', src:'/img/frames/m15/innerCrowns/m15InnerCrownUNyx.png', bounds:bounds},
 	{name:'Black Inner Crown (Nyx)', src:'/img/frames/m15/innerCrowns/m15InnerCrownBNyx.png', bounds:bounds},

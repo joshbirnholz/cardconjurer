@@ -9,6 +9,8 @@ availableFrames = [
 	{name:'Red Frame', src:'/img/frames/saga/creature/ub/transform-front/r.png', masks:masks},
 	{name:'Green Frame', src:'/img/frames/saga/creature/ub/transform-front/g.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/saga/creature/ub/transform-front/m.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/saga/creature/ub/transform-front/a.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/saga/creature/ub/transform-front/c.png', masks:masks},
 
 	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/creature/sagaMidStripe.png', bounds:{x:145/2010, y:572/2814, width:18/2010, height:1333/2814}},
 

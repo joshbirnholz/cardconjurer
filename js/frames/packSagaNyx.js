@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/saga/nyx/g.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/saga/nyx/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/saga/nyx/a.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/saga/nyx/c.png', masks:masks},
 	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/sagaMidStripe.png', bounds:{x:0.0727, y:0.3058, width:0.0087, height:0.4762}},
 
 	{name:'White Power/Toughness', src:'/img/frames/saga/pt/w.png', bounds: bounds},

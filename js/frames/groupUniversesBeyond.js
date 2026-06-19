@@ -12,6 +12,8 @@ loadFramePacks([
 	{name:'Rooms (Universes Beyond)', value:'RoomUB'},
 	{name:'Sagas (Universes Beyond)', value:'SagaUB'},
 	{name:'Spree (Universes Beyond)', value:'SpreeUB'},
+	{name:'Classes (Universes Beyond)', value:'ClassUB'},
+	{name:'Cases (Universes Beyond)', value:'CaseUB'},
 
 	{name:'Addons', value:'disabled'},
 	{name:'Legend Crowns (Universes Beyond)', value:'UBLegendCrowns'},
