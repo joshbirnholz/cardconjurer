@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Green Frame (Front)', src:'/img/frames/modal/nyx/g.png', masks:masks},
 	{name:'Multicolored Frame (Front)', src:'/img/frames/modal/nyx/m.png', masks:masks},
 	{name:'Artifact Frame (Front)', src:'/img/frames/modal/nyx/a.png', masks:masks},
+	{name:'Colorless Frame (Front)', src:'/img/frames/modal/nyx/c.png', masks:masks},
 
 	{name:'White Power/Toughness', src:'/img/frames/m15/regular/m15PTW.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/regular/m15PTU.png', bounds:bounds},
@@ -26,6 +27,7 @@ availableFrames = [
 	{name:'Green Frame (Back)', src:'/img/frames/modal/nyx/back/g.png', masks:masks},
 	{name:'Multicolored Frame (Back)', src:'/img/frames/modal/nyx/back/m.png', masks:masks},
 	{name:'Artifact Frame (Back)', src:'/img/frames/modal/nyx/back/a.png', masks:masks},
+	{name:'Colorless Frame (Back)', src:'/img/frames/modal/nyx/back/c.png', masks:masks},
 	
 	{name:'White Power/Toughness (Back)', src:'/img/frames/m15/transform/regular/ptW.png', bounds:bounds},
 	{name:'Blue Power/Toughness (Back)', src:'/img/frames/m15/transform/regular/ptU.png', bounds:bounds},

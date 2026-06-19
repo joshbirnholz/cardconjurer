@@ -1,18 +1,29 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/saga/ub/sagaMaskPinline.png', name:'Pinline'}, {src:'/img/frames/saga/ub/sagaMaskTitle.png', name:'Title'}, {src:'/img/frames/saga/ub/sagaMaskType.png', name:'Type'}, {src:'/img/frames/saga/ub/sagaMaskFrame.png', name:'Frame'}, {src:'/img/frames/saga/ub/sagaMaskBanner.png', name:'Banner'}, {src:'/img/frames/saga/ub/sagaMaskBannerRight.png', name:'Banner (Right)'}, {src:'/img/frames/saga/ub/sagaMaskText.png', name:'Text'}, {src:'/img/frames/saga/ub/sagaMaskTextRight.png', name:'Text (Right)'}, {src:'/img/frames/saga/ub/sagaMaskBorder.png', name:'Border'}];
+var masks = [{src:'/img/frames/saga/sagaMaskPinline.png', name:'Pinline'}, {src:'/img/frames/m15/regular/m15MaskTitle.png', name:'Title'}, {src:'/img/frames/saga/sagaMaskType.png', name:'Type'}, {src:'/img/frames/saga/sagaMaskFrame.png', name:'Frame'}, {src:'/img/frames/saga/sagaMaskBanner.png', name:'Banner'}, {src:'/img/frames/saga/sagaMaskBannerRight.png', name:'Banner (Right)'}, {src:'/img/frames/saga/sagaMaskText.png', name:'Text'}, {src:'/img/frames/saga/sagaMaskTextRight.png', name:'Text (Right)'}, {src:'/img/frames/saga/sagaMaskBorder.png', name:'Border'}];
 //defines available frames
 var stampBounds = {x:666/1500, y:1905/2100, width:171/1500, height:95/2100};
 availableFrames = [
-	{name:'White Frame', src:'/img/frames/saga/ub/sagaFrameW.png', masks:masks},
-	{name:'Blue Frame', src:'/img/frames/saga/ub/sagaFrameU.png', masks:masks},
-	{name:'Black Frame', src:'/img/frames/saga/ub/sagaFrameB.png', masks:masks},
-	{name:'Red Frame', src:'/img/frames/saga/ub/sagaFrameR.png', masks:masks},
-	{name:'Green Frame', src:'/img/frames/saga/ub/sagaFrameG.png', masks:masks},
-	{name:'Multicolored Frame', src:'/img/frames/saga/ub/sagaFrameM.png', masks:masks},
-	{name:'Land Frame', src:'/img/frames/saga/ub/l.png', masks:masks},
-	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/ub/sagaMidStripe.png', bounds:{x:112/1500, y:630/2100, width:15/1500, height:985/2100}},
+	{name:'White Frame', src:'/img/frames/saga/ubNyx/sagaFrameW.png', masks:masks},
+	{name:'Blue Frame', src:'/img/frames/saga/ubNyx/sagaFrameU.png', masks:masks},
+	{name:'Black Frame', src:'/img/frames/saga/ubNyx/sagaFrameB.png', masks:masks},
+	{name:'Red Frame', src:'/img/frames/saga/ubNyx/sagaFrameR.png', masks:masks},
+	{name:'Green Frame', src:'/img/frames/saga/ubNyx/sagaFrameG.png', masks:masks},
+	{name:'Multicolored Frame', src:'/img/frames/saga/ubNyx/sagaFrameM.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/saga/ubNyx/sagaFrameA.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/saga/ubNyx/l.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/saga/ubNyx/sagaFrameC.png', masks:masks},
+	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/sagaMidStripe.png', bounds:{x:0.0727, y:0.3058, width:0.0087, height:0.4762}},
 	{name:'Holo Stamp', src:'/img/frames/saga/ub/stamp.png', bounds:stampBounds},
 	{name:'Gray Stamp', src:'/img/frames/saga/ub/stampGray.png', bounds:stampBounds},
+
+	{name:'White Regular Frame', src:'/img/frames/saga/ub/sagaFrameW.png', masks:masks},
+	{name:'Blue Regular Frame', src:'/img/frames/saga/ub/sagaFrameU.png', masks:masks},
+	{name:'Black Regular Frame', src:'/img/frames/saga/ub/sagaFrameB.png', masks:masks},
+	{name:'Red Regular Frame', src:'/img/frames/saga/ub/sagaFrameR.png', masks:masks},
+	{name:'Green Regular Frame', src:'/img/frames/saga/ub/sagaFrameG.png', masks:masks},
+	{name:'Multicolored Regular Frame', src:'/img/frames/saga/ub/sagaFrameM.png', masks:masks},
+	{name:'Land Regular Frame', src:'/img/frames/saga/ub/l.png', masks:masks},
+	{name:'Colorless Regular Frame', src:'/img/frames/saga/ub/c.png', masks:masks},
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
@@ -25,10 +36,10 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	card.onload = '/js/frames/versionSaga.js';
 	loadScript('/js/frames/versionSaga.js');
 	//art bounds
-	card.artBounds = {x:753/1500, y:240/2100, width:630/1500, height:1517/2100};
+	card.artBounds = {x:0.5, y:0.1124, width:0.4247, height:0.7253};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:0.9227, y:1829/2100, width:0.12, height:0.0381, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:0.9227, y:0.8739, width:0.12, height:0.0381, vertical:'center', horizontal: 'right'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.3027, y:0.4748, width:0.3547, height:0.6767};
@@ -37,7 +48,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
 		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
-		type: {name:'Type', text:'', x:0.0854, y:1775/2100, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
+		type: {name:'Type', text:'', x:0.0854, y:0.8481, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
 		ability0: {name:'Ability 1', text:'', x:0.1334, y:0.2896, width:0.35, height:0.1786, size:0.0305},
 		ability1: {name:'Ability 2', text:'', x:0.1334, y:0, width:0.35, height:0.1786, size:0.0305},
 		ability2: {name:'Ability 3', text:'', x:0.1334, y:0, width:0.35, height:0.1786, size:0.0305},

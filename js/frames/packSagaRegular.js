@@ -10,6 +10,7 @@ availableFrames = [
 	{name:'Multicolored Frame', src:'/img/frames/saga/regular/sagaFrameM.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/saga/regular/sagaFrameA.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/saga/regular/l.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/saga/regular/c.png', masks:masks},
 	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/sagaMidStripe.png', bounds:{x:0.0727, y:0.3058, width:0.0087, height:0.4762}},
 	{name:'Holo Stamp', src:'/img/frames/saga/stamp.png', bounds:{x:0.438, y:0.912, width:0.124, height:0.0372}}
 ];

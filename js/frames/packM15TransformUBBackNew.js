@@ -12,6 +12,17 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/m15/transform/ub/new/backA.png', masks:masks},
 	{name:'Vehicle Frame', src:'/img/frames/m15/transform/ub/new/backV.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/m15/transform/ub/new/backL.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/m15/transform/ub/new/backC.png', masks:masks},
+
+	{name:'White Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backWE.png', masks:masks},
+	{name:'Blue Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backUE.png', masks:masks},
+	{name:'Black Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backBE.png', masks:masks},
+	{name:'Red Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backRE.png', masks:masks},
+	{name:'Green Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backGE.png', masks:masks},
+	{name:'Multicolored Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backME.png', masks:masks},
+	{name:'Artifact Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backAE.png', masks:masks},
+	{name:'Colorless Enchantment Frame', src:'/img/frames/m15/transform/ub/new/backCE.png', masks:masks},
+
 	{name:'White Power/Toughness', src:'/img/frames/m15/transform/ub/ptW.png', bounds:bounds},
 	{name:'Blue Power/Toughness', src:'/img/frames/m15/transform/ub/ptU.png', bounds:bounds},
 	{name:'Black Power/Toughness', src:'/img/frames/m15/transform/ub/ptB.png', bounds:bounds},

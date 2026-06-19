@@ -2,6 +2,16 @@
 var masks = [{src:'/img/frames/class/masks/maskPinlines.png', name:'Pinline'}, {src:'/img/frames/class/masks/maskBorderlessPinlines.png', name:'Borderless Pinlines'}, {src:'/img/frames/class/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/class/masks/maskType.png', name:'Type'}, {src:'/img/frames/class/masks/maskFrame.png', name:'Frame'}, {src:'/img/frames/class/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/class/masks/maskTextBoxes.png', name:'Text Boxes'}, {src:'/img/frames/class/textRight.png', name:'Text, Right Half'}, {src:'/img/frames/class/masks/maskBorderless.png', name:'Borderless'}, {src:'/img/frames/class/masks/maskBorder.png', name:'Border'}, {src:'/img/frames/class/masks/maskBorderlessBorder.png', name:'Borderless Border'},];
 //defines available frames
 availableFrames = [
+	{name:'White Frame', src:'/img/frames/class/nyx/w.png', masks:masks},
+	{name:'Blue Frame', src:'/img/frames/class/nyx/u.png', masks:masks},
+	{name:'Black Frame', src:'/img/frames/class/nyx/b.png', masks:masks},
+	{name:'Red Frame', src:'/img/frames/class/nyx/r.png', masks:masks},
+	{name:'Green Frame', src:'/img/frames/class/nyx/g.png', masks:masks},
+	{name:'Multicolored Frame', src:'/img/frames/class/nyx/m.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/class/nyx/a.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/class/nyx/l.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/class/nyx/c.png', masks:masks},
+
 	{name:'White Frame', src:'/img/frames/class/w.png', masks:masks},
 	{name:'Blue Frame', src:'/img/frames/class/u.png', masks:masks},
 	{name:'Black Frame', src:'/img/frames/class/b.png', masks:masks},
@@ -9,7 +19,8 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/class/g.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/class/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/class/a.png', masks:masks},
-	{name:'Land Frame', src:'/img/frames/class/l.png', masks:masks}
+	{name:'Land Frame', src:'/img/frames/class/l.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/class/c.png', masks:masks}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;

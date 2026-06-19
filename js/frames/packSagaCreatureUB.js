@@ -11,6 +11,7 @@ availableFrames = [
 	{name:'Green Frame', src:'/img/frames/saga/creature/ub/g.png', masks:masks},
 	{name:'Multicolored Frame', src:'/img/frames/saga/creature/ub/m.png', masks:masks},
 	{name:'Artifact Frame', src:'/img/frames/saga/creature/ub/a.png', masks:masks},
+	{name:'Colorless Frame', src:'/img/frames/saga/creature/ub/c.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/saga/creature/ub/l.png', masks:masks},
 
 	{name:'Banner Pinstripe (Multicolored)', src:'/img/frames/saga/creature/sagaMidStripe.png', bounds:{x:145/2010, y:572/2814, width:18/2010, height:1333/2814}},
