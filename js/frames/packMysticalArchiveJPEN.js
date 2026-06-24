@@ -1,8 +1,6 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/mysticalArchive/jp/pinline.svg', name:'Pinline'}, {src:'/img/frames/mysticalArchive/jp/horizontal/rightHalf.svg', name:'Right Half'}];
-var masks2 = [{src:'/img/frames/mysticalArchive/jp/rightHalf.svg', name:'Right Half'}];
-var bounds = {x:0.8027, y:0.5381, width:0.116, height:0.0829}
-var bounds2 = {x:0.7767, y:0.8881, width:0.1687, height:0.0591}
+var masks = [{src:'/img/frames/mysticalArchive/jp/en/pinline.svg', name:'Pinline'}, {src:'/img/frames/mysticalArchive/jp/en/title.svg', name:'Title'}, {src:'/img/frames/mysticalArchive/jp/en/type.svg', name:'Type'}, {src:'/img/frames/mysticalArchive/jp/en/rules.svg', name:'Rules'}, {src:'/img/frames/mysticalArchive/jp/en/border.svg', name:'Border'}];
+var ptBounds = {x:0.7767, y:0.8881, width:0.1687, height:0.0591}
 //defines available frames
 availableFrames = [
 	{name:'White Frame', src:'/img/frames/mysticalArchive/jp/en/w.svg', masks:masks},
@@ -14,15 +12,15 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/mysticalArchive/jp/en/a.svg', masks:masks},
 	{name:'Land Frame', src:'/img/frames/mysticalArchive/jp/en/l.svg', masks:masks},
 	
-	{name:'White Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/w.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Blue Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/u.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Black Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/b.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Red Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/r.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Green Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/g.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Multicolored Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/m.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Artifact Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/a.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Land Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/l.svg', bounds:bounds2, complementary:'Power/Toughness Cutout'},
-	{name:'Power/Toughness Cutout', src:'/img/frames/mysticalArchive/jp/pt/cutout.svg', bounds:bounds2, erase:true}
+	{name:'White Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/w.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Blue Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/u.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Black Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/b.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Red Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/r.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Green Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/g.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Multicolored Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/m.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Artifact Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/a.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Land Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/l.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Power/Toughness Cutout', src:'/img/frames/mysticalArchive/jp/pt/cutout.svg', bounds:ptBounds, erase:true}
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
