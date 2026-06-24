@@ -1,16 +1,16 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/mysticalArchive/jp/en/pinline.svg', name:'Pinline'}, {src:'/img/frames/mysticalArchive/jp/en/title.svg', name:'Title'}, {src:'/img/frames/mysticalArchive/jp/en/type.svg', name:'Type'}, {src:'/img/frames/mysticalArchive/jp/en/rules.svg', name:'Rules'}, {src:'/img/frames/mysticalArchive/jp/en/border.svg', name:'Border'}];
+var masks = [{src:'/img/frames/mysticalArchive/jp/en/title.png', name:'Title'}, {src:'/img/frames/mysticalArchive/jp/en/type.svg', name:'Type'}, {src:'/img/frames/mysticalArchive/jp/en/titleOutline.png', name:'Title - Outer (for multicolor cards)'}, {src:'/img/frames/mysticalArchive/jp/en/titleInner.png', name:'Title - Inner'}, {src:'/img/frames/mysticalArchive/jp/en/rules.svg', name:'Rules'}, {src:'/img/frames/mysticalArchive/jp/en/border.svg', name:'Border'}];
 var ptBounds = {x:0.7767, y:0.8881, width:0.1687, height:0.0591}
 //defines available frames
 availableFrames = [
-	{name:'White Frame', src:'/img/frames/mysticalArchive/jp/en/w.svg', masks:masks},
-	{name:'Blue Frame', src:'/img/frames/mysticalArchive/jp/en/u.svg', masks:masks},
-	{name:'Black Frame', src:'/img/frames/mysticalArchive/jp/en/b.svg', masks:masks},
-	{name:'Red Frame', src:'/img/frames/mysticalArchive/jp/en/r.svg', masks:masks},
-	{name:'Green Frame', src:'/img/frames/mysticalArchive/jp/en/g.svg', masks:masks},
-	{name:'Multicolored Frame', src:'/img/frames/mysticalArchive/jp/en/m.svg', masks:masks},
-	{name:'Artifact Frame', src:'/img/frames/mysticalArchive/jp/en/a.svg', masks:masks},
-	{name:'Land Frame', src:'/img/frames/mysticalArchive/jp/en/l.svg', masks:masks},
+	{name:'White Frame', src:'/img/frames/mysticalArchive/jp/en/w.png', masks:masks},
+	{name:'Blue Frame', src:'/img/frames/mysticalArchive/jp/en/u.png', masks:masks},
+	{name:'Black Frame', src:'/img/frames/mysticalArchive/jp/en/b.png', masks:masks},
+	{name:'Red Frame', src:'/img/frames/mysticalArchive/jp/en/r.png', masks:masks},
+	{name:'Green Frame', src:'/img/frames/mysticalArchive/jp/en/g.png', masks:masks},
+	{name:'Multicolored Frame', src:'/img/frames/mysticalArchive/jp/en/m.png', masks:masks},
+	{name:'Artifact Frame', src:'/img/frames/mysticalArchive/jp/en/a.png', masks:masks},
+	{name:'Land Frame', src:'/img/frames/mysticalArchive/jp/en/l.png', masks:masks},
 	
 	{name:'White Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/w.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
 	{name:'Blue Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/u.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
