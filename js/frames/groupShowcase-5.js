@@ -56,7 +56,7 @@ loadFramePacks([
 	{name:'Sketch Cards (MH2)', value:'MH2'},
 	{name:'Mystical Archive (STA)', value:'MysticalArchive'},
 	{name:'Japanese Mystical Archive (STA)', value:'MysticalArchiveJP'},
-	{name:'Horizontal Japanese Mystical Archive (STA)', value:'MysticalArchiveJPHorizontal'},
+	{name:'Horizontal Japanese Mystical Archive (STA)', value:'MysticalArchiveJPEN'},
 	{name:'Kaldheim (KHM)', value:'Kaldheim-2'},
 	{name:'Nonlegendary Kaldheim (KHM)', value:'KaldheimNonleg'},
 	{name:'Commander Legends (CMR)', value:'CommanderLegends'},

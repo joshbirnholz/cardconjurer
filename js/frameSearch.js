@@ -293,7 +293,7 @@ const frameNames = new Map ([
 	['Colored Golden Age (SNC)', 'SNCGildedColored'],
 	['Textless Golden Age (SNC)', 'SNCGildedTextless'],
 	['Textless Equinox (MID)', 'EquinoxTextless'],
-	['Horizontal Japanese Mystical Archive (STA)', 'MysticalArchiveJPHorizontal'],
+	['Horizontal Japanese Mystical Archive (STA)', 'MysticalArchiveJPEN'],
 	['Brawl Legend Crowns', 'Brawl'],
 	['Cartoony - Sheepwave', 'Cartoony'],
 	['Neon - Elry', 'CustomNeon'],
