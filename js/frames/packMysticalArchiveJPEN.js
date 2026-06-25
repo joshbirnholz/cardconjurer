@@ -13,7 +13,7 @@ availableFrames = [
 	{name:'Land Frame', src:'/img/frames/mysticalArchive/jp/en/l.png', masks:masks},
 	
 	{name:'White Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/w.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
-	{name:'Blue Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/u.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
+	{name:'Blue Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/uAlt.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
 	{name:'Black Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/b.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
 	{name:'Red Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/r.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
 	{name:'Green Power/Toughness', src:'/img/frames/mysticalArchive/jp/pt/g.svg', bounds:ptBounds, complementary:'Power/Toughness Cutout'},
