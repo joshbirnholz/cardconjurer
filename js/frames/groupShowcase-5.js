@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
+	{name:'Showcase Panel (MSH)', value:'ShowcasePanel'},
 	{name:'Pixel (TMT)', value:'PixelTMT'},
 	{name:'Sewer (TMT)', value:'SewerTMT'},
 	{name:'Mystical Archive (SOA)', value:'MysticalArchiveSOA'},
