@@ -39,21 +39,21 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//sets card version
 	card.version = 'showcasePanel';
 	//art bounds
-	card.artBounds = {x:0/2010, y:0/2814, width:2010/2010, height:1585/2814};
+	card.artBounds = {x:0/2010, y:0/2814, width:2010/2010, height:2532/2814};
 	autoFitArt();
 	//set symbol bounds
-	card.setSymbolBounds = {x:1845/2010, y:1240/2100, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
+	card.setSymbolBounds = {x:1865/2010, y:1200/2100, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
 	resetSetSymbol();
 	//watermark bounds
 	card.watermarkBounds = {x:0.5, y:0.7762, width:0.75, height:0.2305};
 	resetWatermark();
 	//text
 	loadTextOptions({
-		mana: {name:'Mana Cost', text:'', x:-34/2010, y:194/2814, width:1864/2010, height:71/2100, oneLine:true, size:70.5/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
-		title: {name:'Title', text:'', x:168/2010, y:163/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
-		type: {name:'Type', text:'', x:168/2010, y:1588/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
-		rules: {name:'Rules Text', text:'', x:187/2010, y:1780/2814, width:1650/2010, height:790/2814, size:0.0362},
-		pt: {name:'Power/Toughness', text:'', x:0.7928, y:2532/2814, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'}
+		mana: {name:'Mana Cost', text:'', x:28/2010, y:169/2814, width:1864/2010, height:71/2100, oneLine:true, size:70.5/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
+		title: {name:'Title', text:'', x:110/2010, y:142/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0381},
+		type: {name:'Type', text:'', x:110/2010, y:1543/2814, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324},
+		rules: {name:'Rules Text', text:'', x:150/2010, y:1780/2814, width:1710/2010, height:800/2814, size:0.0362},
+		pt: {name:'Power/Toughness', text:'', x:1580/2010, y:2536/2814, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'}
 	});
 }
 //loads available frames
