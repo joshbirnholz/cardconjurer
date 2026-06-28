@@ -1,12 +1,12 @@
 loadFramePacks([
 	{name:'Set Showcase Frames (Chronological)', value:'disabled'},
-	{name:'Showcase Panel (MSH)', value:'ShowcasePanel'},
 	{name:'Pixel (TMT)', value:'PixelTMT'},
 	{name:'Sewer (TMT)', value:'SewerTMT'},
 	{name:'Mystical Archive (SOA)', value:'MysticalArchiveSOA'},
 	{name:'Fable (ECL)', value:'FableECL'},
 	{name:'Neon Ink (TLA)', value:'NeonInk'},
 	{name:'Avatar Elemental (TLA)', value:'Elemental'},
+	{name:'Showcase Panel (SPM)', value:'ShowcasePanel'},
 	{name:'Borderless Stellar Sights (EOS)', value:'BorderlessStellarSights'},
 	{name:'Poster Stellar Sights (EOS)', value:'PosterStellarSights'},
 	{name:'Borderless Source Material', value:'FCA'},
