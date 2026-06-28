@@ -48,6 +48,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
+	['Showcase Panel (MSH)', 'ShowcasePanel'],
 	['Pixel (TMT)', 'PixelTMT'],
 	['Sewer (TMT)', 'SewerTMT'],
 	['Mystical Archive (SOA)', 'MysticalArchiveSOA'],

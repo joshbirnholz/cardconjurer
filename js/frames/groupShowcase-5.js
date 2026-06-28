@@ -6,6 +6,7 @@ loadFramePacks([
 	{name:'Fable (ECL)', value:'FableECL'},
 	{name:'Neon Ink (TLA)', value:'NeonInk'},
 	{name:'Avatar Elemental (TLA)', value:'Elemental'},
+	{name:'Showcase Panel (SPM)', value:'ShowcasePanel'},
 	{name:'Borderless Stellar Sights (EOS)', value:'BorderlessStellarSights'},
 	{name:'Poster Stellar Sights (EOS)', value:'PosterStellarSights'},
 	{name:'Borderless Source Material', value:'FCA'},

@@ -3,6 +3,7 @@ loadFramePacks([
 	{name:'Sewer (TMT) Margins', value:'MarginSewerTMT'},
 	{name:'Fable (ECL) Margins', value:'MarginFableECL'},
 	{name:'Elemental Margins (TLA)', value:'MarginElemental'},
+	{name:'Showcase Panel (SPM) Margins', value:'MarginShowcasePanel'},
 	{name:'Edge of Eternities Basics (EOE)', value:'MarginEOEBasics'},
 	{name:'Borderless Stellar Sights', value:'MarginBorderlessStellarSights'},
 	{name:'Borderless Source Material', value:'MarginFCA'},
