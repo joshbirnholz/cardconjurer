@@ -1,6 +1,6 @@
 //Create objects for common properties across available frames
 var masks = [{src:'/img/frames/showcasePanel/masks/maskTitle.png', name:'Title'}, {src:'/img/frames/showcasePanel/masks/maskType.png', name:'Type'}, {src:'/img/frames/showcasePanel/masks/maskRules.png', name:'Rules'}, {src:'/img/frames/showcasePanel/masks/maskNoBorder.png', name:'No Border'}, {src:'/img/frames/showcasePanel/masks/maskBorder.png', name:'Border'}];
-var ptBounds = {x:1536/2010, y:2490/2814, width:354/2010, height:188/2814};
+var ptBounds = {x:1582/2010, y:2484/2814, width:354/2010, height:188/2814};
 var stampBounds = {x:812/2010, y:2500/2814, width:390/2010, height:110/2814};
 //defines available frames
 availableFrames = [
@@ -54,7 +54,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 		title: {name:'Title', text:'', x:110/2010, y:147/2814, width:0.8292, height:0.0543, oneLine:true, font:'MightyMouth', color:'white', size:0.0381},
 		type: {name:'Type', text:'', x:110/2010, y:1546/2814, width:0.8292, height:0.0543, oneLine:true, font:'MightyMouth', color:'white', size:0.0324},
 		rules: {name:'Rules Text', text:'', x:150/2010, y:1780/2814, width:1710/2010, height:800/2814, size:0.0275, font:'MightyMouth'},
-		pt: {name:'Power/Toughness', text:'', x:1580/2010, y:2540/2814, width:0.1367, height:0.0372, size:0.0372, font:'MightyMouth', oneLine:true, align:'center'}
+		pt: {name:'Power/Toughness', text:'', x:1626/2010, y:2534/2814, width:0.1367, height:0.0372, size:0.0372, font:'MightyMouth', oneLine:true, align:'center'}
 	});
 }
 //loads available frames
