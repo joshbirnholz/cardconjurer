@@ -207,6 +207,10 @@
 	font-family: sewertmt-ccrumble;
 	src: url('../fonts/SewerTMT-CCRumble.ttf') format('truetype');
 }
+@font-face {
+	font-family: MightyMouth;
+	src: url('../fonts/MightyMouth.otf') format('opentype');
+}
 /*Variables*/
 :root {
 	--site-background: url('../img/lowpolyBackground.svg');
