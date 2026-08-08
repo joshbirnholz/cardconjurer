@@ -4,6 +4,7 @@ loadFramePacks([
 	{name:'Adventure Time Enchantments', value:'AdventureTimeEnchantments'},
 	{name:'Adventure Time Snow', value:'AdventureTimeSnow'},
 	{name:'Adventure Time Adventures', value:'AdventureTimeAdventures'},
+	{name:'Adventure Time Planeswalkers', value:'PlaneswalkerAdventureTime'},
 
 	{name:'Adventure Time Transform Front Frames', value:'disabled'},
 	{name:'Adventure Time Transform Front', value:'AdventureTimeRegularTransformFront'},

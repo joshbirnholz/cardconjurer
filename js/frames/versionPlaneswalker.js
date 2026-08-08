@@ -212,13 +212,20 @@ function fixPlaneswalkerInputs(callback) {
 function resetPlaneswalkerImages(callback) {
 	var planeswalkerImageFolder = '';
 	var planeswalkerImageExtension = 'png';
-	if (card.version == 'planeswalkerSDCC15') {
-		planeswalkerImageFolder = '/sdcc15';
-		planeswalkerImageExtension = 'svg';
+
+	if (card.version == 'planeswalkerAdventureTime') {
+		setImageUrl(plusIcon, `/img/frames/adventuretime/planeswalker/planeswalkerPlus.${planeswalkerImageExtension}`);
+		setImageUrl(minusIcon, `/img/frames/adventuretime/planeswalker/planeswalkerMinus.${planeswalkerImageExtension}`);
+		setImageUrl(neutralIcon, `/img/frames/adventuretime/planeswalker/planeswalkerNeutral.${planeswalkerImageExtension}`);
+	} else {
+		if (card.version == 'planeswalkerSDCC15') {
+			planeswalkerImageFolder = '/sdcc15';
+			planeswalkerImageExtension = 'svg';
+		}
+		setImageUrl(plusIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerPlus.${planeswalkerImageExtension}`);
+		setImageUrl(minusIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerMinus.${planeswalkerImageExtension}`);
+		setImageUrl(neutralIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerNeutral.${planeswalkerImageExtension}`);
 	}
-	setImageUrl(plusIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerPlus.${planeswalkerImageExtension}`);
-	setImageUrl(minusIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerMinus.${planeswalkerImageExtension}`);
-	setImageUrl(neutralIcon, `/img/frames/planeswalker${planeswalkerImageFolder}/planeswalkerNeutral.${planeswalkerImageExtension}`);
 	setImageUrl(lightToDark, `/img/frames/planeswalker${planeswalkerImageFolder}/abilityLineOdd.${planeswalkerImageExtension}`);
 	setImageUrl(darkToLight, `/img/frames/planeswalker${planeswalkerImageFolder}/abilityLineEven.${planeswalkerImageExtension}`);
 	if (!darkToLight.onload) {
