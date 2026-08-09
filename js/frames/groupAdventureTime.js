@@ -15,4 +15,9 @@ loadFramePacks([
 	{name:'Adventure Time Transform Back', value:'AdventureTimeRegularTransformBack'},
 	{name:'Adventure Time Enchantments Transform Back', value:'AdventureTimeEnchantmentsTransformBack'},
 	{name:'Adventure Time Snow Transform Back', value:'AdventureTimeSnowTransformBack'},
+
+	{name:'Adventure Time Token Frames', value:'disabled'},
+	{name:'Adventure Time Tokens (Regular)', value:'AdventureTimeTokenRegular'},
+	{name:'Adventure Time Tokens (Textless)', value:'AdventureTimeTokenTextless'},
+	{name:'Adventure Time Tokens (Tall)', value:'AdventureTimeTokenTall'},
 ])
