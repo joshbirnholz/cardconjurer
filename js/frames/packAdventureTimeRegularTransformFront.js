@@ -53,7 +53,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//sets card version
 	card.version = 'adventureTimeTransformFront';
 	//art bounds
-	card.artBounds = {x:0.0767, y:0.1129, width:0.8476, height:0.4429};
+	card.artBounds = {x:154/2010, y:315/2814, width:1699/2010, height:1247/2814};
 	autoFitArt();
 	//set symbol bounds
 	card.setSymbolBounds = {x:0.9213, y:0.5910, width:0.12, height:0.0410, vertical:'center', horizontal: 'right'};
