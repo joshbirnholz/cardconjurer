@@ -327,16 +327,18 @@ async function setBottomInfoStyle() {
 			await loadBottomInfo({
 				midLeft: {text:'{elemidinfo-set} \u2022 {elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
 				topLeft: {text:'{elemidinfo-rarity} {kerning3}{elemidinfo-number}{kerning0}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
+				bottomLeft: {text:'{elemidinfo-extra}', x:0.0647, y:0.9694, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171*0.75, color:card.bottomInfoColor, outlineWidth:0.003},
 				note: {text:'{loadx}{elemidinfo-note}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
-				credit: {name:'wizards', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.0647, y:0.9377, width:0.8707, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, color:card.bottomInfoColor, align:'right', outlineWidth:0.003}
+				credit: {name:'credit', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.0647, y:0.9377, width:0.8707, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, color:card.bottomInfoColor, align:'right', outlineWidth:0.003}
 			});
 		} else {
 			await loadBottomInfo({
 				midLeft: {text:'{elemidinfo-set} \u2022 {elemidinfo-language}  {savex}{fontbelerenbsc}{fontsize' + scaleHeight(0.001) + '}{upinline' + scaleHeight(0.0005) + '}\uFFEE{savex2}{elemidinfo-artist}', x:0.0647, y:0.9548, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color: card.bottomInfoColor, outlineWidth:0.003},
 				topLeft: {text:'{elemidinfo-number}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
+				bottomLeft: {text:'{elemidinfo-extra}', x:0.0647, y:0.9694, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171*0.75, color:card.bottomInfoColor, outlineWidth:0.003},
 				note: {text:'{loadx2}{elemidinfo-note}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
 				rarity: {text:'{loadx}{elemidinfo-rarity}', x:0.0647, y:0.9377, width:0.8707, height:0.0171, oneLine:true, font:'gothammedium', size:0.0171, color:card.bottomInfoColor, outlineWidth:0.003},
-				credit: {name:'wizards', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.0647, y:0.9377, width:0.8707, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, color:card.bottomInfoColor, align:'right', outlineWidth:0.003}
+				credit: {name:'credit', text:'{ptshift0,0.0172}Designed by {elemidinfo-credit}', x:0.0647, y:0.9377, width:0.8707, height:0.0167, oneLine:true, font:'mplantin', size:0.0162, color:card.bottomInfoColor, align:'right', outlineWidth:0.003}
 			});
 		}
 }
@@ -2348,7 +2350,7 @@ function writeText(textObject, targetContext) {
 		var textLineCap = textObject.lineCap || 'round';
 		var textLineJoin = textObject.lineJoin || 'round';
 		var hideBottomInfoBorder = card.hideBottomInfoBorder || false;
-		if (hideBottomInfoBorder && ['midLeft', 'topLeft', 'note', 'credit', 'rarity'].includes(textObject.name)) {
+		if (hideBottomInfoBorder && ['midLeft', 'topLeft', 'note', 'credit', 'rarity', 'extra'].includes(textObject.name)) {
 			textOutlineWidth = 0;
 		}
 		lineContext.lineWidth = textOutlineWidth;
@@ -3701,12 +3703,17 @@ async function bottomInfoEdited() {
 	card.infoLanguage = document.querySelector('#info-language').value;
 	card.infoArtist = document.querySelector('#info-artist').value;
 	card.infoCredit = document.querySelector('#info-credit').value;
+	card.infoExtra = document.querySelector('#info-extra').value;
 	localStorage.setItem('infoCredit', card.infoCredit);
+	localStorage.setItem('infoExtra', card.infoExtra);
 	card.infoNote = document.querySelector('#info-note').value;
 
 	if (document.querySelector('#enableCollectorInfo').checked) {
 		for (var textObject of Object.entries(card.bottomInfo)) {
 			if (textObject[0] == 'credit' && card.infoCredit.trim() === '') {
+				continue;
+			}
+			if (textObject[0] == 'extra' && card.infoExtra.trim() === '') {
 				continue;
 			}
 			
@@ -5965,6 +5972,7 @@ async function loadCard(selectedCardKey) {
 		document.querySelector('#info-language').value = card.infoLanguage;
 		document.querySelector('#info-note').value = card.infoNote;
 		document.querySelector('#info-credit').value = card.infoCredit;
+		document.querySelector('#info-extra').value = card.infoExtra;
 		artistEdited(card.infoArtist);
 		document.querySelector('#text-editor').value = card.text[Object.keys(card.text)[selectedTextIndex]].text;
 		document.querySelector('#text-editor-font-size').value = card.text[Object.keys(card.text)[selectedTextIndex]].fontSize || 0;
@@ -6401,6 +6409,9 @@ document.querySelector('#autoLoadFrameVersion').checked = 'true' == localStorage
 // collector info (user defaults)
 if (localStorage.getItem('infoCredit')) {
 	document.querySelector('#info-credit').value = localStorage.getItem('infoCredit');
+}
+if (localStorage.getItem('infoExtra')) {
+	document.querySelector('#info-extra').value = localStorage.getItem('infoExtra');
 }
 var defaultCollector = JSON.parse(localStorage.getItem('defaultCollector') || '{}');
 if ('number' in defaultCollector) {
