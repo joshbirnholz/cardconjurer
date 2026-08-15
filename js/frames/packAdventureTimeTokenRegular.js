@@ -18,7 +18,6 @@ availableFrames = [
 	{name:'Artifact Frame', src:'/img/frames/adventuretime/token/regular/a.png', masks:masks},
 	{name:'Land Frame', src:'/img/frames/adventuretime/token/regular/l.png', masks:masks},
 	{name:'Colorless Frame', src:'/img/frames/adventuretime/token/regular/c.png', masks:masks},
-	{name:'Colorless Enchantment Frame', src:'/img/frames/adventuretime/token/regular/e.png', masks:masks},
 	{name:'Helper Frame', src:'/img/frames/adventuretime/token/regular/h.png', masks:masks},
 
 	{name:'White Power/Toughness', src:'/img/frames/adventuretime/pt/w.png', bounds:ptBounds},
@@ -29,7 +28,7 @@ availableFrames = [
 	{name:'Multicolored Power/Toughness', src:'/img/frames/adventuretime/pt/m.png', bounds:ptBounds},
 	{name:'Artifact Power/Toughness', src:'/img/frames/adventuretime/pt/a.png', bounds:ptBounds},
 	{name:'Colorless Power/Toughness', src:'/img/frames/adventuretime/pt/l.png', bounds:ptBounds},
-	{name:'Vehicle Power/Toughness', src:'/img/frames/adventuretime/pt/v.png', bounds:ptBounds},
+	{name:'Vehicle Power/Toughness', src:'/img/frames/adventuretime/pt/v.png', bounds:ptBounds}	
 ];
 //disables/enables the "Load Frame Version" button
 document.querySelector('#loadFrameVersion').disabled = false;
@@ -51,7 +50,7 @@ document.querySelector('#loadFrameVersion').onclick = async function() {
 	//text
 	loadTextOptions({
 		mana: {name:'Mana Cost', text:'', y:0.0613, width:0.9292, height:71/2100, oneLine:true, size:71/1638, align:'right', shadowX:-0.001, shadowY:0.0029, manaCost:true, manaSpacing:0},
-		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenbsc', size:0.0428, align:'center', conditionalColor:'Colorless_Enchantment_Frame:white'},
+		title: {name:'Title', text:'', x:0.0854, y:0.0522, width:0.8292, height:0.0543, oneLine:true, font:'belerenbsc', size:0.0428, align:'center', conditionalColor:'Enchantment_Title:white'},
 		type: {name:'Type', text:'', x:0.0854, y:((0.65*2100)+59)/2100, width:0.8292, height:0.0543, oneLine:true, font:'belerenb', size:0.0324, conditionalColor:'Helper_Frame:white'},
 		rules: {name:'Rules Text', text:'', x:0.086, y:((0.7143*2100)+59)/2100, width:0.828, height:((0.2048*2100)-59)/2100, size:0.0362, conditionalColor:'Helper:white'},
 		pt: {name:'Power/Toughness', text:'', x:0.7928, y:0.902, width:0.1367, height:0.0372, size:0.0372, font:'belerenbsc', oneLine:true, align:'center'}

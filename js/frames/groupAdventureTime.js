@@ -21,4 +21,5 @@ loadFramePacks([
 	{name:'Adventure Time Tokens (Regular)', value:'AdventureTimeTokenRegular'},
 	{name:'Adventure Time Tokens (Textless)', value:'AdventureTimeTokenTextless'},
 	{name:'Adventure Time Tokens (Tall)', value:'AdventureTimeTokenTall'},
+	{name:'Adventure Time Token Legend Crowns & Titles', value:'AdventureTimeTokenExtras'},
 ])
