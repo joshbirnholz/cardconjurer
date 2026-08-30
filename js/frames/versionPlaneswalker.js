@@ -64,8 +64,16 @@ if (!loadedVersions.includes('/js/frames/versionPlaneswalker.js')) {
 	setImageUrl(planeswalkerTextMask, '/img/frames/planeswalker/text.svg');
 	var lightColor = 'white';
 	var darkColor = '#a4a4a4';
+	// Auto-calculate ability heights on first load if text exists
+	if (card.text && card.text.ability0 && card.text.ability0.text) {
+		updatePlaneswalkerAbilityHeights();
+	}
 } else {
 	resetPlaneswalkerImages(fixPlaneswalkerInputs(planeswalkerEdited));
+	// Auto-calculate ability heights when switching frames if text exists
+	if (card.text && card.text.ability0 && card.text.ability0.text) {
+		updatePlaneswalkerAbilityHeights();
+	}
 }
 
 function planeswalkerEdited() {
@@ -123,6 +131,7 @@ function planeswalkerEdited() {
 	 	card.text['ability' + i].height = height;
 	 	lastY += height;
 	}
+	
 	fixPlaneswalkerInputs();
 	var transitionHeight = scaleHeight(0.0048);
 	planeswalkerPreFrameContext.clearRect(0, 0, planeswalkerPreFrameCanvas.width, planeswalkerPreFrameCanvas.height);
@@ -169,7 +178,12 @@ function planeswalkerEdited() {
 	planeswalkerPostFrameContext.textAlign = 'center';
 	for (var i = 0; i < card.planeswalker.count; i ++) {
 		var planeswalkerIconValue = card.planeswalker.abilities[i];
-		var planeswalkerPlacement = scaleY(planeswalkerAbilityLayout[planeswalkerTall][card.planeswalker.count - 1][i] + card.planeswalker.abilityAdjust[i])
+		// Calculate badge position based on actual ability box position and height
+		var abilityY = card.text['ability' + i].y;
+		var abilityHeight = card.text['ability' + i].height;
+		var badgeY = abilityY + (abilityHeight / 2); // Center badge vertically in the ability box
+		var planeswalkerPlacement = scaleY(badgeY + card.planeswalker.abilityAdjust[i]);
+		
 		if (planeswalkerIconValue.includes('+')) {
 			if (plusIcon.complete) {
 				planeswalkerPostFrameContext.drawImage(plusIcon, scaleX(0.0294), planeswalkerPlacement - scaleHeight(0.0258), scaleWidth(0.14), scaleHeight(0.0724));
@@ -187,8 +201,164 @@ function planeswalkerEdited() {
 			planeswalkerPostFrameContext.fillText(planeswalkerIconValue, scaleX(0.1027), planeswalkerPlacement + scaleHeight(0.0191));
 		}
 	}
+	
 	drawTextBuffer();
 	drawCard();
+}
+
+// Check if last ability text would overlap the loyalty badge
+function checkLoyaltyBadgeOverlap(abilityIndex, fontSize) {
+	if (!card.text || !card.text[`ability${abilityIndex}`]) return false;
+	const abilityTextObj = card.text[`ability${abilityIndex}`];
+	if (!abilityTextObj.text || !abilityTextObj.text.trim()) return false;
+	
+	const badgeX = 0.795, badgeY = 0.880, badgeHeight = 0.0372;
+	const abilityTextX = abilityTextObj.x || 0.18;
+	const abilityTextWidth = abilityTextObj.width || 0.7467;
+	const abilityY = abilityTextObj.y;
+	const abilityBottomY = abilityY + abilityTextObj.height;
+	
+	// Check vertical overlap
+	if (badgeY >= abilityBottomY || (badgeY + badgeHeight) <= abilityY) return false;
+	
+	// Estimate text layout
+	const cleanText = abilityTextObj.text.replace(/\{[^}]+\}/g, '');
+	const explicitBreaks = (abilityTextObj.text.match(/\{lns\}|\{line\}/g) || []).length;
+	const charsPerLine = 35 / (fontSize / 0.0305);
+	const totalLines = Math.max(explicitBreaks + 1, Math.ceil(cleanText.length / charsPerLine));
+	
+	// Check if text reaches badge area
+	const lineHeight = fontSize * 1.3;
+	const badgeLineIndex = Math.floor((badgeY - abilityY) / lineHeight);
+	if (badgeLineIndex >= totalLines) return false;
+	
+	// Check horizontal extent - only flag if clearly overlapping
+	const badgeOverlapStartX = (badgeX - abilityTextX) / abilityTextWidth;
+	const charsOnBadgeLine = Math.min(charsPerLine, Math.max(0, cleanText.length - badgeLineIndex * charsPerLine));
+	const lineFullness = charsOnBadgeLine / charsPerLine;
+	
+	// Only trigger if line extends well past badge start (10% margin)
+	return lineFullness >= (badgeOverlapStartX + 0.1);
+}
+
+// Calculate uniform font size for all planeswalker abilities
+function uniformPlaneswalkerFontSize() {
+	if (!card.planeswalker || card.planeswalker.count === 0) return;
+	
+	const defaultSize = 0.0305;
+	let minFontSize = defaultSize;
+	
+	// Estimate font size needed for each ability based on text density
+	for (let i = 0; i < card.planeswalker.count; i++) {
+		const ability = card.text[`ability${i}`];
+		if (!ability?.text?.trim()) continue;
+		
+		const charCount = ability.text.replace(/\{[^}]+\}/g, '').replace(/\([^)]*\)/g, '').length;
+		if (charCount === 0) continue;
+		
+		const boxWidth = scaleWidth(ability.width);
+		const boxHeight = scaleHeight(ability.height);
+		if (boxHeight <= 0 || boxWidth <= 0) continue;
+		
+		const estimatedLines = Math.ceil(charCount / Math.max(1, boxWidth / 12));
+		const fontSizeScale = Math.max(0.1, Math.min(2, boxHeight / (estimatedLines * 1.3)));
+		const estimatedFontSize = (ability.size || defaultSize) * fontSizeScale;
+		
+		if (estimatedFontSize > 0 && estimatedFontSize < defaultSize * 2) {
+			minFontSize = Math.min(minFontSize, estimatedFontSize);
+		}
+	}
+	
+	// Apply the minimum font size to all abilities
+	if (minFontSize > 0 && minFontSize < 1) {
+		// Check if last ability overlaps badge - use binary search for efficiency
+		const lastAbilityIndex = card.planeswalker.count - 1;
+		if (checkLoyaltyBadgeOverlap(lastAbilityIndex, minFontSize)) {
+			let low = minFontSize * 0.90; // Don't reduce more than 10%
+			let high = minFontSize;
+			
+			// Binary search for largest font size without overlap (max ~10 iterations)
+			for (let i = 0; i < 20; i++) {
+				const mid = (low + high) / 2;
+				if (checkLoyaltyBadgeOverlap(lastAbilityIndex, mid)) {
+					high = mid; // Still overlaps, need smaller
+				} else {
+					low = mid; // No overlap, can try larger
+				}
+				if (high - low < 0.0001) break;
+			}
+			minFontSize = low; // Use the largest size without overlap
+		}
+		
+		// Apply the final font size to all abilities
+		for (let i = 0; i < card.planeswalker.count; i++) {
+			const abilityText = card.text[`ability${i}`];
+			if (abilityText && abilityText.text && abilityText.text.trim()) {
+				abilityText.size = minFontSize;
+			}
+		}
+	}
+}
+
+function updatePlaneswalkerAbilityHeights() {
+	// Get all planeswalker abilities that have content
+	const abilities = [];
+	for (let i = 0; i < 4; i++) {
+		const abilityText = card.text[`ability${i}`].text;
+		if (!abilityText || abilityText.trim() === '') {
+			continue;
+		}
+		// Count words excluding reminder text in parentheses
+		const wordCount = abilityText
+			.replace(/\([^)]*\)/g, '') // Remove reminder text
+			.trim()
+			.split(/\s+/)
+			.filter(word => word.length > 0)
+			.length;
+		
+		abilities.push({
+			index: i,
+			wordCount: Math.max(wordCount, 1), // At least 1 to avoid division by zero
+			text: abilityText
+		});
+	}
+	
+	if (abilities.length === 0) {
+		return; // No abilities to adjust
+	}
+	
+	card.planeswalker.count = abilities.length;
+	
+	// Calculate available height (type line to loyalty area max)
+	const maxHeight = 0.85 - card.text.type.y;
+	const totalWords = abilities.reduce((sum, a) => sum + a.wordCount, 0);
+	const minBoxHeight = 0.045;
+	const minimumTotalSpace = minBoxHeight * abilities.length;
+	
+	// Calculate space per word: equal distribution if tight, proportional if room
+	const spacePerWord = minimumTotalSpace >= maxHeight 
+		? maxHeight / abilities.length 
+		: (maxHeight - minimumTotalSpace) / totalWords
+	
+	// Assign Y positions and heights
+	let lastY = card.text.ability0.y + 0.002;
+	for (let i = 0; i < 4; i++) {
+		const ability = abilities.find(a => a.index === i);
+		if (ability) {
+			card.text[`ability${i}`].y = lastY;
+			const height = minBoxHeight + (ability.wordCount * spacePerWord);
+			card.text[`ability${i}`].height = height;
+			lastY += height;
+		} else {
+			card.text[`ability${i}`].height = 0;
+		}
+	}
+	
+	// Calculate and apply uniform font size for all abilities
+	// This will also check for badge overlap and reduce size if needed
+	uniformPlaneswalkerFontSize();
+	
+	fixPlaneswalkerInputs(planeswalkerEdited);
 }
 
 function fixPlaneswalkerInputs(callback) {
