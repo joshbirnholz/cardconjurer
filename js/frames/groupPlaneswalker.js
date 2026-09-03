@@ -16,6 +16,8 @@ loadFramePacks([
 	{name:'MDFC', value:'PlaneswalkerMDFC'},
 	{name:'Transform (Front)', value:'PlaneswalkerTransformFront'},
 	{name:'Transform (Back)', value:'PlaneswalkerTransformBack'},
+	{name:'Transform (Back, Tall)', value:'PlaneswalkerTransformBackTall'},
+	{name:'Transform (Old Back)', value:'PlaneswalkerTransformOldBack'},
 	{name:'Innistrad: Double Feature: Transform (Front)', value:'PlaneswalkerTransformFrontDBL'},
 	{name:'Innistrad: Double Feature: Transform (Back)', value:'PlaneswalkerTransformBackDBL'},
 	{name:'Color Identity Pips', value:'M15CIPips'},

@@ -152,6 +152,8 @@ const frameNames = new Map ([
 	['Planeswalker MDFC', 'PlaneswalkerMDFC'],
 	['Planeswalker Transform (Front)', 'PlaneswalkerTransformFront'],
 	['Planeswalker Transform (Back)', 'PlaneswalkerTransformBack'],
+	['Planeswalker Transform (Back, Tall)', 'PlaneswalkerTransformBackTall'],
+	['Planeswalker Transform (Old Back)', 'PlaneswalkerTransformOldBack'],
 	['Double Feature Planeswalker Transform (Front)', 'PlaneswalkerTransformFrontDBL'],
 	['Double Feature Planeswalker Transform (Back)', 'PlaneswalkerTransformBackDBL'],
 	['Planeswalker Transform Icons', 'PlaneswalkerTransformIcons'],

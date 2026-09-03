@@ -3863,10 +3863,14 @@ function changeCardIndex() {
 		//Front Face (standard handling for all multi-faced cards)
 		if (card.text?.title && card.text?.mana) {
 			card.text.title.text = langFontCode + flipData.front.name;
-			card.text.type.text = langFontCode + flipData.front.type; 
-			card.text.rules.text = langFontCode + flipData.front.rules;
-			if (flipData.front.flavor) {
-				card.text.rules.text += '{flavor}' + curlyQuotes(flipData.front.flavor.replace('\n', '{lns}'));
+			if (card.text.type) {
+				card.text.type.text = langFontCode + flipData.front.type; 
+			}
+			if (card.text.rules) {
+				card.text.rules.text = langFontCode + flipData.front.rules;
+				if (flipData.front.flavor) {
+					card.text.rules.text += '{flavor}' + curlyQuotes(flipData.front.flavor.replace('\n', '{lns}'));
+				}
 			}
 			card.text.mana.text = flipData.front.mana || '';
 			
@@ -3893,12 +3897,14 @@ function changeCardIndex() {
 		else if (card.text?.title2 && card.text?.mana2) {
 			card.text.title2.text = langFontCode + flipData.back.name;
 			// Skip importing back type for room cards AND battle cards
-			if (!cardToImport.type_line?.toLowerCase().includes('room')) {
+			if (!cardToImport.type_line?.toLowerCase().includes('room') && card.text.type2) {
 				card.text.type2.text = langFontCode + flipData.back.type;
 			}
-			card.text.rules2.text = langFontCode + flipData.back.rules;
-			if (flipData.back.flavor) {
-				card.text.rules2.text += '{flavor}' + curlyQuotes(flipData.back.flavor.replace('\n', '{lns}'));
+			if (card.text.rules2) {
+				card.text.rules2.text = langFontCode + flipData.back.rules;
+				if (flipData.back.flavor) {
+					card.text.rules2.text += '{flavor}' + curlyQuotes(flipData.back.flavor.replace('\n', '{lns}'));
+				}
 			}
 			card.text.mana2.text = flipData.back.mana || '';
 			if (card.text.pt2) {

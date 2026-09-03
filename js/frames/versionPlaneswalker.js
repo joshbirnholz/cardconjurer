@@ -86,7 +86,7 @@ function planeswalkerEdited() {
 		}
 	}
 	// manage textbox size
-	if (card.version.toLowerCase().includes('TransformFront')) {
+	if (card.version.includes('TransformFront')) {
 		card.planeswalker.x = 0.1167;
 		card.planeswalker.width = 0.8334;
 	} else {

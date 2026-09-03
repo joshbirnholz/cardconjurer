@@ -1,5 +1,5 @@
 //Create objects for common properties across available frames
-var masks = [{src:'/img/frames/planeswalker/transform/pinlineFront.svg', name:'Pinline'}, {src:'/img/frames/planeswalker/transform/title.svg', name:'Title'}, {src:'/img/frames/planeswalker/regular/planeswalkerMaskType.png', name:'Type'}, {src:'/img/frames/planeswalker/transform/frameFront.svg', name:'Frame'}, {src:'/img/frames/planeswalker/regular/planeswalkerMaskBorder.png', name:'Border'}, {src:'/img/frames/planeswalker/maskLoyalty.png', name:'Loyalty'}];
+var masks = [{src:'/img/frames/planeswalker/transform/pinlineFront.svg', name:'Pinline'}, {src:'/img/frames/planeswalker/transform/titleFront.svg', name:'Title'}, {src:'/img/frames/planeswalker/regular/planeswalkerMaskType.png', name:'Type'}, {src:'/img/frames/planeswalker/transform/frameFront.svg', name:'Frame'}, {src:'/img/frames/planeswalker/regular/planeswalkerMaskBorder.png', name:'Border'}, {src:'/img/frames/planeswalker/maskLoyalty.png', name:'Loyalty'}];
 //defines available frames
 availableFrames = [
 	{name:'White Frame (Front)', src:'/img/frames/planeswalker/transform/wf.png', masks:masks},
