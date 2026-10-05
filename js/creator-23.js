@@ -432,7 +432,7 @@ loadManaSymbols(['xxbgw', 'xxbrg', 'xxgub', 'xxgwu', 'xxrgw', 'xxrwu', 'xxubr', 
 loadManaSymbols(true, ['chaos'], [1.2, 1]);
 loadManaSymbols(true, ['tk'], [0.8, 1]);
 loadManaSymbols(true, ['planeswalker'], [0.6, 1.2]);
-loadManaSymbols(true, ['+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '-1', '-2', '-3', '-4', '-5', '-6', '-7', '-8', '-9', '+0'], [1.6, 1]);
+loadManaSymbols(true, ['+1', '+2', '+3', '+4', '+5', '+6', '+7', '+8', '+9', '-1', '-2', '-3', '-4', '-5', '-6', '-7', '-8', '-9', '-10', '-11', '-12', '+0'], [1.6, 1]);
 function loadManaSymbols(matchColor, manaSymbolPaths, size = [1, 1]) {
 	if (typeof matchColor === 'object') {
 		// Hacky way to add a default argument for matchColor without breaking the function call from other places
@@ -4225,7 +4225,10 @@ else if (cardToImport.oracle_text && cardToImport.oracle_text.includes('Station'
 		if (!isCleaveSpell) {
 		// Replace loyalty ability brackets [+1], [-2], etc. with curly brackets
 		// Also convert em dash (−) to regular hyphen (-)
-		rulesText = rulesText.replace(/\[([+\-−]\d+)\]/g, function(match, number) {
+		rulesText = rulesText.replace(/\[([+\-−]\d+|0)\]/g, function(match, number) {
+			if (number === '0') {
+				number = '+0';
+			}
 			return '{' + number.replace('\u2212', '-') + '}';
 		});
 	}
