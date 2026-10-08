@@ -1,5 +1,6 @@
 loadFramePacks([
 	{name:'Generic Margins', value:'Margin-1'},
+	{name:'Dragon Hoard (HOB) Margins', value:'MarginDragonHoard'},
 	{name:'Sewer (TMT) Margins', value:'MarginSewerTMT'},
 	{name:'Fable (ECL) Margins', value:'MarginFableECL'},
 	{name:'Elemental Margins (TLA)', value:'MarginElemental'},

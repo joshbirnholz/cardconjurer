@@ -48,6 +48,7 @@ const frameNames = new Map ([
 	['Colorshifted (Planar Chaos)', 'Colorshifted'],
 	['Brawl Legend Crowns', 'Brawl'],
 	// Showcase
+	['Dragon Hoard (HOB)', 'DragonHoard'],
 	['Showcase Panel (MSH)', 'ShowcasePanel'],
 	['Pixel (TMT)', 'PixelTMT'],
 	['Sewer (TMT)', 'SewerTMT'],
