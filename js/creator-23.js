@@ -205,8 +205,40 @@ document.querySelector("#info-year").value = card.infoYear;
 var loadedVersions = [];
 //Card Object managament
 async function resetCardIrregularities({canvas = [getStandardWidth(), getStandardHeight(), 0, 0], resetOthers = true} = {}) {
+	var lockMargin = document.querySelector('#lock-bleed-margin') && document.querySelector('#lock-bleed-margin').checked;
+	
+	if (lockMargin) {
+		canvas[2] = Math.max(canvas[2], 0.044);
+		canvas[3] = Math.max(canvas[3], 1/35);
+	}
+
+	if (lockMargin || canvas[2] > 0) {
+		var changedArtBounds = false;
+		if (card.artBounds.width == 1) {
+			card.artBounds.width += 0.044;
+			changedArtBounds = true;
+		}
+		if (card.artBounds.x == 0) {
+			card.artBounds.x = -0.044;
+			card.artBounds.width += 0.044;
+			changedArtBounds = true;
+		}
+		if (card.artBounds.height == 1) {
+			card.artBounds.height += 1/35;
+			changedArtBounds = true;
+		}
+		if (card.artBounds.y == 0) {
+			card.artBounds.y = -1/35;
+			card.artBounds.height += 1/35;
+			changedArtBounds = true;
+		}
+		if (changedArtBounds && typeof autoFitArt === 'function') {
+			autoFitArt();
+		}
+	}
+
 	//misc details
-	card.margins = false;
+	card.margins = lockMargin || (canvas[2] > 0);
 	card.bottomInfoTranslate = {x:0, y:0};
 	card.bottomInfoRotate = 0;
 	card.bottomInfoZoom = 1;
@@ -591,7 +623,26 @@ function loadFramePack(frameOptions = availableFrames) {
 	document.querySelector('#mask-picker').innerHTML = '';
 	document.querySelector('#frame-picker').children[0].click();
 	if (localStorage.getItem('autoLoadFrameVersion') == 'true') {
-		document.querySelector('#loadFrameVersion').click();
+		const loadFrameVersionBtn = document.querySelector('#loadFrameVersion');
+		if (loadFrameVersionBtn && loadFrameVersionBtn.onclick) {
+			const result = loadFrameVersionBtn.onclick(new Event('click'));
+			if (result instanceof Promise) {
+				result.then(() => {
+					drawFrames();
+					if (typeof autoFrame === 'function') autoFrame();
+				});
+			} else {
+				drawFrames();
+				if (typeof autoFrame === 'function') autoFrame();
+			}
+		} else if (loadFrameVersionBtn) {
+			loadFrameVersionBtn.click();
+			drawFrames();
+			if (typeof autoFrame === 'function') autoFrame();
+		}
+	} else {
+		drawFrames();
+		if (typeof autoFrame === 'function') autoFrame();
 	}
 }
 function autoLoadFrameVersion() {
@@ -2949,6 +3000,29 @@ function setAutoFrame() {
 		localStorage.setItem('autoLoadFrameVersion', 'true');
 	}
 
+	autoFrame();
+}
+async function setLockBleedMargin(checked) {
+	var isMarginGroup = document.querySelector('#selectFrameGroup').value === 'Margin';
+	
+	if (isMarginGroup) {
+		await resetCardIrregularities({
+			canvas: [getStandardWidth(), getStandardHeight(), 0.044, 1/35], 
+			resetOthers: false
+		});
+	} else {
+		await resetCardIrregularities({
+			canvas: [getStandardWidth(), getStandardHeight(), 0, 0], 
+			resetOthers: false
+		});
+	}
+	
+	drawTextBuffer();
+	drawFrames();
+	bottomInfoEdited();
+	watermarkEdited();
+	drawNewGuidelines();
+	
 	autoFrame();
 }
 function setAutofit() {
