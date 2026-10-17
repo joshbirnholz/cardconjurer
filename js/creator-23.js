@@ -1416,6 +1416,29 @@ function drawRubyHorizontal(base, annotation, ctx, paragraphCtx, lineCanvas, ann
 	ctx.fillText(base, state.currentX + opts.canvasMargin + baseOffsetX, baseY);
 	state.currentX += totalWidth;
 }
+// Measure adjacent inline symbols as one word. A regular space ends the run; a
+// nonbreaking space stays inside the text token and can bind the preceding word.
+function inlineManaRunWidth(tokens, index, tokenWidth, context, size, manaSpacing, manaPrefix, startsWithMana) {
+	var width = tokenWidth;
+	var hasMana = startsWithMana;
+	for (var next = index + 1; next < tokens.length; next++) {
+		var token = tokens[next];
+		if (!token || token == ' ') break;
+		if (token.startsWith('{') && token.endsWith('}')) {
+			var code = token.slice(1, -1).toLowerCase().replaceAll('/', '');
+			var symbol = getManaSymbol(manaPrefix + code) || getManaSymbol(manaPrefix + code.split('').reverse().join('')) ||
+				getManaSymbol(code) || getManaSymbol(code.split('').reverse().join(''));
+			if (!symbol) break;
+			width += symbol.width * size * 0.78 + (size * 0.04 + manaSpacing) * 2;
+			hasMana = true;
+		} else if (hasMana) {
+			width += context.measureText(token).width;
+		} else {
+			break;
+		}
+	}
+	return hasMana ? width : tokenWidth;
+}
 function writeText(textObject, targetContext) {
 	manaSymbolsToRender = [];
 	//Most bits of info about text loaded, with defaults when needed
@@ -1539,6 +1562,7 @@ function writeText(textObject, targetContext) {
 	var drawingText = true;
 	//Repeatedly tries to draw the text at smaller and smaller sizes until it fits
 	outerloop: while (drawingText) {
+		manaSymbolsToRender = [];
 		//Rest of the text info loaded that may have been changed by a previous attempt at drawing the text
 		var textColor = textObject.color || 'black';
 		if (textObject.conditionalColor != undefined) {
@@ -1677,8 +1701,10 @@ function writeText(textObject, targetContext) {
 		lineContext.lineJoin = textLineJoin;
 		var rubyGlobalAnnSize = prescanRubySize(splitText, textObject, lineContext, textSize, textFontStyle, textFont, textFontExtension);
 		//Begin looping through words/codes
-		innerloop: for (word of splitText) {
+		innerloop: for (var tokenIndex = 0; tokenIndex < splitText.length; tokenIndex++) {
+			var word = splitText[tokenIndex];
 			var wordToWrite = word;
+			var deferredMana = null;
 			if (wordToWrite.includes('{') && wordToWrite.includes('}') || textManaCost || savedFont) {
 				var possibleCode = wordToWrite.toLowerCase().replace('{', '').replace('}', '');
 				wordToWrite = null;
@@ -2033,6 +2059,12 @@ function writeText(textObject, targetContext) {
 						shadowBlur: textShadowBlur
 					});
 					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
+					// Keep ordinary inline symbols in the same width check as words.
+					// Positioned mana costs retain their frame-pack behavior.
+					if (!textManaCost && !textObject.manaPlacement && !textObject.manaLayout && !textObject.manaImageScale && textArcRadius == 0) {
+						deferredMana = manaSymbolsToRender.pop();
+						currentX -= manaSymbolWidth + manaSymbolSpacing * 2;
+					}
 
 					manaSymbolColor = origManaSymbolColor;
 				} else {
@@ -2196,8 +2228,19 @@ function writeText(textObject, targetContext) {
 				wordToWrite = wordToWrite.replace(/f(?:\s|$)/g, '\ue006').replace(/h(?:\s|$)/g, '\ue007').replace(/m(?:\s|$)/g, '\ue008').replace(/n(?:\s|$)/g, '\ue009').replace(/k(?:\s|$)/g, '\ue00a');
 			}
 
-			//if the word goes past the max line width, go to the next line
-			if (wordToWrite && lineContext.measureText(wordToWrite).width + currentX >= textWidth && textArcRadius == 0) {
+			// Inline symbols can wrap before their image is drawn.
+			var tokenWidth = deferredMana ? deferredMana.width + (textSize * 0.04 + textManaSpacing) * 2 :
+				(wordToWrite ? lineContext.measureText(wordToWrite).width : 0);
+			var fitWidth = tokenWidth;
+			if (!textManaCost && !textObject.manaPlacement && !textObject.manaLayout &&
+				!textObject.manaImageScale && textArcRadius == 0 && tokenWidth &&
+				(deferredMana || (wordToWrite && wordToWrite != ' '))) {
+				var runWidth = inlineManaRunWidth(splitText, tokenIndex, tokenWidth, lineContext,
+					textSize, textManaSpacing, textObject.manaPrefix || '', !!deferredMana);
+				// An overlong run must still be able to wrap at its individual symbols.
+				if (runWidth < textWidth - startingCurrentX) fitWidth = runWidth;
+			}
+			if (fitWidth && currentX + fitWidth >= textWidth && textArcRadius == 0) {
 				if (textOneLine && startingTextSize > 1) {
 					//doesn't fit... try again at a smaller text size?
 					startingTextSize -= 1;
@@ -2206,7 +2249,7 @@ function writeText(textObject, targetContext) {
 				newLine = true;
 			}
 			//if we need a new line, go to the next line
-			if ((newLine && !textOneLine) || splitText.indexOf(word) == splitText.length - 1) {
+			if ((newLine && !textOneLine) || tokenIndex == splitText.length - 1) {
 				var horizontalAdjust = 0
 				if (textAlign == 'center') {
 					horizontalAdjust = (textWidth - currentX) / 2;
@@ -2241,6 +2284,12 @@ function writeText(textObject, targetContext) {
 				currentY += textSize + newLineSpacing;
 				newLineSpacing = (textObject.lineSpacing || 0) * textSize;
 				newLine = false;
+			}
+			if (deferredMana) {
+				deferredMana.x = currentX + canvasMargin + (textSize * 0.04 + textManaSpacing);
+				deferredMana.currentX = currentX;
+				manaSymbolsToRender.push(deferredMana);
+				currentX += tokenWidth;
 			}
 			//if there's a word to write, it's not a space on a new line, and it's allowed to write words, then we write the word
 			if (wordToWrite && (currentX != startingCurrentX || wordToWrite != ' ') && !textManaCost) {
@@ -2290,7 +2339,7 @@ function writeText(textObject, targetContext) {
 				startingTextSize -= 1;
 				continue outerloop;
 			}
-			if (splitText.indexOf(word) == splitText.length - 1) {
+			if (tokenIndex == splitText.length - 1) {
 				//should manage vertical centering here
 				var verticalAdjust = 0;
 				if (!textObject.noVerticalCenter) {
