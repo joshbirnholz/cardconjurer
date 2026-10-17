@@ -1176,6 +1176,7 @@ function hslToRGB(h, s, l){
 //TEXT TAB
 var writingText;
 var autoFrameTimer;
+var textAvoidancePreviewEnabled = false;
 function loadTextOptions(textObject, replace=true) {
 	var oldCardText = card.text || {};
 	Object.entries(oldCardText).forEach(item => {
@@ -1192,6 +1193,9 @@ function loadTextOptions(textObject, replace=true) {
 	Object.entries(card.text).forEach(item => {
 		if (oldCardText[item[0]]) {
 			card.text[item[0]].text = oldCardText[item[0]].text;
+			if (oldCardText[item[0]] !== item[1] && Array.isArray(oldCardText[item[0]].avoidAreas)) {
+				card.text[item[0]].avoidAreas = JSON.parse(JSON.stringify(oldCardText[item[0]].avoidAreas));
+			}
 		} else if (savedTextContents[item[0]]) {
 			card.text[item[0]].text = savedTextContents[item[0]];
 		}
@@ -1210,18 +1214,230 @@ function textOptionClicked(event) {
 	document.querySelector('#text-editor').value = Object.entries(card.text)[selectedTextIndex][1].text;
 	document.querySelector('#text-editor-font-size').value = Object.entries(card.text)[selectedTextIndex][1].fontSize;
 	selectSelectable(event);
+	renderTextAvoidanceEditor();
+	if (textAvoidancePreviewEnabled) drawCard();
 }
 function textboxEditor() {
 	var selectedTextbox = card.text[Object.keys(card.text)[selectedTextIndex]];
 	document.querySelector('#textbox-editor').classList.add('opened');
 	document.querySelector('#textbox-editor-x').value = scaleWidth(selectedTextbox.x || 0);
-	document.querySelector('#textbox-editor-x').onchange = (event) => {selectedTextbox.x = (event.target.value / card.width); textEdited();}
+	document.querySelector('#textbox-editor-x').onchange = (event) => {selectedTextbox.x = (event.target.value / card.width); textEdited(); if (textAvoidancePreviewEnabled) drawCard();}
 	document.querySelector('#textbox-editor-y').value = scaleHeight(selectedTextbox.y || 0);
-	document.querySelector('#textbox-editor-y').onchange = (event) => {selectedTextbox.y = (event.target.value / card.height); textEdited();}
+	document.querySelector('#textbox-editor-y').onchange = (event) => {selectedTextbox.y = (event.target.value / card.height); textEdited(); if (textAvoidancePreviewEnabled) drawCard();}
 	document.querySelector('#textbox-editor-width').value = scaleWidth(selectedTextbox.width || 1);
-	document.querySelector('#textbox-editor-width').onchange = (event) => {selectedTextbox.width = (event.target.value / card.width); textEdited();}
+	document.querySelector('#textbox-editor-width').onchange = (event) => {selectedTextbox.width = (event.target.value / card.width); textEdited(); if (textAvoidancePreviewEnabled) drawCard();}
 	document.querySelector('#textbox-editor-height').value = scaleHeight(selectedTextbox.height || 1);
-	document.querySelector('#textbox-editor-height').onchange = (event) => {selectedTextbox.height = (event.target.value / card.height); textEdited();}
+	document.querySelector('#textbox-editor-height').onchange = (event) => {selectedTextbox.height = (event.target.value / card.height); textEdited(); if (textAvoidancePreviewEnabled) drawCard();}
+}
+function selectedTextArea() {
+	return card.text[Object.keys(card.text)[selectedTextIndex]];
+}
+function toggleTextAvoidanceEditor() {
+	var editor = document.querySelector('#text-avoidance-editor');
+	var opening = editor.classList.contains('hidden');
+	editor.classList.toggle('hidden', !opening);
+	document.querySelector('#text-avoidance-toggle').setAttribute('aria-expanded', opening);
+	textAvoidancePreviewEnabled = opening;
+	updateTextAvoidancePreviewButton();
+	if (opening) renderTextAvoidanceEditor();
+	drawCard();
+}
+function updateTextAvoidancePreviewButton() {
+	var button = document.querySelector('#text-avoidance-preview-button');
+	button.setAttribute('aria-pressed', textAvoidancePreviewEnabled);
+	button.textContent = textAvoidancePreviewEnabled ? 'Hide areas on card' : 'Show areas on card';
+}
+function toggleTextAvoidancePreview() {
+	textAvoidancePreviewEnabled = !textAvoidancePreviewEnabled;
+	updateTextAvoidancePreviewButton();
+	drawCard();
+}
+function textAvoidanceChanged() {
+	drawTextBuffer();
+	drawCard();
+}
+function setTextAvoidanceDefaultInsets(area, source) {
+	// P/T lettering is smaller than its surrounding frame on common packs.
+	area.insetTop = source == 'pt' ? -34 / card.height : 0;
+	area.insetRight = source == 'pt' ? -38 / card.width : 0;
+	area.insetBottom = source == 'pt' ? -24 / card.height : 0;
+	area.insetLeft = source == 'pt' ? -45 / card.width : 0;
+}
+function addTextAvoidanceArea(kind) {
+	var area = selectedTextArea();
+	if (!area) return;
+	if (!Array.isArray(area.avoidAreas)) area.avoidAreas = [];
+	var otherKeys = Object.keys(card.text).filter(key => card.text[key] !== area);
+	if (kind == 'linked' && otherKeys.length) {
+		var source = otherKeys.includes('pt') ? 'pt' : otherKeys[0];
+		var linked = {source: source};
+		setTextAvoidanceDefaultInsets(linked, source);
+		area.avoidAreas.push(linked);
+	} else {
+		area.avoidAreas.push({
+			x: (area.x || 0) + (area.width || 1) * 0.75,
+			y: (area.y || 0) + (area.height || 1) * 0.75,
+			width: (area.width || 1) * 0.25,
+			height: (area.height || 1) * 0.25,
+			insetTop: 0, insetRight: 0, insetBottom: 0, insetLeft: 0
+		});
+	}
+	renderTextAvoidanceEditor();
+	textAvoidanceChanged();
+}
+function removeTextAvoidanceArea(index) {
+	selectedTextArea().avoidAreas.splice(index, 1);
+	renderTextAvoidanceEditor();
+	textAvoidanceChanged();
+}
+function textAvoidanceInput(label, value, onChange) {
+	var wrapper = document.createElement('label');
+	var description = document.createElement('h5');
+	description.className = 'input-description';
+	description.textContent = label;
+	wrapper.appendChild(description);
+	var input = document.createElement('input');
+	input.className = 'input';
+	input.type = 'number';
+	input.step = '1';
+	input.value = Math.round(value);
+	input.oninput = () => {
+		if (input.value === '' || !Number.isFinite(Number(input.value))) return;
+		onChange(Number(input.value));
+		textAvoidanceChanged();
+	};
+	wrapper.appendChild(input);
+	return wrapper;
+}
+function renderTextAvoidanceEditor() {
+	var list = document.querySelector('#text-avoidance-list');
+	if (!list || !selectedTextArea()) return;
+	list.replaceChildren();
+	var areas = selectedTextArea().avoidAreas || [];
+	if (!areas.length) {
+		var empty = document.createElement('p');
+		empty.textContent = 'No avoidance areas. Text uses its usual layout.';
+		list.appendChild(empty);
+	}
+	areas.forEach((area, index) => {
+		var row = document.createElement('div');
+		row.className = 'text-avoidance-area';
+		var heading = document.createElement('div');
+		heading.className = 'text-avoidance-heading';
+		var title = document.createElement('h5');
+		title.textContent = '#' + (index + 1);
+		var remove = document.createElement('button');
+		remove.className = 'input';
+		remove.textContent = 'Remove';
+		remove.onclick = () => removeTextAvoidanceArea(index);
+		heading.append(title, remove);
+		row.appendChild(heading);
+		var sourceLabel = document.createElement('label');
+		sourceLabel.className = 'text-avoidance-source';
+		var sourceDescription = document.createElement('h5');
+		sourceDescription.className = 'input-description';
+		sourceDescription.textContent = 'Area based on';
+		sourceLabel.appendChild(sourceDescription);
+		var sourceSelect = document.createElement('select');
+		sourceSelect.className = 'input';
+		var customOption = document.createElement('option');
+		customOption.value = '';
+		customOption.textContent = 'Custom rectangle';
+		sourceSelect.appendChild(customOption);
+		Object.entries(card.text).forEach(([key, text]) => {
+			if (text === selectedTextArea()) return;
+			var option = document.createElement('option');
+			option.value = key;
+			option.textContent = text.name + ' (' + key + ')';
+			sourceSelect.appendChild(option);
+		});
+		if (area.source && !card.text[area.source]) {
+			var missing = document.createElement('option');
+			missing.value = area.source;
+			missing.textContent = 'Missing: ' + area.source;
+			sourceSelect.appendChild(missing);
+		}
+		sourceSelect.value = area.source || '';
+		sourceSelect.onchange = () => {
+			if (sourceSelect.value) {
+				area.source = sourceSelect.value;
+				setTextAvoidanceDefaultInsets(area, area.source);
+			} else {
+				var oldSource = card.text[area.source];
+				if (oldSource) {
+					area.x = oldSource.x || 0;
+					area.y = oldSource.y || 0;
+					area.width = oldSource.width || 1;
+					area.height = oldSource.height || 1;
+				}
+				delete area.source;
+				setTextAvoidanceDefaultInsets(area, null);
+			}
+			renderTextAvoidanceEditor();
+			textAvoidanceChanged();
+		};
+		sourceLabel.appendChild(sourceSelect);
+		row.appendChild(sourceLabel);
+		if (!area.source) {
+			var bounds = document.createElement('div');
+			bounds.className = 'text-avoidance-fields';
+			[['X', 'x', card.width], ['Y', 'y', card.height], ['Width', 'width', card.width], ['Height', 'height', card.height]].forEach(([label, key, scale]) => {
+				bounds.appendChild(textAvoidanceInput(label, (area[key] || 0) * scale, value => { area[key] = value / scale; }));
+			});
+			row.appendChild(bounds);
+		}
+		if (area.source) {
+			var insets = document.createElement('div');
+			insets.className = 'text-avoidance-fields';
+			[['Top inset', 'insetTop', card.height], ['Right inset', 'insetRight', card.width], ['Bottom inset', 'insetBottom', card.height], ['Left inset', 'insetLeft', card.width]].forEach(([label, key, scale]) => {
+				insets.appendChild(textAvoidanceInput(label, (area[key] || 0) * scale, value => { area[key] = value / scale; }));
+			});
+			row.appendChild(insets);
+		}
+		list.appendChild(row);
+	});
+}
+function resolveTextAvoidanceAreas(textObject) {
+	if (!Array.isArray(textObject.avoidAreas)) return [];
+	return textObject.avoidAreas.map(area => {
+		var source = area.source ? card.text?.[area.source] : area;
+		if (!source || source === textObject) return null;
+		var insetLeft = area.source ? Number(area.insetLeft || 0) : 0;
+		var insetTop = area.source ? Number(area.insetTop || 0) : 0;
+		var insetRight = area.source ? Number(area.insetRight || 0) : 0;
+		var insetBottom = area.source ? Number(area.insetBottom || 0) : 0;
+		var x = Number(source.x ?? 0) + insetLeft;
+		var y = Number(source.y ?? 0) + insetTop;
+		var width = Number(source.width ?? 1) - insetLeft - insetRight;
+		var height = Number(source.height ?? 1) - insetTop - insetBottom;
+		if (![x, y, width, height].every(Number.isFinite) || width <= 0 || height <= 0) return null;
+		return {x: scaleX(x), y: scaleY(y), width: scaleWidth(width), height: scaleHeight(height),
+			source: {x: scaleX(source.x ?? 0), y: scaleY(source.y ?? 0), width: scaleWidth(source.width ?? 1), height: scaleHeight(source.height ?? 1)}};
+	}).filter(Boolean);
+}
+function textAvoidanceRowInterval(areas, textX, textY, textWidth, rowY, textSize, verticalAdjust, extraTop = 0) {
+	var intervals = [{left: 0, right: textWidth}];
+	// Italics and mana images can extend outside their nominal line advance.
+	var padding = Math.max(3, textSize * 0.12);
+	var top = textY + verticalAdjust + rowY - padding - extraTop;
+	var bottom = textY + verticalAdjust + rowY + textSize + padding;
+	areas.forEach(area => {
+		if (area.y >= bottom || area.y + area.height <= top) return;
+		var left = area.x - textX - padding;
+		var right = area.x + area.width - textX + padding;
+		var remainder = [];
+		intervals.forEach(interval => {
+			if (right <= interval.left || left >= interval.right) {
+				remainder.push(interval);
+			} else {
+				if (left > interval.left) remainder.push({left: interval.left, right: left});
+				if (right < interval.right) remainder.push({left: right, right: interval.right});
+			}
+		});
+		intervals = remainder;
+	});
+	intervals.sort((a, b) => (b.right - b.left) - (a.right - a.left));
+	return intervals[0] || {left: textWidth, right: textWidth};
 }
 function textEdited() {
 	card.text[Object.keys(card.text)[selectedTextIndex]].text = curlyQuotes(document.querySelector('#text-editor').value);
@@ -1327,19 +1543,36 @@ function drawRubyVertical(base, annotation, ctx, paragraphCtx, lineCanvas, annSi
 		var annChars = annotation.substring(annStart, Math.min(annStart + charsPerBase, annotation.length));
 		//Flush line before drawing next base character
 		if (i > 0) {
+			var previousInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {right:opts.textWidth};
 			var hAdj = 0;
-			if (opts.textAlign == 'center') { hAdj = (opts.textWidth - state.currentX) / 2; }
-			else if (opts.textAlign == 'right') { hAdj = opts.textWidth - state.currentX; }
+			if (opts.textAlign == 'center') { hAdj = (previousInterval.right - state.currentX) / 2; }
+			else if (opts.textAlign == 'right') { hAdj = previousInterval.right - state.currentX; }
 			if (state.currentX > state.widestLineWidth) { state.widestLineWidth = state.currentX; }
 			paragraphCtx.drawImage(lineCanvas, hAdj, state.currentY);
 			state.lineY = 0;
 			ctx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
 			state.currentX = opts.startingCurrentX;
 			state.currentY += opts.textSize + state.newLineSpacing;
-			state.newLineSpacing = (textObject.lineSpacing || 0) * opts.textSize;
+			state.newLineSpacing = (opts.lineSpacing || 0) * opts.textSize;
 		}
 		//Draw base character
 		var baseCharWidth = ctx.measureText(baseChar).width;
+		var annotationWidth = 0;
+		if (annChars.length) {
+			ctx.font = opts.textFontStyle + annSize + 'px ' + opts.textFont + opts.textFontExtension;
+			for (var j = 0; j < annChars.length; j++) annotationWidth = Math.max(annotationWidth, ctx.measureText(annChars[j]).width);
+			ctx.font = savedFont;
+		}
+		var rowInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {left:0, right:opts.textWidth};
+		state.currentX = Math.max(state.currentX, rowInterval.left);
+		var skippedRows = 0;
+		while (state.currentX + baseCharWidth + annotationWidth >= rowInterval.right &&
+			state.currentY < opts.textHeight && skippedRows++ < 100) {
+			state.currentY += opts.textSize + state.newLineSpacing;
+			state.currentX = opts.startingCurrentX;
+			rowInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {left:0, right:opts.textWidth};
+			state.currentX = Math.max(state.currentX, rowInterval.left);
+		}
 		var baseY = opts.canvasMargin + opts.textSize * opts.textFontHeightRatio + state.lineY;
 		if (opts.textOutlineWidth >= 1) { ctx.strokeText(baseChar, state.currentX + opts.canvasMargin, baseY); }
 		ctx.fillText(baseChar, state.currentX + opts.canvasMargin, baseY);
@@ -1367,18 +1600,28 @@ function drawRubyHorizontal(base, annotation, ctx, paragraphCtx, lineCanvas, ann
 	var annWidth = ctx.measureText(annotation).width;
 	ctx.font = savedFont;
 	var totalWidth = Math.max(baseWidth, annWidth);
+	var rowInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {left:0, right:opts.textWidth};
+	if (state.currentX < rowInterval.left) { state.currentX = rowInterval.left; }
 	//Wrap to new line if needed
-	if (totalWidth + state.currentX >= opts.textWidth && opts.textArcRadius == 0 && !opts.textOneLine) {
+	if (totalWidth + state.currentX >= rowInterval.right && opts.textArcRadius == 0 && !opts.textOneLine) {
 		var hAdj = 0;
-		if (opts.textAlign == 'center') { hAdj = (opts.textWidth - state.currentX) / 2; }
-		else if (opts.textAlign == 'right') { hAdj = opts.textWidth - state.currentX; }
+		if (opts.textAlign == 'center') { hAdj = (rowInterval.right - state.currentX) / 2; }
+		else if (opts.textAlign == 'right') { hAdj = rowInterval.right - state.currentX; }
 		if (state.currentX > state.widestLineWidth) { state.widestLineWidth = state.currentX; }
 		paragraphCtx.drawImage(lineCanvas, hAdj, state.currentY);
 		state.lineY = 0;
 		ctx.clearRect(0, 0, lineCanvas.width, lineCanvas.height);
 		state.currentX = opts.startingCurrentX;
 		state.currentY += opts.textSize + state.newLineSpacing;
-		state.newLineSpacing = (textObject.lineSpacing || 0) * opts.textSize;
+		state.newLineSpacing = (opts.lineSpacing || 0) * opts.textSize;
+		rowInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {left:0, right:opts.textWidth};
+		var skippedRows = 0;
+		while (rowInterval.right - Math.max(opts.startingCurrentX, rowInterval.left) < totalWidth &&
+			state.currentY < opts.textHeight && skippedRows++ < 100) {
+			state.currentY += opts.textSize + state.newLineSpacing;
+			rowInterval = opts.rowIntervalAt ? opts.rowIntervalAt(state.currentY) : {left:0, right:opts.textWidth};
+		}
+		state.currentX = Math.max(opts.startingCurrentX, rowInterval.left);
 	}
 	var baseOffsetX = (totalWidth - baseWidth) / 2;
 	var baseY = opts.canvasMargin + opts.textSize * opts.textFontHeightRatio + state.lineY;
@@ -1416,6 +1659,29 @@ function drawRubyHorizontal(base, annotation, ctx, paragraphCtx, lineCanvas, ann
 	ctx.fillText(base, state.currentX + opts.canvasMargin + baseOffsetX, baseY);
 	state.currentX += totalWidth;
 }
+// Measure adjacent inline symbols as one word. A regular space ends the run; a
+// nonbreaking space stays inside the text token and can bind the preceding word.
+function inlineManaRunWidth(tokens, index, tokenWidth, context, size, manaSpacing, manaPrefix, startsWithMana) {
+	var width = tokenWidth;
+	var hasMana = startsWithMana;
+	for (var next = index + 1; next < tokens.length; next++) {
+		var token = tokens[next];
+		if (!token || token == ' ') break;
+		if (token.startsWith('{') && token.endsWith('}')) {
+			var code = token.slice(1, -1).toLowerCase().replaceAll('/', '');
+			var symbol = getManaSymbol(manaPrefix + code) || getManaSymbol(manaPrefix + code.split('').reverse().join('')) ||
+				getManaSymbol(code) || getManaSymbol(code.split('').reverse().join(''));
+			if (!symbol) break;
+			width += symbol.width * size * 0.78 + (size * 0.04 + manaSpacing) * 2;
+			hasMana = true;
+		} else if (hasMana) {
+			width += context.measureText(token).width;
+		} else {
+			break;
+		}
+	}
+	return hasMana ? width : tokenWidth;
+}
 function writeText(textObject, targetContext) {
 	manaSymbolsToRender = [];
 	//Most bits of info about text loaded, with defaults when needed
@@ -1423,6 +1689,9 @@ function writeText(textObject, targetContext) {
 	var textY = scaleY(textObject.y) || scaleY(0);
 	var textWidth = scaleWidth(textObject.width) || scaleWidth(1);
 	var textHeight = scaleHeight(textObject.height) || scaleHeight(1);
+	var avoidanceAreas = resolveTextAvoidanceAreas(textObject);
+	var avoidanceVerticalAdjust = 0;
+	var avoidancePasses = 0;
 	var startingTextSize = scaleHeight(textObject.size) || scaleHeight(0.038);
 	var textFontHeightRatio = 0.7;
 	var textBounded = textObject.bounded || true;
@@ -1506,6 +1775,13 @@ function writeText(textObject, targetContext) {
 
 	splitText = splitText.filter(item => item);
 	splitText = splitCJKCharacters(splitText);
+	// Permashift moves the entire paragraph at paint time, including earlier rows.
+	// Resolve its final position before testing avoidance rectangles against rows.
+	var avoidancePermaShift = [0, 0];
+	if (avoidanceAreas.length) splitText.forEach(item => {
+		var match = item.match(/^\{permashift(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)\}$/i);
+		if (match) avoidancePermaShift = [Number(match[1]), Number(match[2])];
+	});
 	if (textObject.manaCost) {
 		splitText = splitText.filter(item => item != ' ');
 	}
@@ -1539,6 +1815,7 @@ function writeText(textObject, targetContext) {
 	var drawingText = true;
 	//Repeatedly tries to draw the text at smaller and smaller sizes until it fits
 	outerloop: while (drawingText) {
+		manaSymbolsToRender = [];
 		//Rest of the text info loaded that may have been changed by a previous attempt at drawing the text
 		var textColor = textObject.color || 'black';
 		if (textObject.conditionalColor != undefined) {
@@ -1677,8 +1954,10 @@ function writeText(textObject, targetContext) {
 		lineContext.lineJoin = textLineJoin;
 		var rubyGlobalAnnSize = prescanRubySize(splitText, textObject, lineContext, textSize, textFontStyle, textFont, textFontExtension);
 		//Begin looping through words/codes
-		innerloop: for (word of splitText) {
+		innerloop: for (var tokenIndex = 0; tokenIndex < splitText.length; tokenIndex++) {
+			var word = splitText[tokenIndex];
 			var wordToWrite = word;
+			var deferredMana = null;
 			if (wordToWrite.includes('{') && wordToWrite.includes('}') || textManaCost || savedFont) {
 				var possibleCode = wordToWrite.toLowerCase().replace('{', '').replace('}', '');
 				wordToWrite = null;
@@ -1752,7 +2031,11 @@ function writeText(textObject, targetContext) {
 					drawRubyText(word, textObject, lineContext, paragraphContext, lineCanvas, rubyGlobalAnnSize, rubyState, {
 						textSize:textSize, textFontStyle:textFontStyle, textFont:textFont, textFontExtension:textFontExtension,
 						textFontHeightRatio:textFontHeightRatio, textAlign:textAlign, textWidth:textWidth, textArcRadius:textArcRadius,
-						textOneLine:textOneLine, textOutlineWidth:textOutlineWidth, canvasMargin:canvasMargin, startingCurrentX:startingCurrentX
+						textOneLine:textOneLine, textOutlineWidth:textOutlineWidth, canvasMargin:canvasMargin,
+						startingCurrentX:startingCurrentX, lineSpacing:textObject.lineSpacing || 0, textHeight:textHeight,
+						rowIntervalAt:avoidanceAreas.length ? rowY => textAvoidanceRowInterval(
+							avoidanceAreas, textX + avoidancePermaShift[0], textY + avoidancePermaShift[1],
+							textWidth, rowY, textSize, avoidanceVerticalAdjust, textSize * 0.55) : null
 					});
 					currentX = rubyState.currentX; currentY = rubyState.currentY; lineY = rubyState.lineY;
 					widestLineWidth = rubyState.widestLineWidth; newLineSpacing = rubyState.newLineSpacing;
@@ -2033,6 +2316,12 @@ function writeText(textObject, targetContext) {
 						shadowBlur: textShadowBlur
 					});
 					currentX += manaSymbolWidth + manaSymbolSpacing * 2;
+					// Ordinary inline mana must take part in wrapping before it is drawn.
+					// Positioned mana costs keep their frame-pack placement behavior.
+					if (!textManaCost && !textObject.manaPlacement && !textObject.manaLayout && !textObject.manaImageScale && textArcRadius == 0) {
+						deferredMana = manaSymbolsToRender.pop();
+						currentX -= manaSymbolWidth + manaSymbolSpacing * 2;
+					}
 
 					manaSymbolColor = origManaSymbolColor;
 				} else {
@@ -2196,22 +2485,41 @@ function writeText(textObject, targetContext) {
 				wordToWrite = wordToWrite.replace(/f(?:\s|$)/g, '\ue006').replace(/h(?:\s|$)/g, '\ue007').replace(/m(?:\s|$)/g, '\ue008').replace(/n(?:\s|$)/g, '\ue009').replace(/k(?:\s|$)/g, '\ue00a');
 			}
 
-			//if the word goes past the max line width, go to the next line
-			if (wordToWrite && lineContext.measureText(wordToWrite).width + currentX >= textWidth && textArcRadius == 0) {
+			// Words and inline mana symbols share the same line-fit check.
+			var tokenWidth = deferredMana ? deferredMana.width + (textSize * 0.04 + textManaSpacing) * 2 :
+				(wordToWrite ? lineContext.measureText(wordToWrite).width : 0);
+			var fitWidth = tokenWidth;
+			if (!textManaCost && !textObject.manaPlacement && !textObject.manaLayout &&
+				!textObject.manaImageScale && textArcRadius == 0 && tokenWidth &&
+				(deferredMana || (wordToWrite && wordToWrite != ' '))) {
+				var runWidth = inlineManaRunWidth(splitText, tokenIndex, tokenWidth, lineContext,
+					textSize, textManaSpacing, textObject.manaPrefix || '', !!deferredMana);
+				// An overlong run must still be able to wrap at its individual symbols.
+				if (runWidth < textWidth - startingCurrentX) fitWidth = runWidth;
+			}
+			var rowInterval = avoidanceAreas.length ?
+				textAvoidanceRowInterval(avoidanceAreas, textX + avoidancePermaShift[0], textY + avoidancePermaShift[1],
+					textWidth, currentY, textSize, avoidanceVerticalAdjust) :
+				{left: 0, right: textWidth};
+			if (tokenWidth && avoidanceAreas.length && textArcRadius == 0 && currentX < rowInterval.left) {
+				currentX = rowInterval.left;
+			}
+			if (fitWidth && currentX + fitWidth >= rowInterval.right && textArcRadius == 0) {
 				if (textOneLine && startingTextSize > 1) {
 					//doesn't fit... try again at a smaller text size?
 					startingTextSize -= 1;
+					avoidancePasses = 0;
 					continue outerloop;
 				}
 				newLine = true;
 			}
 			//if we need a new line, go to the next line
-			if ((newLine && !textOneLine) || splitText.indexOf(word) == splitText.length - 1) {
+			if ((newLine && !textOneLine) || tokenIndex == splitText.length - 1) {
 				var horizontalAdjust = 0
 				if (textAlign == 'center') {
-					horizontalAdjust = (textWidth - currentX) / 2;
+					horizontalAdjust = (rowInterval.right - currentX) / 2;
 				} else if (textAlign == 'right') {
-					horizontalAdjust = textWidth - currentX;
+					horizontalAdjust = rowInterval.right - currentX;
 				}
 				if (currentX > widestLineWidth) {
 					widestLineWidth = currentX;
@@ -2241,6 +2549,24 @@ function writeText(textObject, targetContext) {
 				currentY += textSize + newLineSpacing;
 				newLineSpacing = (textObject.lineSpacing || 0) * textSize;
 				newLine = false;
+				if (avoidanceAreas.length && tokenWidth && !textOneLine && textArcRadius == 0) {
+					var nextInterval = textAvoidanceRowInterval(avoidanceAreas, textX + avoidancePermaShift[0], textY + avoidancePermaShift[1],
+						textWidth, currentY, textSize, avoidanceVerticalAdjust);
+					var skippedRows = 0;
+					while (nextInterval.right - Math.max(startingCurrentX, nextInterval.left) < fitWidth && currentY < textHeight && skippedRows++ < 100) {
+						currentY += textSize + newLineSpacing;
+						nextInterval = textAvoidanceRowInterval(avoidanceAreas, textX + avoidancePermaShift[0], textY + avoidancePermaShift[1],
+							textWidth, currentY, textSize, avoidanceVerticalAdjust);
+					}
+					currentX = Math.max(startingCurrentX, nextInterval.left);
+					if (wordToWrite == ' ' && currentX == nextInterval.left) wordToWrite = null;
+				}
+			}
+			if (deferredMana) {
+				deferredMana.x = currentX + canvasMargin + (textSize * 0.04 + textManaSpacing);
+				deferredMana.currentX = currentX;
+				manaSymbolsToRender.push(deferredMana);
+				currentX += tokenWidth;
 			}
 			//if there's a word to write, it's not a space on a new line, and it's allowed to write words, then we write the word
 			if (wordToWrite && (currentX != startingCurrentX || wordToWrite != ' ') && !textManaCost) {
@@ -2288,22 +2614,32 @@ function writeText(textObject, targetContext) {
 			if (currentY > textHeight && textBounded && !textOneLine && startingTextSize > 1 && textArcRadius == 0) {
 				//doesn't fit... try again at a smaller text size?
 				startingTextSize -= 1;
+				avoidancePasses = 0;
+				avoidanceVerticalAdjust = 0;
 				continue outerloop;
 			}
-			if (splitText.indexOf(word) == splitText.length - 1) {
+			if (tokenIndex == splitText.length - 1) {
 				//should manage vertical centering here
 				var verticalAdjust = 0;
 				if (!textObject.noVerticalCenter) {
 					verticalAdjust = (textHeight - currentY + textSize * 0.15) / 2;
 				}
+				if (avoidanceAreas.length && !textObject.noVerticalCenter) {
+					if (Math.abs(verticalAdjust - avoidanceVerticalAdjust) > 1 && avoidancePasses++ < 6) {
+						avoidanceVerticalAdjust = verticalAdjust;
+						continue outerloop;
+					}
+					// Use the position that was checked against all avoidance areas.
+					verticalAdjust = avoidanceVerticalAdjust;
+				}
 				var finalHorizontalAdjust = 0;
 				const horizontalAdjustUnit = (textWidth - widestLineWidth) / 2;
-				if (textJustify == 'right' && textAlign != 'right') {
+				if (!avoidanceAreas.length && textJustify == 'right' && textAlign != 'right') {
 					finalHorizontalAdjust = 2 * horizontalAdjustUnit;
 					if (textAlign == 'center') {
 						finalHorizontalAdjust = horizontalAdjustUnit;
 					}
-				} else if (textJustify == 'center' && textAlign != 'center') {
+				} else if (!avoidanceAreas.length && textJustify == 'center' && textAlign != 'center') {
 					finalHorizontalAdjust = horizontalAdjustUnit;
 					if (textAlign == 'right') {
 						finalHorizontalAdjust = - horizontalAdjustUnit;
@@ -3153,11 +3489,37 @@ function drawCard() {
 	// show preview
 	previewContext.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
 	previewContext.drawImage(cardCanvas, 0, 0, previewCanvas.width, previewCanvas.height);
+	if (textAvoidancePreviewEnabled) drawTextAvoidancePreview();
 
 	if (window.cardDrawingPromiseResolver) {
         window.cardDrawingPromiseResolver();
         window.cardDrawingPromiseResolver = null;
 	}
+}
+function drawTextAvoidancePreview() {
+	var area = selectedTextArea();
+	if (!area) return;
+	var scaleXPreview = previewCanvas.width / card.width;
+	var scaleYPreview = previewCanvas.height / card.height;
+	previewContext.save();
+	previewContext.scale(scaleXPreview, scaleYPreview);
+	previewContext.lineWidth = 7;
+	previewContext.strokeStyle = '#00d4ff';
+	previewContext.strokeRect(scaleX(area.x || 0), scaleY(area.y || 0), scaleWidth(area.width || 1), scaleHeight(area.height || 1));
+	resolveTextAvoidanceAreas(area).forEach((avoid, index) => {
+		previewContext.setLineDash([14, 10]);
+		previewContext.strokeStyle = '#ffdf52';
+		previewContext.strokeRect(avoid.source.x, avoid.source.y, avoid.source.width, avoid.source.height);
+		previewContext.setLineDash([]);
+		previewContext.fillStyle = 'rgba(225, 0, 58, 0.24)';
+		previewContext.fillRect(avoid.x, avoid.y, avoid.width, avoid.height);
+		previewContext.strokeStyle = '#f0003b';
+		previewContext.strokeRect(avoid.x, avoid.y, avoid.width, avoid.height);
+		previewContext.font = 'bold 28px sans-serif';
+		previewContext.fillStyle = '#f0003b';
+		previewContext.fillText(String(index + 1), avoid.x + 8, avoid.y + 34);
+	});
+	previewContext.restore();
 }
 //DOWNLOADING
 function downloadCard(alt = false, jpeg = false) {

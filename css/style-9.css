@@ -962,6 +962,50 @@ textarea.input {
 	justify-self: right;
 }
 /*Text tab*/
+.text-avoidance-editor {
+	padding: 1rem;
+	margin-top: 0.5rem;
+	background: #252525;
+}
+.text-avoidance-editor > .input-description {
+	margin-bottom: 0.5rem;
+}
+.text-avoidance-editor > .input-grid {
+	margin-top: 0.75rem;
+}
+.text-avoidance-area {
+	background: #292929;
+	border: 1px solid #666;
+	padding: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+.text-avoidance-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 0.5rem;
+}
+.text-avoidance-heading .input {
+	width: auto;
+	min-width: 8rem;
+}
+.text-avoidance-source {
+	display: block;
+}
+.text-avoidance-source h5,
+.text-avoidance-fields h5 {
+	margin-bottom: 0.25rem;
+}
+.text-avoidance-fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+	gap: 0.5rem;
+	margin-top: 0.5rem;
+}
+.text-avoidance-fields input {
+	width: 100%;
+}
 .text-option {
 	background: var(--input-background);
 }

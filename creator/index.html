@@ -216,6 +216,16 @@
 							</div>
 							<h5 class='margin-bottom padding input-description'>Edit the placement and size of the selected textbox</h5>
 							<button class='input' onclick='textboxEditor();'>Edit Bounds</button>
+							<button id='text-avoidance-toggle' class='input margin-top' onclick='toggleTextAvoidanceEditor();' aria-expanded='false'>Text Avoidance Areas</button>
+							<div id='text-avoidance-editor' class='text-avoidance-editor hidden'>
+							<h5 class='input-description'>Text flows around these areas. Areas based on another text area follow its bounds. Negative insets expand them. Preview colors: cyan is this text area, yellow is the source, and red is the avoided area.</h5>
+							<button id='text-avoidance-preview-button' class='input margin-bottom' onclick='toggleTextAvoidancePreview();' aria-pressed='false'>Show areas on card</button>
+							<div id='text-avoidance-list'></div>
+							<div class='input-grid'>
+								<button class='input' onclick='addTextAvoidanceArea("linked");'>Add from another text area</button>
+								<button class='input' onclick='addTextAvoidanceArea("custom");'>Add custom rectangle</button>
+							</div>
+						</div>
 							<h5 class='margin-bottom padding input-description'>Adjust font size</h5>
 							<input id="text-editor-font-size" class="input" type="number" placeholder="0" value="0" step="1" oninput="fontSizedEdited();">
 						</div>
